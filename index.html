@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="CarCare POS"/>
+<meta name="theme-color" content="#C9A84C"/>
+<link rel="manifest" href="manifest.json"/>
+<title>CarCare POS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --gold:#C9A84C;--gold-light:#fef3d0;--gold-dark:#9a7a2e;
+  --black:#1a1a1a;--surface:#ffffff;--bg:#f5f4f0;
+  --border:#e0ddd5;--border2:#c8c4b8;
+  --text:#1a1a1a;--text2:#6b6860;--text3:#9b9890;
+  --success:#3B6D11;--success-bg:#E2EFDA;
+  --danger:#A32D2D;--danger-bg:#FCEBEB;
+  --info:#185FA5;--info-bg:#E6F1FB;
+  --amber:#854F0B;--amber-bg:#FAEEDA;
+  --r:10px;--r-sm:7px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Segoe UI',Tahoma,Arial,sans-serif;color:var(--text);font-size:14px;}
+
+/* LAYOUT */
+.app{display:flex;flex-direction:column;height:100%;height:100dvh;}
+.topbar{background:var(--black);color:var(--gold);padding:10px 14px;padding-top:calc(10px + var(--safe-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-logo{font-size:17px;font-weight:700;letter-spacing:0.5px;display:flex;align-items:center;gap:7px;}
+.topbar-right{font-size:11px;color:#aaa;display:flex;align-items:center;gap:8px;}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+.bottomnav{background:var(--surface);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:var(--safe-bottom);}
+.bn-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 4px 7px;cursor:pointer;border:none;background:none;color:var(--text3);font-size:9px;font-weight:600;gap:3px;transition:color 0.15s;text-transform:uppercase;letter-spacing:0.04em;}
+.bn-tab.active{color:var(--gold);}
+.bn-icon{font-size:20px;line-height:1;}
+
+/* SCREENS */
+.screen{display:none;padding:12px;padding-bottom:16px;}
+.screen.active{display:block;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;}
+.card-row{display:flex;gap:10px;margin-bottom:10px;}
+.stat-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;text-align:center;}
+.stat-val{font-size:20px;font-weight:700;color:var(--black);}
+.stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 14px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:all 0.12s;-webkit-appearance:none;}
+.btn:active{transform:scale(0.97);opacity:0.85;}
+.btn-gold{background:var(--gold);color:var(--black);border-color:var(--gold-dark);}
+.btn-block{width:100%;font-size:14px;padding:12px;}
+.btn-sm{padding:6px 10px;font-size:11px;}
+.btn-danger{background:var(--danger-bg);color:var(--danger);border-color:var(--danger);}
+.btn-success{background:var(--success-bg);color:var(--success);border-color:var(--success);}
+
+/* INPUTS */
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:14px;background:var(--surface);color:var(--text);font-family:inherit;outline:none;-webkit-appearance:none;}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.2);}
+.label{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;display:block;}
+.form-row{margin-bottom:12px;}
+.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+
+/* SERVICE GRID */
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;-webkit-overflow-scrolling:touch;}
+.filters::-webkit-scrollbar{display:none;}
+.fchip{padding:6px 12px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text2);flex-shrink:0;}
+.fchip.active{background:var(--black);color:var(--gold);border-color:var(--black);}
+.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.svc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px;cursor:pointer;transition:all 0.12s;position:relative;}
+.svc-card:active{transform:scale(0.96);background:var(--gold-light);border-color:var(--gold);}
+.svc-cat-badge{font-size:9px;padding:2px 6px;border-radius:99px;font-weight:700;margin-bottom:5px;display:inline-block;}
+.svc-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:4px;}
+.svc-code{font-size:10px;color:var(--text3);}
+.svc-price{font-size:14px;font-weight:700;color:var(--gold);margin-top:5px;}
+
+/* CART */
+.cart-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.cart-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.cart-head span{font-size:14px;font-weight:700;}
+.cart-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);gap:8px;}
+.cart-item:last-child{border-bottom:none;}
+.ci-info{flex:1;}
+.ci-name{font-size:12px;font-weight:600;}
+.ci-sub{font-size:10px;color:var(--text3);margin-top:2px;}
+.ci-price{font-size:13px;font-weight:700;white-space:nowrap;}
+.ci-rm{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--danger-bg);color:var(--danger);font-size:15px;cursor:pointer;flex-shrink:0;border:none;}
+.cart-total-row{padding:12px 14px;border-top:1px solid var(--border);}
+.ct-line{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:5px;}
+.ct-total{display:flex;justify-content:space-between;font-size:18px;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+
+/* CUSTOMER BAR */
+.cust-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;}
+.cust-result{background:var(--bg);border-radius:var(--r-sm);overflow:hidden;margin-top:8px;}
+.cust-opt{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);cursor:pointer;}
+.cust-opt:last-child{border-bottom:none;}
+.cust-opt:active{background:var(--gold-light);}
+.cust-chip{background:var(--gold-light);border:1px solid var(--gold);border-radius:var(--r-sm);padding:8px 12px;margin-top:8px;}
+.pts-chip{background:var(--amber-bg);color:var(--amber);font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;display:inline-block;}
+.loy-bar-wrap{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin:5px 0;}
+.loy-bar{height:100%;background:var(--gold);border-radius:99px;transition:width 0.5s;}
+
+/* BADGE */
+.badge{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:700;display:inline-block;white-space:nowrap;}
+.b-blue{background:var(--info-bg);color:var(--info);}
+.b-green{background:var(--success-bg);color:var(--success);}
+.b-amber{background:var(--amber-bg);color:var(--amber);}
+.b-red{background:var(--danger-bg);color:var(--danger);}
+.b-pink{background:#FBEAF0;color:#993556;}
+.b-teal{background:#E1F5EE;color:#0F6E56;}
+.b-gray{background:#F1EFE8;color:#5F5E5A;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);background:#f9f8f5;border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+
+/* MODAL / SHEET */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;}
+.sheet{background:var(--surface);border-radius:18px 18px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:20px 16px;padding-bottom:calc(20px + var(--safe-bottom));}
+.sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:99px;margin:0 auto 16px;}
+.sheet h3{font-size:17px;font-weight:700;margin-bottom:16px;}
+.sheet-btns{display:flex;gap:8px;margin-top:16px;}
+.sheet-btns .btn{flex:1;}
+
+/* SUCCESS SHEET */
+.success-icon{font-size:48px;text-align:center;margin:10px 0 8px;}
+.success-title{text-align:center;font-size:20px;font-weight:700;margin-bottom:6px;}
+.success-sub{text-align:center;font-size:12px;color:var(--text2);margin-bottom:14px;}
+.receipt-box{background:var(--bg);border-radius:var(--r);padding:12px 14px;font-size:13px;}
+.receipt-line{display:flex;justify-content:space-between;margin-bottom:6px;}
+.receipt-total{display:flex;justify-content:space-between;font-size:16px;font-weight:700;border-top:1px solid var(--border);padding-top:8px;margin-top:6px;}
+
+/* SECTION HEADER */
+.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.sec-head h2{font-size:16px;font-weight:700;}
+
+/* STOCK BAR */
+.stock-bar{width:50px;height:5px;background:var(--border);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:5px;}
+.stock-fill{height:100%;border-radius:99px;}
+
+/* SIZE SELECTOR */
+.size-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.size-tab{padding:7px 14px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border2);background:var(--surface);color:var(--text2);}
+.size-tab.active{background:var(--black);color:var(--gold);border-color:var(--black);}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;}
+
+/* PRICE TYPE */
+.type-tabs{display:flex;gap:5px;margin-bottom:10px;}
+.type-tab{flex:1;padding:7px;border-radius:var(--r-sm);font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text2);text-align:center;}
+.type-tab.active{background:var(--gold);color:var(--black);border-color:var(--gold-dark);}
+
+/* INSTALL BANNER */
+.install-banner{background:var(--black);color:var(--gold);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;font-size:12px;flex-shrink:0;}
+.install-banner button{background:var(--gold);color:var(--black);border:none;border-radius:var(--r-sm);padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="install-banner" style="display:none;">
+  <span>📲 ติดตั้งเป็นแอปบนมือถือ</span>
+  <button onclick="installApp()">ติดตั้ง</button>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">⚙ CarCare POS</div>
+  <div class="topbar-right">
+    <span id="save-ind">✓ Saved</span>
+    <span class="badge b-green">Open</span>
+  </div>
+</div>
+
+<!-- CONTENT AREA -->
+<div class="content" id="main-content">
+
+  <!-- POS SCREEN -->
+  <div id="screen-pos" class="screen active">
+    <!-- Customer -->
+    <div class="cust-bar">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="cust-q" type="text" placeholder="ค้นหาลูกค้า / ทะเบียน..." oninput="custSearch()" style="flex:1;" />
+        <button class="btn btn-sm btn-gold" onclick="showSheet('sh-newcust')">+</button>
+      </div>
+      <div id="cust-dd" style="display:none;" class="cust-result"></div>
+      <div id="cust-chip" style="display:none;" class="cust-chip">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:700;font-size:13px;" id="cc-name"></span>
+          <span class="pts-chip" id="cc-pts">0 pts</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;" id="cc-info"></div>
+        <div class="loy-bar-wrap"><div class="loy-bar" id="cc-bar" style="width:0%"></div></div>
+        <div style="font-size:10px;color:var(--text3);" id="cc-next"></div>
+      </div>
+    </div>
+
+    <!-- Size & Type selectors -->
+    <div class="card" style="padding:10px 12px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:7px;text-transform:uppercase;letter-spacing:0.04em;">ขนาดรถ</div>
+      <div class="size-tabs">
+        <div class="size-tab active" onclick="setSize('S',this)">S</div>
+        <div class="size-tab" onclick="setSize('M',this)">M</div>
+        <div class="size-tab" onclick="setSize('L',this)">L</div>
+        <div class="size-tab" onclick="setSize('XL',this)">XL</div>
+        <div class="size-tab" onclick="setSize('XXL',this)">XXL</div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:7px;text-transform:uppercase;letter-spacing:0.04em;">ราคา</div>
+      <div class="type-tabs">
+        <div class="type-tab active" onclick="setType('Standard',this)">Standard</div>
+        <div class="type-tab" onclick="setType('C-Sale',this)">C-Sale</div>
+        <div class="type-tab" onclick="setType('C-Op.',this)">C-Op.</div>
+      </div>
+    </div>
+
+    <!-- Category filter -->
+    <div class="filters" id="cat-filters">
+      <div class="fchip active" onclick="setCat('all',this)">ทั้งหมด</div>
+      <div class="fchip" onclick="setCat('ล้างรถ',this)">ล้างรถ</div>
+      <div class="fchip" onclick="setCat('เคลือบสี',this)">เคลือบสี</div>
+      <div class="fchip" onclick="setCat('ภายใน',this)">ภายใน</div>
+      <div class="fchip" onclick="setCat('บริการอื่น',this)">บริการอื่น</div>
+      <div class="fchip" onclick="setCat('ใบปัดน้ำฝน',this)">ใบปัดน้ำฝน</div>
+    </div>
+
+    <!-- Services -->
+    <div class="svc-grid" id="svc-grid"></div>
+
+    <!-- Cart -->
+    <div class="cart-section" id="cart-section" style="display:none;">
+      <div class="cart-head">
+        <span>Cart</span>
+        <button class="btn btn-sm btn-danger" onclick="clearCart()">ล้าง</button>
+      </div>
+      <div id="cart-items"></div>
+      <div class="cart-total-row">
+        <div class="ct-line"><span>Subtotal</span><span id="ct-sub">฿0</span></div>
+        <div class="ct-line" id="ct-disc-row" style="display:none;"><span>ส่วนลด Loyalty</span><span id="ct-disc" style="color:var(--success);font-weight:700;">-฿0</span></div>
+        <div class="ct-line"><span>Tax (7%)</span><span id="ct-tax">฿0</span></div>
+        <div class="ct-total"><span>รวม</span><span id="ct-tot">฿0</span></div>
+        <div class="form-row" style="margin-top:10px;">
+          <input id="plate-inp" type="text" placeholder="ทะเบียนรถ (เช่น กข 1234)" />
+        </div>
+        <div class="form-row">
+          <select id="pay-method">
+            <option>เงินสด</option>
+            <option>โอน</option>
+            <option>บุญถอด</option>
+            <option>บัตร</option>
+          </select>
+        </div>
+        <button class="btn btn-gold btn-block" onclick="checkout()">ชำระเงิน →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOYALTY SCREEN -->
+  <div id="screen-loyalty" class="screen">
+    <div class="card-row">
+      <div class="stat-card"><div class="stat-val" id="ls-mem">0</div><div class="stat-lbl">Members</div></div>
+      <div class="stat-card"><div class="stat-val" id="ls-pts">0</div><div class="stat-lbl">Points</div></div>
+      <div class="stat-card"><div class="stat-val" id="ls-gold">0</div><div class="stat-lbl">Gold</div></div>
+    </div>
+    <div class="sec-head">
+      <h2>สมาชิก</h2>
+      <button class="btn btn-sm btn-gold" onclick="showSheet('sh-newcust')">+ เพิ่ม</button>
+    </div>
+    <input type="text" id="loy-q" placeholder="ค้นหาสมาชิก..." oninput="renderLoyalty()" style="margin-bottom:10px;" />
+    <div id="loy-list"></div>
+  </div>
+
+  <!-- STOCK SCREEN -->
+  <div id="screen-stock" class="screen">
+    <div class="card-row">
+      <div class="stat-card"><div class="stat-val" id="st-skus">0</div><div class="stat-lbl">SKUs</div></div>
+      <div class="stat-card"><div class="stat-val" id="st-low" style="color:var(--amber);">0</div><div class="stat-lbl">Low</div></div>
+      <div class="stat-card"><div class="stat-val" id="st-out" style="color:var(--danger);">0</div><div class="stat-lbl">Out</div></div>
+    </div>
+    <div class="sec-head">
+      <h2>สต็อกสินค้า</h2>
+      <button class="btn btn-sm btn-gold" onclick="showSheet('sh-newstock')">+ เพิ่ม</button>
+    </div>
+    <input type="text" id="st-q" placeholder="ค้นหาสินค้า..." oninput="renderStock()" style="margin-bottom:10px;" />
+    <div id="st-list"></div>
+  </div>
+
+  <!-- HISTORY SCREEN -->
+  <div id="screen-history" class="screen">
+    <div class="card-row">
+      <div class="stat-card"><div class="stat-val" id="hs-tot">฿0</div><div class="stat-lbl">วันนี้</div></div>
+      <div class="stat-card"><div class="stat-val" id="hs-txn">0</div><div class="stat-lbl">รายการ</div></div>
+    </div>
+    <div class="sec-head" style="margin-bottom:10px;">
+      <h2>ประวัติ</h2>
+      <button class="btn btn-sm btn-gold" onclick="exportReport()">📊 Export</button>
+    </div>
+    <div id="hist-list"></div>
+  </div>
+
+</div><!-- content -->
+
+<!-- BOTTOM NAV -->
+<div class="bottomnav">
+  <button class="bn-tab active" onclick="switchScreen('pos',this)">
+    <span class="bn-icon">🛒</span>POS
+  </button>
+  <button class="bn-tab" onclick="switchScreen('loyalty',this)">
+    <span class="bn-icon">⭐</span>Loyalty
+  </button>
+  <button class="bn-tab" onclick="switchScreen('stock',this)">
+    <span class="bn-icon">📦</span>Stock
+  </button>
+  <button class="bn-tab" onclick="switchScreen('history',this)">
+    <span class="bn-icon">📋</span>History
+  </button>
+</div>
+
+</div><!-- app -->
+
+<!-- SHEETS (modals) -->
+<!-- New Customer Sheet -->
+<div id="sh-newcust" class="sheet-bg" style="display:none;" onclick="closeSBg(event,'sh-newcust')">
+<div class="sheet" onclick="event.stopPropagation()">
+  <div class="sheet-handle"></div>
+  <h3>เพิ่มสมาชิกใหม่</h3>
+  <div class="form-row2">
+    <div><label class="label">ชื่อ</label><input id="cf" type="text" placeholder="สมชาย"/></div>
+    <div><label class="label">นามสกุล</label><input id="cl" type="text" placeholder="ใจดี"/></div>
+  </div>
+  <div class="form-row"><label class="label">เบอร์โทร</label><input id="cp" type="tel" placeholder="08x-xxx-xxxx"/></div>
+  <div class="form-row2">
+    <div><label class="label">ทะเบียน</label><input id="cpl" type="text" placeholder="กข 1234"/></div>
+    <div><label class="label">รุ่นรถ</label><input id="cc" type="text" placeholder="Toyota Camry"/></div>
+  </div>
+  <div class="form-row"><label class="label">ขนาดรถ</label>
+    <select id="csz"><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select>
+  </div>
+  <div class="sheet-btns">
+    <button class="btn" onclick="closeSheet('sh-newcust')">ยกเลิก</button>
+    <button class="btn btn-gold" onclick="addCust()">บันทึก</button>
+  </div>
+</div></div>
+
+<!-- New Stock Sheet -->
+<div id="sh-newstock" class="sheet-bg" style="display:none;" onclick="closeSBg(event,'sh-newstock')">
+<div class="sheet" onclick="event.stopPropagation()">
+  <div class="sheet-handle"></div>
+  <h3>เพิ่มสินค้า</h3>
+  <div class="form-row"><label class="label">ชื่อสินค้า</label><input id="sn" type="text" placeholder="Castrol 10W-40 1L"/></div>
+  <div class="form-row2">
+    <div><label class="label">หมวดหมู่</label>
+      <select id="sc"><option>Oil</option><option>Filter</option><option>Tyre</option><option>Fluid</option><option>Accessory</option><option>Chemical</option></select>
+    </div>
+    <div><label class="label">ราคาขาย (฿)</label><input id="sp" type="number" placeholder="350"/></div>
+  </div>
+  <div class="form-row2">
+    <div><label class="label">จำนวน</label><input id="sq" type="number" placeholder="20"/></div>
+    <div><label class="label">แจ้งเตือน</label><input id="sm" type="number" placeholder="5"/></div>
+  </div>
+  <div class="sheet-btns">
+    <button class="btn" onclick="closeSheet('sh-newstock')">ยกเลิก</button>
+    <button class="btn btn-gold" onclick="addStock()">บันทึก</button>
+  </div>
+</div></div>
+
+<!-- Restock Sheet -->
+<div id="sh-restock" class="sheet-bg" style="display:none;" onclick="closeSBg(event,'sh-restock')">
+<div class="sheet" onclick="event.stopPropagation()">
+  <div class="sheet-handle"></div>
+  <h3>เติมสต็อก</h3>
+  <div style="font-size:13px;color:var(--text2);margin-bottom:14px;" id="rst-label"></div>
+  <div class="form-row"><label class="label">เพิ่มจำนวน</label><input id="rq" type="number" placeholder="10"/></div>
+  <div class="sheet-btns">
+    <button class="btn" onclick="closeSheet('sh-restock')">ยกเลิก</button>
+    <button class="btn btn-gold" onclick="doRestock()">ยืนยัน</button>
+  </div>
+</div></div>
+
+<!-- Success Sheet -->
+<div id="sh-ok" class="sheet-bg" style="display:none;">
+<div class="sheet" onclick="event.stopPropagation()">
+  <div class="sheet-handle"></div>
+  <div class="success-icon">✅</div>
+  <div class="success-title">ชำระเงินสำเร็จ</div>
+  <div class="success-sub" id="ok-sub"></div>
+  <div class="receipt-box" id="ok-receipt"></div>
+  <button class="btn btn-gold btn-block" style="margin-top:14px;" onclick="closeSheet('sh-ok')">รายการใหม่</button>
+</div></div>
+
+<script>
+// ── SERVICE DATA ──
+const SERVICES=[
+  {cat:'ล้างรถ',name:'ล้างสี & ดูดฝุ่น',code:'-',S:200,SC:0,SCo:0,M:220,MC:0,MCo:0,L:240,LC:0,LCo:0,XL:270,XLC:0,XLCo:0,XXL:320},
+  {cat:'ล้างรถ',name:'Rainy Season Pass',code:'W02',S:800,SC:60,SCo:0,M:880,MC:60,MCo:0,L:960,LC:60,LCo:0,XL:1080,XLC:60,XLCo:0,XXL:0},
+  {cat:'ล้างรถ',name:'คูปองล้างรถ 10 ครั้ง',code:'W03',S:2500,SC:150,SCo:0,M:2500,MC:150,MCo:0,L:2500,LC:150,LCo:0,XL:2500,XLC:150,XLCo:0,XXL:2500},
+  {cat:'ล้างรถ',name:'ล้างสี มอเตอร์ไซค์',code:'B01',S:140,SC:0,SCo:0,M:140,MC:0,MCo:0,L:140,LC:0,LCo:0,XL:140,XLC:0,XLCo:0,XXL:140},
+  {cat:'เคลือบสี',name:'ล้างลูกค้าเก่า/เครื่องล่วง',code:'P01',S:300,SC:10,SCo:10,M:320,MC:10,MCo:10,L:340,LC:15,LCo:15,XL:370,XLC:15,XLCo:15,XXL:420},
+  {cat:'เคลือบสี',name:'ล้างดูดฝุ่น + ดินน้ำมัน + เคลือบสี',code:'P02',S:600,SC:25,SCo:25,M:700,MC:30,MCo:30,L:800,LC:35,LCo:35,XL:950,XLC:40,XLCo:40,XXL:1100},
+  {cat:'เคลือบสี',name:'ล้างดูดฝุ่น + Clay + ขัดเคลือบ 2 steps',code:'P03',S:1500,SC:70,SCo:80,M:1600,MC:75,MCo:85,L:1700,LC:80,LCo:90,XL:1800,XLC:90,XLCo:100,XXL:2000},
+  {cat:'เคลือบสี',name:'กำจัดคราบยางมะตอย',code:'P04',S:400,SC:15,SCo:25,M:400,MC:20,MCo:35,L:400,LC:30,LCo:45,XL:400,XLC:35,XLCo:55,XXL:800},
+  {cat:'เคลือบสี',name:'ทำความสะอาดตัวเส้น',code:'P06',S:350,SC:20,SCo:20,M:350,MC:20,MCo:20,L:390,LC:20,LCo:20,XL:410,XLC:20,XLCo:20,XXL:450},
+  {cat:'เคลือบสี',name:'เคลือบแก้วเซรามิก',code:'P07',S:6000,SC:400,SCo:600,M:7000,MC:400,MCo:600,L:8000,LC:400,LCo:600,XL:9000,XLC:400,XLCo:600,XXL:10000},
+  {cat:'เคลือบสี',name:'เคลือบแก้วเซรามิก - มัดจำ',code:'S11',S:500,SC:0,SCo:0,M:500,MC:0,MCo:0,L:500,LC:0,LCo:0,XL:500,XLC:0,XLCo:0,XXL:500},
+  {cat:'บริการอื่น',name:'ติดสติกเกอร์ Lalamove',code:'L01',S:100,SC:10,SCo:10,M:100,MC:10,MCo:10,L:100,LC:10,LCo:10,XL:100,XLC:10,XLCo:10,XXL:100},
+  {cat:'ภายใน',name:'อัดฉีดภายในทั้งคัน',code:'I01',S:2600,SC:110,SCo:145,M:3000,MC:130,MCo:165,L:3400,LC:150,LCo:185,XL:3800,XLC:170,XLCo:205,XXL:4800},
+  {cat:'ภายใน',name:'อัดฉีดพื้นทั้งคัน + แผงประตู',code:'I02',S:1500,SC:70,SCo:80,M:1600,MC:75,MCo:85,L:1700,LC:80,LCo:90,XL:1800,XLC:90,XLCo:100,XXL:2700},
+  {cat:'ภายใน',name:'อัดพรม',code:'I03',S:1000,SC:30,SCo:40,M:1250,MC:35,MCo:45,L:1300,LC:40,LCo:50,XL:1500,XLC:40,XLCo:50,XXL:2000},
+  {cat:'ภายใน',name:'อัดแผงทั้งคัน',code:'I04',S:500,SC:25,SCo:25,M:600,MC:30,MCo:30,L:720,LC:35,LCo:35,XL:800,XLC:40,XLCo:40,XXL:1000},
+  {cat:'ภายใน',name:'พักนาเนียน Spa + อบโอโซน',code:'I05',S:430,SC:10,SCo:10,M:450,MC:10,MCo:10,L:450,LC:10,LCo:10,XL:500,XLC:10,XLCo:10,XXL:800},
+  {cat:'ภายใน',name:'เคลือบแบบภายในรถพัก',code:'I06',S:680,SC:25,SCo:20,M:700,MC:25,MCo:20,L:820,LC:30,LCo:25,XL:850,XLC:30,XLCo:25,XXL:1050},
+  {cat:'บริการอื่น',name:'เครื่องกระจก-น้ำไม่เกาะ',code:'S01',S:300,SC:15,SCo:15,M:300,MC:15,MCo:15,L:350,LC:15,LCo:15,XL:400,XLC:20,XLCo:25,XXL:400},
+  {cat:'บริการอื่น',name:'อัดฟีฝา + กราบมอง',code:'S02',S:450,SC:20,SCo:20,M:450,MC:20,MCo:20,L:450,LC:20,LCo:20,XL:450,XLC:20,XLCo:20,XXL:450},
+  {cat:'บริการอื่น',name:'เติมน้ำมัน',code:'S03',S:200,SC:20,SCo:20,M:200,MC:20,MCo:20,L:200,LC:20,LCo:20,XL:200,XLC:20,XLCo:20,XXL:300},
+  {cat:'บริการอื่น',name:'ล้างแอร์ทั้งระบบ + กำจัดเชื้อรา',code:'S04',S:1500,SC:50,SCo:90,M:1500,MC:50,MCo:90,L:1500,LC:50,LCo:90,XL:1500,XLC:50,XLCo:90,XXL:1500},
+  {cat:'บริการอื่น',name:'อบโอโซน - กำจัดกลิ่น',code:'S08',S:230,SC:30,SCo:10,M:230,MC:30,MCo:10,L:230,LC:30,LCo:10,XL:230,XLC:30,XLCo:10,XXL:230},
+  {cat:'บริการอื่น',name:'ห้องเครื่อง',code:'S09',S:300,SC:20,SCo:20,M:300,MC:20,MCo:20,L:300,LC:20,LCo:20,XL:300,XLC:20,XLCo:20,XXL:300},
+  {cat:'บริการอื่น',name:'น้ำยาอัดเครือบ',code:'S10',S:1200,SC:100,SCo:0,M:1200,MC:100,MCo:0,L:1200,LC:100,LCo:0,XL:1200,XLC:100,XLCo:0,XXL:1200},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 14"',code:'O01',S:190,SC:20,SCo:10,M:190,MC:20,MCo:10,L:190,LC:20,LCo:10,XL:190,XLC:20,XLCo:10,XXL:190},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 16"',code:'O02',S:190,SC:20,SCo:10,M:190,MC:20,MCo:10,L:190,LC:20,LCo:10,XL:190,XLC:20,XLCo:10,XXL:190},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 18"',code:'O04',S:220,SC:20,SCo:10,M:220,MC:20,MCo:10,L:220,LC:20,LCo:10,XL:220,XLC:20,XLCo:10,XXL:220},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 20"',code:'O06',S:240,SC:20,SCo:10,M:240,MC:20,MCo:10,L:240,LC:20,LCo:10,XL:240,XLC:20,XLCo:10,XXL:240},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 22"',code:'O08',S:270,SC:20,SCo:10,M:270,MC:20,MCo:10,L:270,LC:20,LCo:10,XL:270,XLC:20,XLCo:10,XXL:270},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 24"',code:'O09',S:320,SC:40,SCo:10,M:320,MC:40,MCo:10,L:320,LC:40,LCo:10,XL:320,XLC:40,XLCo:10,XXL:320},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 26"',code:'O10',S:400,SC:40,SCo:10,M:400,MC:40,MCo:10,L:400,LC:40,LCo:10,XL:400,XLC:40,XLCo:10,XXL:400},
+];
+const CAT_COLORS={'ล้างรถ':'b-blue','เคลือบสี':'b-teal','ภายใน':'b-pink','บริการอื่น':'b-amber','ใบปัดน้ำฝน':'b-gray'};
+
+// ── STATE ──
+const ST={get(k){try{return JSON.parse(localStorage.getItem(k));}catch{return null;}},set(k,v){localStorage.setItem(k,JSON.stringify(v));}};
+let customers=ST.get('cust')||[
+  {id:1,name:'สมชาย ใจดี',phone:'081-234-5678',plate:'กข 1234',car:'Toyota Camry',size:'M',points:850,visits:12,redeemed:1},
+  {id:2,name:'มาลี ศรีสุข',phone:'089-876-5432',plate:'งด 5678',car:'Honda City',size:'S',points:220,visits:4,redeemed:0},
+  {id:3,name:'ณรงค์ ธนา',phone:'062-111-2233',plate:'ขค 9900',car:'Isuzu D-Max',size:'XL',points:1500,visits:23,redeemed:3},
+];
+let stock=ST.get('stock')||[
+  {id:1,name:'Castrol 10W-40 1L',cat:'Oil',price:350,qty:18,min:5},
+  {id:2,name:'Oil Filter (Toyota)',cat:'Filter',price:180,qty:30,min:8},
+  {id:3,name:'Brake Fluid DOT4',cat:'Fluid',price:220,qty:3,min:5},
+  {id:4,name:'Air Freshener',cat:'Accessory',price:89,qty:0,min:5},
+];
+let transactions=ST.get('txns')||[];
+let txnN=ST.get('txnN')||1000;
+let cart=[],selCust=null,restockId=null;
+let curSize='S',curType='Standard',curCat='all';
+
+function save(){ST.set('cust',customers);ST.set('stock',stock);ST.set('txns',transactions);ST.set('txnN',txnN);document.getElementById('save-ind').textContent='✓ Saved';}
+
+// ── PRICE ──
+function getPrice(s,size,type){
+  const m={S:{Standard:'S','C-Sale':'SC','C-Op.':'SCo'},M:{Standard:'M','C-Sale':'MC','C-Op.':'MCo'},L:{Standard:'L','C-Sale':'LC','C-Op.':'LCo'},XL:{Standard:'XL','C-Sale':'XLC','C-Op.':'XLCo'},XXL:{Standard:'XXL'}};
+  const keys=m[size];if(!keys)return 0;
+  if(type==='C-Sale')return s[keys['C-Sale']]||0;
+  if(type==='C-Op.')return s[keys['C-Op.']]||0;
+  return s[keys.Standard]||0;
+}
+
+// ── RENDER SERVICES ──
+function renderServices(){
+  const grid=document.getElementById('svc-grid');
+  let list=SERVICES;
+  if(curCat!=='all')list=list.filter(s=>s.cat===curCat);
+  const items=list.map(s=>{
+    const price=getPrice(s,curSize,curType);
+    if(!price)return '';
+    const d=JSON.stringify({id:s.code+'_'+curSize+'_'+curType,name:s.name,cat:s.cat,price,size:curSize,type:curType,code:s.code});
+    return `<div class="svc-card" onclick='addCart(${d.replace(/'/g,"&apos;")})'>
+      <div class="svc-cat-badge badge ${CAT_COLORS[s.cat]||'b-gray'}">${s.cat}</div>
+      <div class="svc-name">${s.name}</div>
+      <div class="svc-code">${s.code} · ${curSize}</div>
+      <div class="svc-price">฿${price.toLocaleString()}</div>
+    </div>`;
+  }).filter(Boolean).join('');
+  grid.innerHTML=items||'<div class="empty" style="grid-column:1/-1;">ไม่มีบริการในหมวดนี้</div>';
+}
+
+function setSize(s,el){curSize=s;document.querySelectorAll('.size-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderServices();}
+function setType(t,el){curType=t;document.querySelectorAll('.type-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderServices();}
+function setCat(c,el){curCat=c;document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderServices();}
+
+// ── CART ──
+function addCart(item){
+  const ex=cart.find(c=>c.id===item.id);
+  if(ex)ex.qty++;else cart.push({...item,qty:1});
+  renderCart();
+}
+function removeCart(i){cart.splice(i,1);renderCart();}
+function clearCart(){cart=[];selCust=null;document.getElementById('cust-q').value='';document.getElementById('cust-chip').style.display='none';document.getElementById('cust-dd').style.display='none';renderCart();}
+
+function renderCart(){
+  const sec=document.getElementById('cart-section');
+  const el=document.getElementById('cart-items');
+  if(!cart.length){sec.style.display='none';updateTotals();return;}
+  sec.style.display='block';
+  el.innerHTML=cart.map((c,i)=>`<div class="cart-item">
+    <div class="ci-info">
+      <div class="ci-name">${c.name}</div>
+      <div class="ci-sub">${c.code} · ${c.size} · ${c.type} × ${c.qty}</div>
+    </div>
+    <div class="ci-price">฿${(c.price*c.qty).toLocaleString()}</div>
+    <button class="ci-rm" onclick="removeCart(${i})">×</button>
+  </div>`).join('');
+  updateTotals();
+}
+
+function updateTotals(){
+  const sub=cart.reduce((a,c)=>a+c.price*c.qty,0);
+  let disc=0;
+  if(selCust&&selCust.points>=500)disc=Math.min(Math.floor(selCust.points/500)*50,Math.floor(sub*0.15));
+  const tax=Math.round((sub-disc)*0.07);
+  const tot=sub-disc+tax;
+  document.getElementById('ct-sub').textContent='฿'+sub.toLocaleString();
+  document.getElementById('ct-tax').textContent='฿'+tax.toLocaleString();
+  document.getElementById('ct-tot').textContent='฿'+tot.toLocaleString();
+  const dr=document.getElementById('ct-disc-row');
+  if(disc>0){dr.style.display='flex';document.getElementById('ct-disc').textContent='-฿'+disc.toLocaleString();}
+  else dr.style.display='none';
+}
+
+// ── CUSTOMER SEARCH ──
+function custSearch(){
+  const q=document.getElementById('cust-q').value.toLowerCase().trim();
+  const dd=document.getElementById('cust-dd');
+  if(!q){dd.style.display='none';selCust=null;document.getElementById('cust-chip').style.display='none';updateTotals();return;}
+  const res=customers.filter(c=>c.name.toLowerCase().includes(q)||c.phone.includes(q)||c.plate.toLowerCase().includes(q));
+  dd.style.display=res.length?'block':'none';
+  dd.innerHTML=res.map(c=>`<div class="cust-opt" onclick="selectCust(${c.id})">
+    <div><div style="font-weight:700;font-size:13px;">${c.name}</div><div style="font-size:11px;color:var(--text3);">${c.plate} · ${c.car} · ${c.size}</div></div>
+    <span class="pts-chip">${c.points} pts</span>
+  </div>`).join('');
+}
+
+function selectCust(id){
+  selCust=customers.find(c=>c.id===id);
+  document.getElementById('cust-dd').style.display='none';
+  document.getElementById('cust-q').value=selCust.name;
+  document.getElementById('cust-chip').style.display='block';
+  document.getElementById('cc-name').textContent=selCust.name;
+  document.getElementById('cc-pts').textContent=selCust.points+' pts';
+  document.getElementById('cc-info').textContent=selCust.car+' · '+tier(selCust.points)+' · '+selCust.visits+' visits';
+  document.getElementById('cc-bar').style.width=Math.min((selCust.points%500)/500*100,100)+'%';
+  document.getElementById('cc-next').textContent=(500-selCust.points%500)+' pts ถึงส่วนลด ฿50';
+  document.getElementById('plate-inp').value=selCust.plate;
+  setSize(selCust.size,document.querySelector(`.size-tab[onclick*="'${selCust.size}'"]`)||document.querySelectorAll('.size-tab')[0]);
+  updateTotals();
+}
+
+function tier(pts){return pts>=1000?'Gold ★':pts>=400?'Silver ✦':'Bronze ◆';}
+
+// ── CHECKOUT ──
+function checkout(){
+  if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
+  const plate=document.getElementById('plate-inp').value||(selCust?selCust.plate:'—');
+  const pay=document.getElementById('pay-method').value;
+  const sub=cart.reduce((a,c)=>a+c.price*c.qty,0);
+  let disc=0;
+  if(selCust&&selCust.points>=500)disc=Math.min(Math.floor(selCust.points/500)*50,Math.floor(sub*0.15));
+  const tax=Math.round((sub-disc)*0.07);
+  const tot=sub-disc+tax;
+  const pts=Math.floor(tot/10);
+  const now=new Date();
+  const recId='#'+String(++txnN);
+  if(selCust){const used=Math.floor(selCust.points/500);selCust.points=selCust.points-(used*500)+pts;selCust.visits++;if(disc>0)selCust.redeemed++;}
+  transactions.unshift({id:recId,customer:selCust?selCust.name:'Walk-in',plate,size:curSize,payment:pay,items:cart.map(c=>c.name).join(', '),total:tot,pts:selCust?pts:0,date:now.toLocaleDateString('th-TH'),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})});
+  save();
+  document.getElementById('ok-sub').textContent=recId+' · '+(selCust?selCust.name:'Walk-in')+' · '+plate;
+  document.getElementById('ok-receipt').innerHTML=
+    `<div class="receipt-line"><span>Subtotal</span><span>฿${sub.toLocaleString()}</span></div>`+
+    (disc?`<div class="receipt-line" style="color:var(--success);"><span>Loyalty discount</span><span>-฿${disc.toLocaleString()}</span></div>`:'')+
+    `<div class="receipt-line"><span>Tax (7%)</span><span>฿${tax.toLocaleString()}</span></div>`+
+    `<div class="receipt-total"><span>รวม</span><span>฿${tot.toLocaleString()}</span></div>`+
+    (selCust?`<div style="margin-top:8px;font-size:11px;color:var(--gold);">+${pts} pts · ยอด ${selCust.points} pts</div>`:'');
+  showSheet('sh-ok');
+  cart=[];selCust=null;
+  document.getElementById('cust-q').value='';
+  document.getElementById('cust-chip').style.display='none';
+  document.getElementById('plate-inp').value='';
+  renderCart();
+}
+
+// ── LOYALTY ──
+function renderLoyalty(){
+  const q=(document.getElementById('loy-q')||{value:''}).value.toLowerCase();
+  document.getElementById('ls-mem').textContent=customers.length;
+  document.getElementById('ls-pts').textContent=customers.reduce((a,c)=>a+c.points,0).toLocaleString();
+  document.getElementById('ls-gold').textContent=customers.filter(c=>c.points>=1000).length;
+  const list=customers.filter(c=>!q||c.name.toLowerCase().includes(q)||c.phone.includes(q)||c.plate.toLowerCase().includes(q));
+  document.getElementById('loy-list').innerHTML=list.map(c=>`
+    <div class="card" style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+        <div>
+          <div style="font-weight:700;font-size:14px;">${c.name}</div>
+          <div style="font-size:11px;color:var(--text3);">${c.car} · ${c.plate} · <span class="badge b-blue">${c.size}</span></div>
+        </div>
+        <span class="pts-chip">${c.points} pts</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:11px;color:var(--text2);">${tier(c.points)} · ${c.visits} visits · ${c.phone}</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm btn-success" onclick="addPts(${c.id})">+ Pts</button>
+          <button class="btn btn-sm btn-danger" onclick="delCust(${c.id})">Del</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function addPts(id){
+  const pts=parseInt(prompt('เพิ่ม bonus points:','50'));
+  if(pts>0){customers.find(c=>c.id===id).points+=pts;save();renderLoyalty();}
+}
+function delCust(id){if(confirm('ลบสมาชิกนี้?')){customers=customers.filter(c=>c.id!==id);save();renderLoyalty();}}
+
+// ── STOCK ──
+function renderStockStats(){
+  document.getElementById('st-skus').textContent=stock.length;
+  document.getElementById('st-low').textContent=stock.filter(s=>s.qty>0&&s.qty<=s.min).length;
+  document.getElementById('st-out').textContent=stock.filter(s=>s.qty===0).length;
+  renderStock();
+}
+function renderStock(){
+  const q=(document.getElementById('st-q')||{value:''}).value.toLowerCase();
+  const list=stock.filter(s=>!q||s.name.toLowerCase().includes(q));
+  document.getElementById('st-list').innerHTML=list.map(s=>{
+    const pct=Math.min(s.qty/Math.max(s.min*3,10)*100,100);
+    const col=s.qty===0?'var(--danger)':s.qty<=s.min?'var(--amber)':'var(--success)';
+    const badge=s.qty===0?'<span class="badge b-red">หมด</span>':s.qty<=s.min?'<span class="badge b-amber">ใกล้หมด</span>':'<span class="badge b-green">มีสต็อก</span>';
+    return `<div class="card" style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div>
+          <div style="font-weight:700;font-size:13px;">${s.name}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;"><span class="badge b-blue">${s.cat}</span> · ฿${s.price.toLocaleString()}</div>
+        </div>
+        ${badge}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="stock-bar"><div class="stock-fill" style="width:${Math.round(pct)}%;background:${col};"></div></div>
+          <span style="font-size:13px;font-weight:700;">${s.qty}</span><span style="font-size:11px;color:var(--text3);">/ min ${s.min}</span>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm btn-success" onclick="openRestock(${s.id})">เติม</button>
+          <button class="btn btn-sm btn-danger" onclick="delStock(${s.id})">ลบ</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('')||'<div class="empty">ไม่พบสินค้า</div>';
+}
+
+function openRestock(id){
+  restockId=id;
+  const s=stock.find(i=>i.id===id);
+  document.getElementById('rst-label').textContent=s.name+' — สต็อกปัจจุบัน: '+s.qty;
+  document.getElementById('rq').value='';
+  showSheet('sh-restock');
+}
+function doRestock(){
+  const qty=parseInt(document.getElementById('rq').value);
+  if(!qty||qty<1){alert('กรุณาระบุจำนวน');return;}
+  stock.find(s=>s.id===restockId).qty+=qty;
+  save();closeSheet('sh-restock');renderStockStats();
+}
+function delStock(id){if(confirm('ลบสินค้านี้?')){stock=stock.filter(s=>s.id!==id);save();renderStockStats();}}
+
+// ── HISTORY ──
+function renderHistory(){
+  const today=new Date().toLocaleDateString('th-TH');
+  const todayT=transactions.filter(t=>t.date===today);
+  const tot=todayT.reduce((a,t)=>a+t.total,0);
+  document.getElementById('hs-tot').textContent='฿'+tot.toLocaleString();
+  document.getElementById('hs-txn').textContent=todayT.length;
+  const all=transactions.slice(0,50);
+  document.getElementById('hist-list').innerHTML=all.map(t=>`
+    <div class="card" style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+        <div>
+          <div style="font-weight:700;font-size:13px;">${t.id} · ${t.customer}</div>
+          <div style="font-size:11px;color:var(--text3);">${t.plate} · <span class="badge b-blue">${t.size}</span> · ${t.payment}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:16px;font-weight:700;">฿${t.total.toLocaleString()}</div>
+          ${t.pts?`<span class="pts-chip">+${t.pts} pts</span>`:''}
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);">${t.items}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:3px;">${t.date} ${t.time}</div>
+    </div>`).join('')||'<div class="empty">ไม่มีรายการ</div>';
+}
+
+// ── EXPORT REPORT ──
+function exportReport(){
+  const today=new Date();
+  const todayStr=today.toLocaleDateString('th-TH');
+  const txns=transactions.filter(t=>t.date===todayStr);
+  if(!txns.length&&!confirm('ไม่มีรายการวันนี้ ต้องการ export ทั้งหมดหรือไม่?'))return;
+  const all=txns.length?txns:transactions;
+  const grand=all.reduce((a,t)=>a+t.total,0);
+  const cash=all.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+t.total,0);
+  const transfer=all.filter(t=>t.payment==='โอน').reduce((a,t)=>a+t.total,0);
+  const boon=all.filter(t=>t.payment==='บุญถอด').reduce((a,t)=>a+t.total,0);
+  const MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  let csv='\uFEFF';
+  csv+=`รายงานสรุปบัญชีประจำวัน V.04\t\tสาขา\tMK\tผู้จัดทำ\t\tวันที่\t${today.getDate()}\t${MONTHS[today.getMonth()]}\t-\t${today.getFullYear()}\r\n`;
+  csv+=`ลำดับ\tเลขใบจ่าย\tขนาด\tรวม\tวิธีจ่าย\tลูกค้า\tทะเบียน\tบริการ\r\n`;
+  all.forEach((t,i)=>{csv+=`${i+1}\t${t.id}\t${t.size}\t${t.total}\t${t.payment}\t${t.customer}\t${t.plate}\t"${t.items}"\r\n`;});
+  csv+=`รวม\t\t\t${grand}\r\n\r\n`;
+  csv+=`ยอดเงินสด\t${cash}\r\nยอดโอน\t${transfer}\r\nยอดบุญถอด\t${boon}\r\nรวมทั้งหมด\t${grand}\r\n`;
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`CarCare-Report-${today.toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── FORMS ──
+function addCust(){
+  const fn=document.getElementById('cf').value.trim();
+  if(!fn){alert('กรุณาระบุชื่อ');return;}
+  customers.push({id:Date.now(),name:fn+' '+document.getElementById('cl').value.trim(),phone:document.getElementById('cp').value,plate:document.getElementById('cpl').value,car:document.getElementById('cc').value,size:document.getElementById('csz').value,points:0,visits:0,redeemed:0});
+  save();closeSheet('sh-newcust');['cf','cl','cp','cpl','cc'].forEach(i=>document.getElementById(i).value='');renderLoyalty();
+}
+function addStock(){
+  const name=document.getElementById('sn').value.trim();
+  if(!name){alert('กรุณาระบุชื่อสินค้า');return;}
+  stock.push({id:Date.now(),name,cat:document.getElementById('sc').value,price:parseInt(document.getElementById('sp').value)||0,qty:parseInt(document.getElementById('sq').value)||0,min:parseInt(document.getElementById('sm').value)||5});
+  save();closeSheet('sh-newstock');['sn','sp','sq','sm'].forEach(i=>document.getElementById(i).value='');renderStockStats();
+}
+
+// ── NAV ──
+function switchScreen(id,el){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.bn-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('main-content').scrollTop=0;
+  if(id==='loyalty')renderLoyalty();
+  if(id==='stock')renderStockStats();
+  if(id==='history')renderHistory();
+}
+
+// ── SHEETS ──
+function showSheet(id){document.getElementById(id).style.display='flex';}
+function closeSheet(id){document.getElementById(id).style.display='none';}
+function closeSBg(e,id){if(e.target===document.getElementById(id))closeSheet(id);}
+
+// ── PWA INSTALL ──
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('install-banner').style.display='flex';
+});
+function installApp(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('install-banner').style.display='none';});
+}
+
+// ── SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ── INIT ──
+renderServices();
+</script>
+</body>
+</html>
