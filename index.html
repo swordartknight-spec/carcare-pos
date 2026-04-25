@@ -2,774 +2,1189 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="CarCare POS"/>
 <meta name="theme-color" content="#C9A84C"/>
 <link rel="manifest" href="manifest.json"/>
 <title>CarCare POS</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
-  --gold:#C9A84C;--gold-light:#fef3d0;--gold-dark:#9a7a2e;
-  --black:#1a1a1a;--surface:#ffffff;--bg:#f5f4f0;
-  --border:#e0ddd5;--border2:#c8c4b8;
-  --text:#1a1a1a;--text2:#6b6860;--text3:#9b9890;
-  --success:#3B6D11;--success-bg:#E2EFDA;
-  --danger:#A32D2D;--danger-bg:#FCEBEB;
-  --info:#185FA5;--info-bg:#E6F1FB;
-  --amber:#854F0B;--amber-bg:#FAEEDA;
-  --r:10px;--r-sm:7px;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --gold:#C9A84C;--gold-lt:#fef3d0;--gold-dk:#9a7a2e;
+  --blk:#1a1a1a;--bg:#f5f4f0;--sur:#fff;
+  --bdr:#e0ddd5;--bdr2:#c8c4b8;
+  --tx:#1a1a1a;--tx2:#6b6860;--tx3:#9b9890;
+  --ok:#3B6D11;--ok-bg:#E2EFDA;
+  --err:#A32D2D;--err-bg:#FCEBEB;
+  --inf:#185FA5;--inf-bg:#E6F1FB;
+  --amb:#854F0B;--amb-bg:#FAEEDA;
+  --pur:#534AB7;--pur-bg:#EEEDFE;
+  --r:10px;--rs:7px;
+  --st:env(safe-area-inset-top,0px);
+  --sb:env(safe-area-inset-bottom,0px);
 }
-html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Segoe UI',Tahoma,Arial,sans-serif;color:var(--text);font-size:14px;}
-
-/* LAYOUT */
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Segoe UI',Tahoma,Arial,sans-serif;color:var(--tx);font-size:14px;}
 .app{display:flex;flex-direction:column;height:100%;height:100dvh;}
-.topbar{background:var(--black);color:var(--gold);padding:10px 14px;padding-top:calc(10px + var(--safe-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.topbar-logo{font-size:17px;font-weight:700;letter-spacing:0.5px;display:flex;align-items:center;gap:7px;}
-.topbar-right{font-size:11px;color:#aaa;display:flex;align-items:center;gap:8px;}
-.content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
-.bottomnav{background:var(--surface);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:var(--safe-bottom);}
-.bn-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 4px 7px;cursor:pointer;border:none;background:none;color:var(--text3);font-size:9px;font-weight:600;gap:3px;transition:color 0.15s;text-transform:uppercase;letter-spacing:0.04em;}
-.bn-tab.active{color:var(--gold);}
-.bn-icon{font-size:20px;line-height:1;}
+
+/* SETUP */
+.setup{position:fixed;inset:0;background:var(--blk);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;color:#fff;overflow-y:auto;}
+.setup h1{font-size:22px;font-weight:700;color:var(--gold);margin:10px 0 4px;}
+.setup p{font-size:12px;color:#aaa;text-align:center;margin-bottom:18px;line-height:1.6;}
+.setup-form{width:100%;max-width:380px;}
+.slbl{display:block;font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin:10px 0 3px;}
+.sinput{width:100%;padding:10px 12px;background:#2a2a2a;border:1px solid #444;color:#fff;border-radius:var(--rs);font-size:12px;font-family:monospace;outline:none;}
+.sinput:focus{border-color:var(--gold);}
+.sinput::placeholder{color:#555;}
+.sbtn{width:100%;padding:13px;background:var(--gold);color:var(--blk);border:none;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;}
+.sskip{width:100%;padding:10px;background:none;border:none;color:#555;font-size:12px;cursor:pointer;margin-top:8px;}
+.snote{font-size:10px;color:#444;text-align:center;margin-top:14px;line-height:1.7;}
+
+/* TOPBAR */
+.topbar{background:var(--blk);color:var(--gold);padding:10px 14px;padding-top:calc(10px + var(--st));display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.logo{font-size:16px;font-weight:700;}
+.sync{display:flex;align-items:center;gap:6px;font-size:11px;color:#aaa;}
+.dot{width:8px;height:8px;border-radius:50%;background:#555;transition:background .3s;flex-shrink:0;}
+.dot.on{background:#4ade80;}.dot.sy{background:var(--gold);animation:pl 1s infinite;}.dot.off{background:#f87171;}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* FLOATING CART TOTAL (feature 7) */
+.cart-float{position:fixed;bottom:calc(56px + var(--sb) + 8px);right:12px;background:var(--blk);color:var(--gold);border-radius:var(--r);padding:10px 14px;display:none;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.25);min-width:130px;cursor:pointer;}
+.cf-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#aaa;margin-bottom:2px;}
+.cf-amt{font-size:20px;font-weight:700;}
+.cf-cnt{font-size:10px;color:#aaa;margin-top:1px;}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+
+/* BOTTOM NAV */
+.nav{background:var(--sur);border-top:1px solid var(--bdr);display:flex;flex-shrink:0;padding-bottom:var(--sb);}
+.nt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 6px;cursor:pointer;border:none;background:none;color:var(--tx3);font-size:8px;font-weight:700;gap:2px;text-transform:uppercase;letter-spacing:.03em;}
+.nt.active{color:var(--gold);}
+.ni{font-size:18px;}
 
 /* SCREENS */
-.screen{display:none;padding:12px;padding-bottom:16px;}
-.screen.active{display:block;}
+.sc{display:none;padding:12px;padding-bottom:80px;}
+.sc.active{display:block;}
 
 /* CARDS */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;}
-.card-row{display:flex;gap:10px;margin-bottom:10px;}
-.stat-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;text-align:center;}
-.stat-val{font-size:20px;font-weight:700;color:var(--black);}
-.stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
+.sc-card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:10px 12px;text-align:center;}
+.sc-v{font-size:18px;font-weight:700;}
+.sc-l{font-size:9px;color:var(--tx3);margin-top:2px;text-transform:uppercase;letter-spacing:.04em;}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 14px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:all 0.12s;-webkit-appearance:none;}
-.btn:active{transform:scale(0.97);opacity:0.85;}
-.btn-gold{background:var(--gold);color:var(--black);border-color:var(--gold-dark);}
-.btn-block{width:100%;font-size:14px;padding:12px;}
-.btn-sm{padding:6px 10px;font-size:11px;}
-.btn-danger{background:var(--danger-bg);color:var(--danger);border-color:var(--danger);}
-.btn-success{background:var(--success-bg);color:var(--success);border-color:var(--success);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 14px;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--bdr2);background:var(--sur);color:var(--tx);-webkit-appearance:none;}
+.btn:active{transform:scale(.97);}
+.btn-g{background:var(--gold);color:var(--blk);border-color:var(--gold-dk);}
+.btn-bl{width:100%;font-size:14px;padding:13px;}
+.btn-s{padding:5px 9px;font-size:11px;}
+.btn-d{background:var(--err-bg);color:var(--err);border-color:var(--err);}
+.btn-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok);}
+.btn-pur{background:var(--pur-bg);color:var(--pur);border-color:var(--pur);}
 
 /* INPUTS */
-input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:14px;background:var(--surface);color:var(--text);font-family:inherit;outline:none;-webkit-appearance:none;}
-input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.2);}
-.label{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;display:block;}
-.form-row{margin-bottom:12px;}
-.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--bdr2);border-radius:var(--rs);font-size:14px;background:var(--sur);color:var(--tx);font-family:inherit;outline:none;-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.2);}
+.lbl{font-size:10px;color:var(--tx2);margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;}
+.fr{margin-bottom:11px;}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px;}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:11px;}
 
 /* SERVICE GRID */
-.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;-webkit-overflow-scrolling:touch;}
-.filters::-webkit-scrollbar{display:none;}
-.fchip{padding:6px 12px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text2);flex-shrink:0;}
-.fchip.active{background:var(--black);color:var(--gold);border-color:var(--black);}
-.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
-.svc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px;cursor:pointer;transition:all 0.12s;position:relative;}
-.svc-card:active{transform:scale(0.96);background:var(--gold-light);border-color:var(--gold);}
-.svc-cat-badge{font-size:9px;padding:2px 6px;border-radius:99px;font-weight:700;margin-bottom:5px;display:inline-block;}
-.svc-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:4px;}
-.svc-code{font-size:10px;color:var(--text3);}
-.svc-price{font-size:14px;font-weight:700;color:var(--gold);margin-top:5px;}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:9px;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer;border:1px solid var(--bdr2);background:var(--sur);color:var(--tx2);flex-shrink:0;}
+.chip.active{background:var(--blk);color:var(--gold);border-color:var(--blk);}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.sc2{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:10px;cursor:pointer;position:relative;}
+.sc2:active{background:var(--gold-lt);border-color:var(--gold);}
+.sc2-cat{font-size:9px;padding:2px 6px;border-radius:99px;font-weight:700;margin-bottom:5px;display:inline-block;}
+.sc2-name{font-size:11px;font-weight:700;line-height:1.3;margin-bottom:3px;}
+.sc2-code{font-size:9px;color:var(--tx3);}
+.sc2-price{font-size:13px;font-weight:700;color:var(--gold);margin-top:4px;}
+.sc2-inc{font-size:9px;color:var(--ok);margin-top:2px;}
+.sc2-cpn{font-size:9px;color:var(--pur);margin-top:1px;}
+
+/* SIZE/TYPE TABS */
+.stabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
+.stab{padding:6px 13px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--bdr2);background:var(--sur);color:var(--tx2);}
+.stab.active{background:var(--blk);color:var(--gold);border-color:var(--blk);}
+.ttabs{display:flex;gap:5px;margin-bottom:9px;}
+.ttab{flex:1;padding:7px;border-radius:var(--rs);font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--bdr2);background:var(--sur);color:var(--tx2);text-align:center;}
+.ttab.active{background:var(--gold);color:var(--blk);border-color:var(--gold-dk);}
 
 /* CART */
-.cart-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
-.cart-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-.cart-head span{font-size:14px;font-weight:700;}
-.cart-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);gap:8px;}
-.cart-item:last-child{border-bottom:none;}
-.ci-info{flex:1;}
-.ci-name{font-size:12px;font-weight:600;}
-.ci-sub{font-size:10px;color:var(--text3);margin-top:2px;}
-.ci-price{font-size:13px;font-weight:700;white-space:nowrap;}
-.ci-rm{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--danger-bg);color:var(--danger);font-size:15px;cursor:pointer;flex-shrink:0;border:none;}
-.cart-total-row{padding:12px 14px;border-top:1px solid var(--border);}
-.ct-line{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:5px;}
-.ct-total{display:flex;justify-content:space-between;font-size:18px;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.cart-sec{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.ch{padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;}
+.ch span{font-size:14px;font-weight:700;}
+.ci{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--bdr);gap:8px;}
+.ci:last-child{border-bottom:none;}
+.ci-i{flex:1;}
+.ci-n{font-size:12px;font-weight:700;}
+.ci-s{font-size:10px;color:var(--tx3);margin-top:2px;}
+.ci-p{font-size:13px;font-weight:700;white-space:nowrap;}
+.ci-x{width:28px;height:28px;border-radius:50%;background:var(--err-bg);color:var(--err);font-size:15px;cursor:pointer;border:none;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.ctf{padding:12px 14px;border-top:1px solid var(--bdr);}
+.cl{display:flex;justify-content:space-between;font-size:12px;color:var(--tx2);margin-bottom:5px;}
+.ctot{display:flex;justify-content:space-between;font-size:18px;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr);}
 
 /* CUSTOMER BAR */
-.cust-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;}
-.cust-result{background:var(--bg);border-radius:var(--r-sm);overflow:hidden;margin-top:8px;}
-.cust-opt{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);cursor:pointer;}
-.cust-opt:last-child{border-bottom:none;}
-.cust-opt:active{background:var(--gold-light);}
-.cust-chip{background:var(--gold-light);border:1px solid var(--gold);border-radius:var(--r-sm);padding:8px 12px;margin-top:8px;}
-.pts-chip{background:var(--amber-bg);color:var(--amber);font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;display:inline-block;}
-.loy-bar-wrap{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin:5px 0;}
-.loy-bar{height:100%;background:var(--gold);border-radius:99px;transition:width 0.5s;}
+.cb{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;}
+.cres{background:var(--bg);border-radius:var(--rs);overflow:hidden;margin-top:8px;}
+.co{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bdr);cursor:pointer;}
+.co:last-child{border-bottom:none;}.co:active{background:var(--gold-lt);}
+.cchip{background:var(--gold-lt);border:1px solid var(--gold);border-radius:var(--rs);padding:8px 12px;margin-top:8px;}
+.pc{background:var(--amb-bg);color:var(--amb);font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;display:inline-block;}
+.lb{height:4px;background:var(--bdr);border-radius:99px;overflow:hidden;margin:5px 0;}
+.lf{height:100%;background:var(--gold);border-radius:99px;transition:width .5s;}
 
-/* BADGE */
+/* BADGES */
 .badge{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:700;display:inline-block;white-space:nowrap;}
-.b-blue{background:var(--info-bg);color:var(--info);}
-.b-green{background:var(--success-bg);color:var(--success);}
-.b-amber{background:var(--amber-bg);color:var(--amber);}
-.b-red{background:var(--danger-bg);color:var(--danger);}
-.b-pink{background:#FBEAF0;color:#993556;}
-.b-teal{background:#E1F5EE;color:#0F6E56;}
-.b-gray{background:#F1EFE8;color:#5F5E5A;}
-
-/* TABLE */
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-table{width:100%;border-collapse:collapse;font-size:12px;}
-th{padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);background:#f9f8f5;border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;}
-td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-
-/* MODAL / SHEET */
-.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;}
-.sheet{background:var(--surface);border-radius:18px 18px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:20px 16px;padding-bottom:calc(20px + var(--safe-bottom));}
-.sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:99px;margin:0 auto 16px;}
-.sheet h3{font-size:17px;font-weight:700;margin-bottom:16px;}
-.sheet-btns{display:flex;gap:8px;margin-top:16px;}
-.sheet-btns .btn{flex:1;}
-
-/* SUCCESS SHEET */
-.success-icon{font-size:48px;text-align:center;margin:10px 0 8px;}
-.success-title{text-align:center;font-size:20px;font-weight:700;margin-bottom:6px;}
-.success-sub{text-align:center;font-size:12px;color:var(--text2);margin-bottom:14px;}
-.receipt-box{background:var(--bg);border-radius:var(--r);padding:12px 14px;font-size:13px;}
-.receipt-line{display:flex;justify-content:space-between;margin-bottom:6px;}
-.receipt-total{display:flex;justify-content:space-between;font-size:16px;font-weight:700;border-top:1px solid var(--border);padding-top:8px;margin-top:6px;}
-
-/* SECTION HEADER */
-.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.sec-head h2{font-size:16px;font-weight:700;}
+.bb{background:var(--inf-bg);color:var(--inf);}
+.bg2{background:var(--ok-bg);color:var(--ok);}
+.ba{background:var(--amb-bg);color:var(--amb);}
+.br{background:var(--err-bg);color:var(--err);}
+.bp{background:#FBEAF0;color:#993556;}
+.bt{background:#E1F5EE;color:#0F6E56;}
+.bgy{background:#F1EFE8;color:#5F5E5A;}
+.bpu{background:var(--pur-bg);color:var(--pur);}
 
 /* STOCK BAR */
-.stock-bar{width:50px;height:5px;background:var(--border);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:5px;}
-.stock-fill{height:100%;border-radius:99px;}
+.sb2{width:50px;height:5px;background:var(--bdr);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:5px;}
+.sf{height:100%;border-radius:99px;}
 
-/* SIZE SELECTOR */
-.size-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
-.size-tab{padding:7px 14px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border2);background:var(--surface);color:var(--text2);}
-.size-tab.active{background:var(--black);color:var(--gold);border-color:var(--black);}
+/* SHEET */
+.sbg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end;}
+.sht{background:var(--sur);border-radius:18px 18px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding:20px 16px;padding-bottom:calc(20px + var(--sb));}
+.sh{width:36px;height:4px;background:var(--bdr2);border-radius:99px;margin:0 auto 16px;}
+.sht h3{font-size:17px;font-weight:700;margin-bottom:16px;}
+.sbt{display:flex;gap:8px;margin-top:16px;}.sbt .btn{flex:1;}
 
-/* EMPTY STATE */
-.empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;}
+/* SUCCESS */
+.si{font-size:48px;text-align:center;margin:10px 0 8px;}
+.st2{text-align:center;font-size:20px;font-weight:700;margin-bottom:6px;}
+.ss{text-align:center;font-size:12px;color:var(--tx2);margin-bottom:14px;}
+.rb{background:var(--bg);border-radius:var(--r);padding:12px 14px;font-size:13px;}
+.rl{display:flex;justify-content:space-between;margin-bottom:6px;}
+.rt{display:flex;justify-content:space-between;font-size:16px;font-weight:700;border-top:1px solid var(--bdr);padding-top:8px;margin-top:6px;}
 
-/* PRICE TYPE */
-.type-tabs{display:flex;gap:5px;margin-bottom:10px;}
-.type-tab{flex:1;padding:7px;border-radius:var(--r-sm);font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text2);text-align:center;}
-.type-tab.active{background:var(--gold);color:var(--black);border-color:var(--gold-dark);}
+/* SECTION HEAD */
+.sh2{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.sh2 h2{font-size:16px;font-weight:700;}
 
-/* INSTALL BANNER */
-.install-banner{background:var(--black);color:var(--gold);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;font-size:12px;flex-shrink:0;}
-.install-banner button{background:var(--gold);color:var(--black);border:none;border-radius:var(--r-sm);padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;}
+/* COUPON BADGE on card */
+.cpn-tag{position:absolute;top:6px;right:6px;background:var(--pur-bg);color:var(--pur);font-size:8px;font-weight:700;padding:1px 5px;border-radius:99px;}
+
+/* INCENTIVE INFO */
+.inc-row{display:flex;gap:8px;margin-top:4px;}
+.inc-box{flex:1;background:var(--ok-bg);border-radius:var(--rs);padding:5px 8px;font-size:10px;color:var(--ok);text-align:center;}
+.inc-box b{display:block;font-size:13px;}
+
+/* DATE RANGE */
+.date-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;}
+.date-row input[type=date]{padding:8px 10px;font-size:12px;}
+.date-row .btn{flex-shrink:0;padding:8px 12px;font-size:12px;}
+
+/* TODAY DASHBOARD */
+.big-stat{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:10px;}
+.big-num{font-size:36px;font-weight:700;color:var(--blk);}
+.big-lbl{font-size:12px;color:var(--tx2);margin-top:4px;}
+.pay-row{display:flex;gap:8px;margin-bottom:10px;}
+.pay-box{flex:1;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:10px;text-align:center;}
+.pay-v{font-size:16px;font-weight:700;}
+.pay-l{font-size:10px;color:var(--tx3);margin-top:2px;}
+.inc-summary{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;}
+.inc-row2{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:13px;}
+.inc-row2:last-child{border-bottom:none;}
+
+/* COUPON LIST */
+.cpn-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px;}
+.cpn-item:last-child{border-bottom:none;}
+
+.empty{text-align:center;padding:36px 20px;color:var(--tx3);font-size:13px;}
+
+/* CUSTOMER RECORD */
+.svc-hist{background:var(--bg);border-radius:var(--rs);padding:8px 10px;font-size:11px;margin-top:6px;}
+.svc-hist-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr);color:var(--tx2);}
+.svc-hist-row:last-child{border-bottom:none;}
+.ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
 </style>
 </head>
 <body>
-<div class="app">
 
-<!-- INSTALL BANNER -->
-<div class="install-banner" id="install-banner" style="display:none;">
-  <span>📲 ติดตั้งเป็นแอปบนมือถือ</span>
-  <button onclick="installApp()">ติดตั้ง</button>
+<!-- SETUP -->
+<div class="setup" id="setup">
+  <div style="font-size:42px;">⚙</div>
+  <h1>CarCare POS</h1>
+  <p>ใส่ Firebase Config เพื่อ sync ข้อมูลแบบ real-time<br>ระหว่างมือถือ แท็บเล็ต และ PC</p>
+  <div class="setup-form">
+    <label class="slbl">API Key</label>
+    <input class="sinput" id="fb-key" placeholder="AIzaSy..." autocomplete="off"/>
+    <label class="slbl">Project ID</label>
+    <input class="sinput" id="fb-pid" placeholder="carcare-pos-xxxxx" autocomplete="off"/>
+    <label class="slbl">App ID</label>
+    <input class="sinput" id="fb-aid" placeholder="1:123:web:abc" autocomplete="off"/>
+    <button class="sbtn" onclick="connectFirebase()">เชื่อมต่อ Firebase →</button>
+    <button class="sskip" onclick="goOffline()">ใช้งานแบบ Offline (ไม่ sync) →</button>
+  </div>
+  <div class="snote">Firebase Console → Project Settings → Your apps → SDK snippet<br>ข้อมูลจะถูกจำในเครื่อง ไม่ต้องใส่ซ้ำ</div>
 </div>
 
-<!-- TOPBAR -->
+<!-- APP -->
+<div class="app" id="app" style="display:none;">
+
 <div class="topbar">
-  <div class="topbar-logo">⚙ CarCare POS</div>
-  <div class="topbar-right">
-    <span id="save-ind">✓ Saved</span>
-    <span class="badge b-green">Open</span>
+  <div class="logo">⚙ CarCare POS</div>
+  <div class="sync">
+    <span class="dot" id="dot"></span>
+    <span id="sl">offline</span>
+    <span class="badge bg2" style="margin-left:4px;">Open</span>
   </div>
 </div>
 
-<!-- CONTENT AREA -->
-<div class="content" id="main-content">
+<!-- FLOATING CART TOTAL (Feature 7) -->
+<div class="cart-float" id="cart-float" onclick="scrollToCart()">
+  <div class="cf-lbl">Cart Total</div>
+  <div class="cf-amt" id="cf-amt">฿0</div>
+  <div class="cf-cnt" id="cf-cnt">0 items</div>
+</div>
 
-  <!-- POS SCREEN -->
-  <div id="screen-pos" class="screen active">
+<div class="content" id="content">
+
+  <!-- ═══ POS SCREEN ═══ -->
+  <div id="sc-pos" class="sc active">
     <!-- Customer -->
-    <div class="cust-bar">
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input id="cust-q" type="text" placeholder="ค้นหาลูกค้า / ทะเบียน..." oninput="custSearch()" style="flex:1;" />
-        <button class="btn btn-sm btn-gold" onclick="showSheet('sh-newcust')">+</button>
+    <div class="cb">
+      <div style="display:flex;gap:8px;">
+        <input id="cq" type="text" placeholder="ค้นหาลูกค้า / ทะเบียน..." oninput="cSearch()" style="flex:1;"/>
+        <button class="btn btn-s btn-g" onclick="sh('sh-nc')">+</button>
       </div>
-      <div id="cust-dd" style="display:none;" class="cust-result"></div>
-      <div id="cust-chip" style="display:none;" class="cust-chip">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-weight:700;font-size:13px;" id="cc-name"></span>
-          <span class="pts-chip" id="cc-pts">0 pts</span>
+      <div id="cdd" class="cres" style="display:none;"></div>
+      <div id="cch" class="cchip" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <span style="font-weight:700;font-size:13px;" id="ccn"></span>
+          <span class="pc" id="ccp">0 pts</span>
         </div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px;" id="cc-info"></div>
-        <div class="loy-bar-wrap"><div class="loy-bar" id="cc-bar" style="width:0%"></div></div>
-        <div style="font-size:10px;color:var(--text3);" id="cc-next"></div>
+        <div style="font-size:11px;color:var(--tx2);" id="cci"></div>
+        <div class="lb"><div class="lf" id="ccb" style="width:0%"></div></div>
+        <div style="font-size:10px;color:var(--tx3);" id="ccnxt"></div>
+        <!-- Coupon display -->
+        <div id="cust-cpns" style="margin-top:6px;"></div>
       </div>
     </div>
 
-    <!-- Size & Type selectors -->
+    <!-- Size + Type -->
     <div class="card" style="padding:10px 12px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:7px;text-transform:uppercase;letter-spacing:0.04em;">ขนาดรถ</div>
-      <div class="size-tabs">
-        <div class="size-tab active" onclick="setSize('S',this)">S</div>
-        <div class="size-tab" onclick="setSize('M',this)">M</div>
-        <div class="size-tab" onclick="setSize('L',this)">L</div>
-        <div class="size-tab" onclick="setSize('XL',this)">XL</div>
-        <div class="size-tab" onclick="setSize('XXL',this)">XXL</div>
+      <div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:6px;text-transform:uppercase;">ขนาดรถ</div>
+      <div class="stabs" id="size-tabs">
+        <div class="stab active" onclick="setSz('S',this)">S</div>
+        <div class="stab" onclick="setSz('M',this)">M</div>
+        <div class="stab" onclick="setSz('L',this)">L</div>
+        <div class="stab" onclick="setSz('XL',this)">XL</div>
+        <div class="stab" onclick="setSz('XXL',this)">XXL</div>
       </div>
-      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:7px;text-transform:uppercase;letter-spacing:0.04em;">ราคา</div>
-      <div class="type-tabs">
-        <div class="type-tab active" onclick="setType('Standard',this)">Standard</div>
-        <div class="type-tab" onclick="setType('C-Sale',this)">C-Sale</div>
-        <div class="type-tab" onclick="setType('C-Op.',this)">C-Op.</div>
+      <div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:6px;text-transform:uppercase;">ราคา</div>
+      <div class="ttabs">
+        <div class="ttab active" onclick="setTp('Standard',this)">Standard</div>
+        <div class="ttab" onclick="setTp('C-Sale',this)">C-Sale (ค่าขาย)</div>
+        <div class="ttab" onclick="setTp('C-Op.',this)">C-Op. (ค่าทำ)</div>
       </div>
     </div>
 
     <!-- Category filter -->
-    <div class="filters" id="cat-filters">
-      <div class="fchip active" onclick="setCat('all',this)">ทั้งหมด</div>
-      <div class="fchip" onclick="setCat('ล้างรถ',this)">ล้างรถ</div>
-      <div class="fchip" onclick="setCat('เคลือบสี',this)">เคลือบสี</div>
-      <div class="fchip" onclick="setCat('ภายใน',this)">ภายใน</div>
-      <div class="fchip" onclick="setCat('บริการอื่น',this)">บริการอื่น</div>
-      <div class="fchip" onclick="setCat('ใบปัดน้ำฝน',this)">ใบปัดน้ำฝน</div>
+    <div class="chips" id="cat-chips">
+      <div class="chip active" onclick="setCat('all',this)">ทั้งหมด</div>
+      <div class="chip" onclick="setCat('ล้างรถ',this)">ล้างรถ</div>
+      <div class="chip" onclick="setCat('เคลือบสี',this)">เคลือบสี</div>
+      <div class="chip" onclick="setCat('ภายใน',this)">ภายใน</div>
+      <div class="chip" onclick="setCat('บริการอื่น',this)">บริการอื่น</div>
+      <div class="chip" onclick="setCat('ใบปัดน้ำฝน',this)">ใบปัดน้ำฝน</div>
     </div>
 
-    <!-- Services -->
-    <div class="svc-grid" id="svc-grid"></div>
+    <div class="sg" id="sg"></div>
 
     <!-- Cart -->
-    <div class="cart-section" id="cart-section" style="display:none;">
-      <div class="cart-head">
-        <span>Cart</span>
-        <button class="btn btn-sm btn-danger" onclick="clearCart()">ล้าง</button>
-      </div>
-      <div id="cart-items"></div>
-      <div class="cart-total-row">
-        <div class="ct-line"><span>Subtotal</span><span id="ct-sub">฿0</span></div>
-        <div class="ct-line" id="ct-disc-row" style="display:none;"><span>ส่วนลด Loyalty</span><span id="ct-disc" style="color:var(--success);font-weight:700;">-฿0</span></div>
-        <div class="ct-line"><span>Tax (7%)</span><span id="ct-tax">฿0</span></div>
-        <div class="ct-total"><span>รวม</span><span id="ct-tot">฿0</span></div>
-        <div class="form-row" style="margin-top:10px;">
-          <input id="plate-inp" type="text" placeholder="ทะเบียนรถ (เช่น กข 1234)" />
-        </div>
-        <div class="form-row">
-          <select id="pay-method">
-            <option>เงินสด</option>
-            <option>โอน</option>
-            <option>บุญถอด</option>
-            <option>บัตร</option>
-          </select>
-        </div>
-        <button class="btn btn-gold btn-block" onclick="checkout()">ชำระเงิน →</button>
+    <div class="cart-sec" id="cart-sec" style="display:none;" id="cart-anchor">
+      <div class="ch"><span>🛒 Cart</span><button class="btn btn-s btn-d" onclick="clrCart()">ล้าง</button></div>
+      <div id="ci-list"></div>
+      <div class="ctf">
+        <div class="cl"><span>Subtotal</span><span id="csub">฿0</span></div>
+        <div class="cl" id="cdr" style="display:none;"><span>ส่วนลด Loyalty</span><span id="cdv" style="color:var(--ok);font-weight:700;"></span></div>
+        <div class="cl"><span>Tax (7%)</span><span id="ctx">฿0</span></div>
+        <div class="ctot"><span>รวม</span><span id="ctot">฿0</span></div>
+        <div class="fr" style="margin-top:10px;"><input id="plate" type="text" placeholder="ทะเบียนรถ (เช่น กข 1234)"/></div>
+        <div class="fr"><select id="pay"><option>เงินสด</option><option>โอน</option><option>บุญถอด</option><option>บัตร</option></select></div>
+        <button class="btn btn-g btn-bl" onclick="checkout()">ชำระเงิน →</button>
       </div>
     </div>
   </div>
 
-  <!-- LOYALTY SCREEN -->
-  <div id="screen-loyalty" class="screen">
-    <div class="card-row">
-      <div class="stat-card"><div class="stat-val" id="ls-mem">0</div><div class="stat-lbl">Members</div></div>
-      <div class="stat-card"><div class="stat-val" id="ls-pts">0</div><div class="stat-lbl">Points</div></div>
-      <div class="stat-card"><div class="stat-val" id="ls-gold">0</div><div class="stat-lbl">Gold</div></div>
+  <!-- ═══ TODAY DASHBOARD (Feature 6) ═══ -->
+  <div id="sc-today" class="sc">
+    <div id="today-date-lbl" style="font-size:12px;color:var(--tx2);margin-bottom:10px;font-weight:700;"></div>
+    <div class="big-stat">
+      <div class="big-num" id="td-total">฿0</div>
+      <div class="big-lbl">ยอดขายวันนี้</div>
     </div>
-    <div class="sec-head">
-      <h2>สมาชิก</h2>
-      <button class="btn btn-sm btn-gold" onclick="showSheet('sh-newcust')">+ เพิ่ม</button>
+    <div class="row4">
+      <div class="sc-card"><div class="sc-v" id="td-txn">0</div><div class="sc-l">รายการ</div></div>
+      <div class="sc-card"><div class="sc-v" id="td-avg">฿0</div><div class="sc-l">Avg</div></div>
+      <div class="sc-card"><div class="sc-v" id="td-pts" style="color:var(--amb);">0</div><div class="sc-l">Points</div></div>
+      <div class="sc-card"><div class="sc-v" id="td-cpn" style="color:var(--pur);">0</div><div class="sc-l">คูปอง</div></div>
     </div>
-    <input type="text" id="loy-q" placeholder="ค้นหาสมาชิก..." oninput="renderLoyalty()" style="margin-bottom:10px;" />
-    <div id="loy-list"></div>
+    <!-- Payment breakdown -->
+    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">แยกตามวิธีชำระ</div>
+    <div class="pay-row">
+      <div class="pay-box"><div class="pay-v" id="td-cash">฿0</div><div class="pay-l">เงินสด</div></div>
+      <div class="pay-box"><div class="pay-v" id="td-transfer">฿0</div><div class="pay-l">โอน</div></div>
+      <div class="pay-box"><div class="pay-v" id="td-boon">฿0</div><div class="pay-l">บุญถอด</div></div>
+      <div class="pay-box"><div class="pay-v" id="td-card">฿0</div><div class="pay-l">บัตร</div></div>
+    </div>
+    <!-- Incentive summary (Feature 1) -->
+    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">สรุปค่าสิ่งตอบแทน</div>
+    <div class="inc-summary">
+      <div class="inc-row2"><span style="color:var(--tx2);">ค่าขาย (C-Sale) รวม</span><span id="td-csale" style="font-weight:700;color:var(--ok);">฿0</span></div>
+      <div class="inc-row2"><span style="color:var(--tx2);">ค่าทำ (C-Op.) รวม</span><span id="td-cop" style="font-weight:700;color:var(--inf);">฿0</span></div>
+    </div>
+    <!-- Top services -->
+    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">บริการยอดนิยมวันนี้</div>
+    <div class="card" style="padding:0;overflow:hidden;"><div id="td-top"></div></div>
+    <!-- Recent txns -->
+    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.04em;">รายการล่าสุด</div>
+    <div id="td-list"></div>
   </div>
 
-  <!-- STOCK SCREEN -->
-  <div id="screen-stock" class="screen">
-    <div class="card-row">
-      <div class="stat-card"><div class="stat-val" id="st-skus">0</div><div class="stat-lbl">SKUs</div></div>
-      <div class="stat-card"><div class="stat-val" id="st-low" style="color:var(--amber);">0</div><div class="stat-lbl">Low</div></div>
-      <div class="stat-card"><div class="stat-val" id="st-out" style="color:var(--danger);">0</div><div class="stat-lbl">Out</div></div>
+  <!-- ═══ LOYALTY SCREEN ═══ -->
+  <div id="sc-loyalty" class="sc">
+    <div class="row3">
+      <div class="sc-card"><div class="sc-v" id="lm">—</div><div class="sc-l">Members</div></div>
+      <div class="sc-card"><div class="sc-v" id="lp">—</div><div class="sc-l">Points</div></div>
+      <div class="sc-card"><div class="sc-v" id="lg">—</div><div class="sc-l">Gold</div></div>
     </div>
-    <div class="sec-head">
-      <h2>สต็อกสินค้า</h2>
-      <button class="btn btn-sm btn-gold" onclick="showSheet('sh-newstock')">+ เพิ่ม</button>
-    </div>
-    <input type="text" id="st-q" placeholder="ค้นหาสินค้า..." oninput="renderStock()" style="margin-bottom:10px;" />
-    <div id="st-list"></div>
+    <div class="sh2"><h2>สมาชิก</h2><button class="btn btn-s btn-g" onclick="sh('sh-nc')">+ เพิ่ม</button></div>
+    <input type="text" id="lq" placeholder="ค้นหาสมาชิก..." oninput="rLoy()" style="margin-bottom:10px;"/>
+    <div id="ll"><div class="empty">กำลังโหลด...</div></div>
   </div>
 
-  <!-- HISTORY SCREEN -->
-  <div id="screen-history" class="screen">
-    <div class="card-row">
-      <div class="stat-card"><div class="stat-val" id="hs-tot">฿0</div><div class="stat-lbl">วันนี้</div></div>
-      <div class="stat-card"><div class="stat-val" id="hs-txn">0</div><div class="stat-lbl">รายการ</div></div>
+  <!-- ═══ STOCK SCREEN ═══ -->
+  <div id="sc-stock" class="sc">
+    <div class="row3">
+      <div class="sc-card"><div class="sc-v" id="ssk">—</div><div class="sc-l">SKUs</div></div>
+      <div class="sc-card"><div class="sc-v" id="slo" style="color:var(--amb);">—</div><div class="sc-l">Low</div></div>
+      <div class="sc-card"><div class="sc-v" id="sou" style="color:var(--err);">—</div><div class="sc-l">Out</div></div>
     </div>
-    <div class="sec-head" style="margin-bottom:10px;">
-      <h2>ประวัติ</h2>
-      <button class="btn btn-sm btn-gold" onclick="exportReport()">📊 Export</button>
+    <div class="sh2"><h2>สต็อก</h2><button class="btn btn-s btn-g" onclick="sh('sh-ns')">+ เพิ่ม</button></div>
+    <input type="text" id="stq" placeholder="ค้นหาสินค้า..." oninput="rSt()" style="margin-bottom:10px;"/>
+    <div id="stl"><div class="empty">กำลังโหลด...</div></div>
+  </div>
+
+  <!-- ═══ PRICE LIST SCREEN (Feature 2) ═══ -->
+  <div id="sc-prices" class="sc">
+    <div class="sh2"><h2>ราคาบริการ</h2><button class="btn btn-s btn-g" onclick="sh('sh-nsvc')">+ เพิ่มบริการ</button></div>
+    <div class="chips" id="pl-chips">
+      <div class="chip active" onclick="setPLCat('all',this)">ทั้งหมด</div>
+      <div class="chip" onclick="setPLCat('ล้างรถ',this)">ล้างรถ</div>
+      <div class="chip" onclick="setPLCat('เคลือบสี',this)">เคลือบสี</div>
+      <div class="chip" onclick="setPLCat('ภายใน',this)">ภายใน</div>
+      <div class="chip" onclick="setPLCat('บริการอื่น',this)">บริการอื่น</div>
+      <div class="chip" onclick="setPLCat('ใบปัดน้ำฝน',this)">ใบปัดน้ำฝน</div>
     </div>
-    <div id="hist-list"></div>
+    <input type="text" id="plq" placeholder="ค้นหาบริการ..." oninput="rPL()" style="margin-bottom:10px;"/>
+    <div id="pl-list"></div>
+  </div>
+
+  <!-- ═══ HISTORY SCREEN ═══ -->
+  <div id="sc-history" class="sc">
+    <!-- Date range filter (Feature 5) -->
+    <div class="card" style="padding:10px 12px;margin-bottom:10px;">
+      <div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">กรองตามวันที่</div>
+      <div class="fr2">
+        <div><label class="lbl">จาก</label><input type="date" id="d-from" onchange="rHist()"/></div>
+        <div><label class="lbl">ถึง</label><input type="date" id="d-to" onchange="rHist()"/></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-s" onclick="setRange('today')">วันนี้</button>
+        <button class="btn btn-s" onclick="setRange('week')">7 วัน</button>
+        <button class="btn btn-s" onclick="setRange('month')">เดือนนี้</button>
+        <button class="btn btn-s" onclick="setRange('all')">ทั้งหมด</button>
+        <button class="btn btn-s btn-g" onclick="exportRange()" style="margin-left:auto;">📊 Export CSV</button>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="sc-card"><div class="sc-v" id="hs-tot">฿0</div><div class="sc-l">ยอดรวม</div></div>
+      <div class="sc-card"><div class="sc-v" id="hs-n">0</div><div class="sc-l">รายการ</div></div>
+    </div>
+    <div id="hl"><div class="empty">กำลังโหลด...</div></div>
   </div>
 
 </div><!-- content -->
 
 <!-- BOTTOM NAV -->
-<div class="bottomnav">
-  <button class="bn-tab active" onclick="switchScreen('pos',this)">
-    <span class="bn-icon">🛒</span>POS
-  </button>
-  <button class="bn-tab" onclick="switchScreen('loyalty',this)">
-    <span class="bn-icon">⭐</span>Loyalty
-  </button>
-  <button class="bn-tab" onclick="switchScreen('stock',this)">
-    <span class="bn-icon">📦</span>Stock
-  </button>
-  <button class="bn-tab" onclick="switchScreen('history',this)">
-    <span class="bn-icon">📋</span>History
-  </button>
+<div class="nav">
+  <button class="nt active" onclick="sw('pos',this)"><span class="ni">🛒</span>POS</button>
+  <button class="nt" onclick="sw('today',this)"><span class="ni">📊</span>Today</button>
+  <button class="nt" onclick="sw('loyalty',this)"><span class="ni">⭐</span>Loyalty</button>
+  <button class="nt" onclick="sw('stock',this)"><span class="ni">📦</span>Stock</button>
+  <button class="nt" onclick="sw('prices',this)"><span class="ni">📋</span>Prices</button>
+  <button class="nt" onclick="sw('history',this)"><span class="ni">🕐</span>History</button>
 </div>
-
 </div><!-- app -->
 
-<!-- SHEETS (modals) -->
-<!-- New Customer Sheet -->
-<div id="sh-newcust" class="sheet-bg" style="display:none;" onclick="closeSBg(event,'sh-newcust')">
-<div class="sheet" onclick="event.stopPropagation()">
-  <div class="sheet-handle"></div>
-  <h3>เพิ่มสมาชิกใหม่</h3>
-  <div class="form-row2">
-    <div><label class="label">ชื่อ</label><input id="cf" type="text" placeholder="สมชาย"/></div>
-    <div><label class="label">นามสกุล</label><input id="cl" type="text" placeholder="ใจดี"/></div>
+<!-- ══════════ SHEETS ══════════ -->
+
+<!-- New Customer -->
+<div id="sh-nc" class="sbg" style="display:none;" onclick="csbg(event,'sh-nc')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div><h3>เพิ่มสมาชิก</h3>
+  <div class="fr2">
+    <div><label class="lbl">ชื่อ</label><input id="cf" type="text" placeholder="สมชาย"/></div>
+    <div><label class="lbl">นามสกุล</label><input id="cl2" type="text" placeholder="ใจดี"/></div>
   </div>
-  <div class="form-row"><label class="label">เบอร์โทร</label><input id="cp" type="tel" placeholder="08x-xxx-xxxx"/></div>
-  <div class="form-row2">
-    <div><label class="label">ทะเบียน</label><input id="cpl" type="text" placeholder="กข 1234"/></div>
-    <div><label class="label">รุ่นรถ</label><input id="cc" type="text" placeholder="Toyota Camry"/></div>
+  <div class="fr"><label class="lbl">เบอร์โทร</label><input id="cp" type="tel" placeholder="08x-xxx-xxxx"/></div>
+  <div class="fr2">
+    <div><label class="lbl">ทะเบียน</label><input id="cpl" type="text" placeholder="กข 1234"/></div>
+    <div><label class="lbl">รุ่นรถ</label><input id="cc2" type="text" placeholder="Toyota Camry"/></div>
   </div>
-  <div class="form-row"><label class="label">ขนาดรถ</label>
+  <div class="fr"><label class="lbl">ขนาดรถ</label>
     <select id="csz"><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select>
   </div>
-  <div class="sheet-btns">
-    <button class="btn" onclick="closeSheet('sh-newcust')">ยกเลิก</button>
-    <button class="btn btn-gold" onclick="addCust()">บันทึก</button>
-  </div>
+  <div class="fr"><label class="lbl">หมายเหตุ</label><input id="cnote" type="text" placeholder="ข้อมูลเพิ่มเติม"/></div>
+  <div class="sbt"><button class="btn" onclick="hs('sh-nc')">ยกเลิก</button><button class="btn btn-g" onclick="addCust()">บันทึก</button></div>
 </div></div>
 
-<!-- New Stock Sheet -->
-<div id="sh-newstock" class="sheet-bg" style="display:none;" onclick="closeSBg(event,'sh-newstock')">
-<div class="sheet" onclick="event.stopPropagation()">
-  <div class="sheet-handle"></div>
-  <h3>เพิ่มสินค้า</h3>
-  <div class="form-row"><label class="label">ชื่อสินค้า</label><input id="sn" type="text" placeholder="Castrol 10W-40 1L"/></div>
-  <div class="form-row2">
-    <div><label class="label">หมวดหมู่</label>
-      <select id="sc"><option>Oil</option><option>Filter</option><option>Tyre</option><option>Fluid</option><option>Accessory</option><option>Chemical</option></select>
+<!-- New Stock -->
+<div id="sh-ns" class="sbg" style="display:none;" onclick="csbg(event,'sh-ns')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div><h3>เพิ่มสินค้า</h3>
+  <div class="fr"><label class="lbl">ชื่อสินค้า</label><input id="sn" type="text" placeholder="Castrol 10W-40 1L"/></div>
+  <div class="fr2">
+    <div><label class="lbl">หมวดหมู่</label><select id="sc3"><option>Oil</option><option>Filter</option><option>Tyre</option><option>Fluid</option><option>Accessory</option><option>Chemical</option></select></div>
+    <div><label class="lbl">ราคา (฿)</label><input id="sp" type="number" placeholder="350"/></div>
+  </div>
+  <div class="fr2">
+    <div><label class="lbl">จำนวน</label><input id="sq" type="number" placeholder="20"/></div>
+    <div><label class="lbl">แจ้งเตือน</label><input id="sm" type="number" placeholder="5"/></div>
+  </div>
+  <div class="sbt"><button class="btn" onclick="hs('sh-ns')">ยกเลิก</button><button class="btn btn-g" onclick="addSt()">บันทึก</button></div>
+</div></div>
+
+<!-- Restock -->
+<div id="sh-rs" class="sbg" style="display:none;" onclick="csbg(event,'sh-rs')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div><h3>เติมสต็อก</h3>
+  <div style="font-size:13px;color:var(--tx2);margin-bottom:14px;" id="rsl"></div>
+  <div class="fr"><label class="lbl">เพิ่มจำนวน</label><input id="rq" type="number" placeholder="10"/></div>
+  <div class="sbt"><button class="btn" onclick="hs('sh-rs')">ยกเลิก</button><button class="btn btn-g" onclick="doRs()">ยืนยัน</button></div>
+</div></div>
+
+<!-- New Service (Feature 2) -->
+<div id="sh-nsvc" class="sbg" style="display:none;" onclick="csbg(event,'sh-nsvc')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div><h3 id="nsvc-title">เพิ่มบริการ</h3>
+  <div class="fr"><label class="lbl">ชื่อบริการ</label><input id="sv-name" type="text" placeholder="เช่น ขัดสีพิเศษ"/></div>
+  <div class="fr2">
+    <div><label class="lbl">Code</label><input id="sv-code" type="text" placeholder="X01"/></div>
+    <div><label class="lbl">หมวดหมู่</label>
+      <select id="sv-cat"><option>ล้างรถ</option><option>เคลือบสี</option><option>ภายใน</option><option>บริการอื่น</option><option>ใบปัดน้ำฝน</option></select>
     </div>
-    <div><label class="label">ราคาขาย (฿)</label><input id="sp" type="number" placeholder="350"/></div>
   </div>
-  <div class="form-row2">
-    <div><label class="label">จำนวน</label><input id="sq" type="number" placeholder="20"/></div>
-    <div><label class="label">แจ้งเตือน</label><input id="sm" type="number" placeholder="5"/></div>
+  <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">ราคา Standard (฿)</div>
+  <div class="fr3">
+    <div><label class="lbl">S</label><input id="sv-s" type="number" placeholder="0"/></div>
+    <div><label class="lbl">M</label><input id="sv-m" type="number" placeholder="0"/></div>
+    <div><label class="lbl">L</label><input id="sv-l" type="number" placeholder="0"/></div>
   </div>
-  <div class="sheet-btns">
-    <button class="btn" onclick="closeSheet('sh-newstock')">ยกเลิก</button>
-    <button class="btn btn-gold" onclick="addStock()">บันทึก</button>
+  <div class="fr3">
+    <div><label class="lbl">XL</label><input id="sv-xl" type="number" placeholder="0"/></div>
+    <div><label class="lbl">XXL</label><input id="sv-xxl" type="number" placeholder="0"/></div>
+    <div></div>
+  </div>
+  <div style="font-size:11px;font-weight:700;color:var(--ok);margin-bottom:8px;text-transform:uppercase;">ค่าขาย C-Sale / ค่าทำ C-Op. (S size)</div>
+  <div class="fr2">
+    <div><label class="lbl">C-Sale (ค่าขาย)</label><input id="sv-sc" type="number" placeholder="0"/></div>
+    <div><label class="lbl">C-Op. (ค่าทำ)</label><input id="sv-sco" type="number" placeholder="0"/></div>
+  </div>
+  <div style="font-size:11px;font-weight:700;color:var(--pur);margin-bottom:8px;text-transform:uppercase;">คูปองฟรี (Feature 4)</div>
+  <div class="fr2">
+    <div><label class="lbl">คูปองล้างรถฟรี (ครั้ง)</label><input id="sv-cpn" type="number" placeholder="0"/></div>
+    <div><label class="lbl">คูปองล้างรถฟรี (เดือน)</label><input id="sv-cpnm" type="number" placeholder="0"/></div>
+  </div>
+  <input type="hidden" id="sv-edit-id"/>
+  <div class="sbt"><button class="btn" onclick="hs('sh-nsvc')">ยกเลิก</button><button class="btn btn-g" onclick="saveSvc()">บันทึก</button></div>
+</div></div>
+
+<!-- Customer Detail -->
+<div id="sh-cust" class="sbg" style="display:none;" onclick="csbg(event,'sh-cust')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div>
+  <h3 id="cust-detail-name">ประวัติลูกค้า</h3>
+  <div id="cust-detail-body"></div>
+  <div class="sbt" style="margin-top:10px;">
+    <button class="btn" onclick="hs('sh-cust')">ปิด</button>
+    <button class="btn btn-ok" onclick="addBonusPts()">+ Pts</button>
+    <button class="btn btn-d" onclick="delCustDetail()">ลบ</button>
   </div>
 </div></div>
 
-<!-- Restock Sheet -->
-<div id="sh-restock" class="sheet-bg" style="display:none;" onclick="closeSBg(event,'sh-restock')">
-<div class="sheet" onclick="event.stopPropagation()">
-  <div class="sheet-handle"></div>
-  <h3>เติมสต็อก</h3>
-  <div style="font-size:13px;color:var(--text2);margin-bottom:14px;" id="rst-label"></div>
-  <div class="form-row"><label class="label">เพิ่มจำนวน</label><input id="rq" type="number" placeholder="10"/></div>
-  <div class="sheet-btns">
-    <button class="btn" onclick="closeSheet('sh-restock')">ยกเลิก</button>
-    <button class="btn btn-gold" onclick="doRestock()">ยืนยัน</button>
-  </div>
+<!-- Success -->
+<div id="sh-ok" class="sbg" style="display:none;">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div>
+  <div class="si">✅</div>
+  <div class="st2">ชำระเงินสำเร็จ</div>
+  <div class="ss" id="oks"></div>
+  <div class="rb" id="okr"></div>
+  <div id="ok-cpn" style="display:none;margin-top:10px;background:var(--pur-bg);border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--pur);font-weight:700;"></div>
+  <button class="btn btn-g btn-bl" style="margin-top:14px;" onclick="hs('sh-ok')">รายการใหม่</button>
 </div></div>
 
-<!-- Success Sheet -->
-<div id="sh-ok" class="sheet-bg" style="display:none;">
-<div class="sheet" onclick="event.stopPropagation()">
-  <div class="sheet-handle"></div>
-  <div class="success-icon">✅</div>
-  <div class="success-title">ชำระเงินสำเร็จ</div>
-  <div class="success-sub" id="ok-sub"></div>
-  <div class="receipt-box" id="ok-receipt"></div>
-  <button class="btn btn-gold btn-block" style="margin-top:14px;" onclick="closeSheet('sh-ok')">รายการใหม่</button>
-</div></div>
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import{getFirestore,collection,addDoc,onSnapshot,doc,updateDoc,deleteDoc,query,orderBy,limit,serverTimestamp,getDocs}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 
-<script>
-// ── SERVICE DATA ──
-const SERVICES=[
-  {cat:'ล้างรถ',name:'ล้างสี & ดูดฝุ่น',code:'-',S:200,SC:0,SCo:0,M:220,MC:0,MCo:0,L:240,LC:0,LCo:0,XL:270,XLC:0,XLCo:0,XXL:320},
-  {cat:'ล้างรถ',name:'Rainy Season Pass',code:'W02',S:800,SC:60,SCo:0,M:880,MC:60,MCo:0,L:960,LC:60,LCo:0,XL:1080,XLC:60,XLCo:0,XXL:0},
-  {cat:'ล้างรถ',name:'คูปองล้างรถ 10 ครั้ง',code:'W03',S:2500,SC:150,SCo:0,M:2500,MC:150,MCo:0,L:2500,LC:150,LCo:0,XL:2500,XLC:150,XLCo:0,XXL:2500},
-  {cat:'ล้างรถ',name:'ล้างสี มอเตอร์ไซค์',code:'B01',S:140,SC:0,SCo:0,M:140,MC:0,MCo:0,L:140,LC:0,LCo:0,XL:140,XLC:0,XLCo:0,XXL:140},
-  {cat:'เคลือบสี',name:'ล้างลูกค้าเก่า/เครื่องล่วง',code:'P01',S:300,SC:10,SCo:10,M:320,MC:10,MCo:10,L:340,LC:15,LCo:15,XL:370,XLC:15,XLCo:15,XXL:420},
-  {cat:'เคลือบสี',name:'ล้างดูดฝุ่น + ดินน้ำมัน + เคลือบสี',code:'P02',S:600,SC:25,SCo:25,M:700,MC:30,MCo:30,L:800,LC:35,LCo:35,XL:950,XLC:40,XLCo:40,XXL:1100},
-  {cat:'เคลือบสี',name:'ล้างดูดฝุ่น + Clay + ขัดเคลือบ 2 steps',code:'P03',S:1500,SC:70,SCo:80,M:1600,MC:75,MCo:85,L:1700,LC:80,LCo:90,XL:1800,XLC:90,XLCo:100,XXL:2000},
-  {cat:'เคลือบสี',name:'กำจัดคราบยางมะตอย',code:'P04',S:400,SC:15,SCo:25,M:400,MC:20,MCo:35,L:400,LC:30,LCo:45,XL:400,XLC:35,XLCo:55,XXL:800},
-  {cat:'เคลือบสี',name:'ทำความสะอาดตัวเส้น',code:'P06',S:350,SC:20,SCo:20,M:350,MC:20,MCo:20,L:390,LC:20,LCo:20,XL:410,XLC:20,XLCo:20,XXL:450},
-  {cat:'เคลือบสี',name:'เคลือบแก้วเซรามิก',code:'P07',S:6000,SC:400,SCo:600,M:7000,MC:400,MCo:600,L:8000,LC:400,LCo:600,XL:9000,XLC:400,XLCo:600,XXL:10000},
-  {cat:'เคลือบสี',name:'เคลือบแก้วเซรามิก - มัดจำ',code:'S11',S:500,SC:0,SCo:0,M:500,MC:0,MCo:0,L:500,LC:0,LCo:0,XL:500,XLC:0,XLCo:0,XXL:500},
-  {cat:'บริการอื่น',name:'ติดสติกเกอร์ Lalamove',code:'L01',S:100,SC:10,SCo:10,M:100,MC:10,MCo:10,L:100,LC:10,LCo:10,XL:100,XLC:10,XLCo:10,XXL:100},
-  {cat:'ภายใน',name:'อัดฉีดภายในทั้งคัน',code:'I01',S:2600,SC:110,SCo:145,M:3000,MC:130,MCo:165,L:3400,LC:150,LCo:185,XL:3800,XLC:170,XLCo:205,XXL:4800},
-  {cat:'ภายใน',name:'อัดฉีดพื้นทั้งคัน + แผงประตู',code:'I02',S:1500,SC:70,SCo:80,M:1600,MC:75,MCo:85,L:1700,LC:80,LCo:90,XL:1800,XLC:90,XLCo:100,XXL:2700},
-  {cat:'ภายใน',name:'อัดพรม',code:'I03',S:1000,SC:30,SCo:40,M:1250,MC:35,MCo:45,L:1300,LC:40,LCo:50,XL:1500,XLC:40,XLCo:50,XXL:2000},
-  {cat:'ภายใน',name:'อัดแผงทั้งคัน',code:'I04',S:500,SC:25,SCo:25,M:600,MC:30,MCo:30,L:720,LC:35,LCo:35,XL:800,XLC:40,XLCo:40,XXL:1000},
-  {cat:'ภายใน',name:'พักนาเนียน Spa + อบโอโซน',code:'I05',S:430,SC:10,SCo:10,M:450,MC:10,MCo:10,L:450,LC:10,LCo:10,XL:500,XLC:10,XLCo:10,XXL:800},
-  {cat:'ภายใน',name:'เคลือบแบบภายในรถพัก',code:'I06',S:680,SC:25,SCo:20,M:700,MC:25,MCo:20,L:820,LC:30,LCo:25,XL:850,XLC:30,XLCo:25,XXL:1050},
-  {cat:'บริการอื่น',name:'เครื่องกระจก-น้ำไม่เกาะ',code:'S01',S:300,SC:15,SCo:15,M:300,MC:15,MCo:15,L:350,LC:15,LCo:15,XL:400,XLC:20,XLCo:25,XXL:400},
-  {cat:'บริการอื่น',name:'อัดฟีฝา + กราบมอง',code:'S02',S:450,SC:20,SCo:20,M:450,MC:20,MCo:20,L:450,LC:20,LCo:20,XL:450,XLC:20,XLCo:20,XXL:450},
-  {cat:'บริการอื่น',name:'เติมน้ำมัน',code:'S03',S:200,SC:20,SCo:20,M:200,MC:20,MCo:20,L:200,LC:20,LCo:20,XL:200,XLC:20,XLCo:20,XXL:300},
-  {cat:'บริการอื่น',name:'ล้างแอร์ทั้งระบบ + กำจัดเชื้อรา',code:'S04',S:1500,SC:50,SCo:90,M:1500,MC:50,MCo:90,L:1500,LC:50,LCo:90,XL:1500,XLC:50,XLCo:90,XXL:1500},
-  {cat:'บริการอื่น',name:'อบโอโซน - กำจัดกลิ่น',code:'S08',S:230,SC:30,SCo:10,M:230,MC:30,MCo:10,L:230,LC:30,LCo:10,XL:230,XLC:30,XLCo:10,XXL:230},
-  {cat:'บริการอื่น',name:'ห้องเครื่อง',code:'S09',S:300,SC:20,SCo:20,M:300,MC:20,MCo:20,L:300,LC:20,LCo:20,XL:300,XLC:20,XLCo:20,XXL:300},
-  {cat:'บริการอื่น',name:'น้ำยาอัดเครือบ',code:'S10',S:1200,SC:100,SCo:0,M:1200,MC:100,MCo:0,L:1200,LC:100,LCo:0,XL:1200,XLC:100,XLCo:0,XXL:1200},
-  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 14"',code:'O01',S:190,SC:20,SCo:10,M:190,MC:20,MCo:10,L:190,LC:20,LCo:10,XL:190,XLC:20,XLCo:10,XXL:190},
-  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 16"',code:'O02',S:190,SC:20,SCo:10,M:190,MC:20,MCo:10,L:190,LC:20,LCo:10,XL:190,XLC:20,XLCo:10,XXL:190},
-  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 18"',code:'O04',S:220,SC:20,SCo:10,M:220,MC:20,MCo:10,L:220,LC:20,LCo:10,XL:220,XLC:20,XLCo:10,XXL:220},
-  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 20"',code:'O06',S:240,SC:20,SCo:10,M:240,MC:20,MCo:10,L:240,LC:20,LCo:10,XL:240,XLC:20,XLCo:10,XXL:240},
-  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 22"',code:'O08',S:270,SC:20,SCo:10,M:270,MC:20,MCo:10,L:270,LC:20,LCo:10,XL:270,XLC:20,XLCo:10,XXL:270},
-  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 24"',code:'O09',S:320,SC:40,SCo:10,M:320,MC:40,MCo:10,L:320,LC:40,LCo:10,XL:320,XLC:40,XLCo:10,XXL:320},
-  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 26"',code:'O10',S:400,SC:40,SCo:10,M:400,MC:40,MCo:10,L:400,LC:40,LCo:10,XL:400,XLC:40,XLCo:10,XXL:400},
+// ══ DEFAULT SERVICES (editable) ══
+const DEFAULT_SVCS=[
+  {cat:'ล้างรถ',name:'ล้างสี & ดูดฝุ่น',code:'-',S:200,M:220,L:240,XL:270,XXL:320,SC:0,SCo:0,cpnWash:0,cpnMonth:0},
+  {cat:'ล้างรถ',name:'Rainy Season Pass',code:'W02',S:800,M:880,L:960,XL:1080,XXL:0,SC:60,SCo:0,cpnWash:0,cpnMonth:1},
+  {cat:'ล้างรถ',name:'คูปองล้างรถ 10 ครั้ง',code:'W03',S:2500,M:2500,L:2500,XL:2500,XXL:2500,SC:150,SCo:0,cpnWash:10,cpnMonth:0},
+  {cat:'ล้างรถ',name:'ล้างสี มอเตอร์ไซค์',code:'B01',S:140,M:140,L:140,XL:140,XXL:140,SC:0,SCo:0,cpnWash:0,cpnMonth:0},
+  {cat:'เคลือบสี',name:'ล้างลูกค้าเก่า/เครื่องล่วง',code:'P01',S:300,M:320,L:340,XL:370,XXL:420,SC:10,SCo:10,cpnWash:0,cpnMonth:0},
+  {cat:'เคลือบสี',name:'ล้างดูดฝุ่น+ดินน้ำมัน+เคลือบสี',code:'P02',S:600,M:700,L:800,XL:950,XXL:1100,SC:25,SCo:25,cpnWash:0,cpnMonth:0},
+  {cat:'เคลือบสี',name:'ล้างดูดฝุ่น+Clay+ขัดเคลือบ 2 steps',code:'P03',S:1500,M:1600,L:1700,XL:1800,XXL:2000,SC:70,SCo:80,cpnWash:5,cpnMonth:0},
+  {cat:'เคลือบสี',name:'กำจัดคราบยางมะตอย',code:'P04',S:400,M:400,L:400,XL:400,XXL:800,SC:15,SCo:25,cpnWash:0,cpnMonth:0},
+  {cat:'เคลือบสี',name:'ทำความสะอาดตัวเส้น',code:'P06',S:350,M:350,L:390,XL:410,XXL:450,SC:20,SCo:20,cpnWash:0,cpnMonth:0},
+  {cat:'เคลือบสี',name:'เคลือบแก้วเซรามิก',code:'P07',S:6000,M:7000,L:8000,XL:9000,XXL:10000,SC:400,SCo:600,cpnWash:0,cpnMonth:1},
+  {cat:'เคลือบสี',name:'เคลือบแก้วเซรามิก - มัดจำ',code:'S11',S:500,M:500,L:500,XL:500,XXL:500,SC:0,SCo:0,cpnWash:0,cpnMonth:0},
+  {cat:'บริการอื่น',name:'ติดสติกเกอร์ Lalamove',code:'L01',S:100,M:100,L:100,XL:100,XXL:100,SC:10,SCo:10,cpnWash:0,cpnMonth:0},
+  {cat:'ภายใน',name:'อัดฉีดภายในทั้งคัน',code:'I01',S:2600,M:3000,L:3400,XL:3800,XXL:4800,SC:110,SCo:145,cpnWash:0,cpnMonth:0},
+  {cat:'ภายใน',name:'อัดฉีดพื้นทั้งคัน+แผงประตู',code:'I02',S:1500,M:1600,L:1700,XL:1800,XXL:2700,SC:70,SCo:80,cpnWash:0,cpnMonth:0},
+  {cat:'ภายใน',name:'อัดพรม',code:'I03',S:1000,M:1250,L:1300,XL:1500,XXL:2000,SC:30,SCo:40,cpnWash:0,cpnMonth:0},
+  {cat:'ภายใน',name:'อัดแผงทั้งคัน',code:'I04',S:500,M:600,L:720,XL:800,XXL:1000,SC:25,SCo:25,cpnWash:0,cpnMonth:0},
+  {cat:'ภายใน',name:'พักนาเนียน Spa+อบโอโซน',code:'I05',S:430,M:450,L:450,XL:500,XXL:800,SC:10,SCo:10,cpnWash:0,cpnMonth:0},
+  {cat:'ภายใน',name:'เคลือบแบบภายในรถพัก',code:'I06',S:680,M:700,L:820,XL:850,XXL:1050,SC:25,SCo:20,cpnWash:0,cpnMonth:0},
+  {cat:'บริการอื่น',name:'เครื่องกระจก-น้ำไม่เกาะ',code:'S01',S:300,M:300,L:350,XL:400,XXL:400,SC:15,SCo:15,cpnWash:0,cpnMonth:0},
+  {cat:'บริการอื่น',name:'อัดฟีฝา+กราบมอง',code:'S02',S:450,M:450,L:450,XL:450,XXL:450,SC:20,SCo:20,cpnWash:0,cpnMonth:0},
+  {cat:'บริการอื่น',name:'เติมน้ำมัน',code:'S03',S:200,M:200,L:200,XL:200,XXL:300,SC:20,SCo:20,cpnWash:0,cpnMonth:0},
+  {cat:'บริการอื่น',name:'ล้างแอร์+กำจัดเชื้อรา',code:'S04',S:1500,M:1500,L:1500,XL:1500,XXL:1500,SC:50,SCo:90,cpnWash:0,cpnMonth:0},
+  {cat:'บริการอื่น',name:'อบโอโซน-กำจัดกลิ่น',code:'S08',S:230,M:230,L:230,XL:230,XXL:230,SC:30,SCo:10,cpnWash:0,cpnMonth:0},
+  {cat:'บริการอื่น',name:'ห้องเครื่อง',code:'S09',S:300,M:300,L:300,XL:300,XXL:300,SC:20,SCo:20,cpnWash:0,cpnMonth:0},
+  {cat:'บริการอื่น',name:'น้ำยาอัดเครือบ',code:'S10',S:1200,M:1200,L:1200,XL:1200,XXL:1200,SC:100,SCo:0,cpnWash:0,cpnMonth:0},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 14"',code:'O01',S:190,M:190,L:190,XL:190,XXL:190,SC:20,SCo:10,cpnWash:0,cpnMonth:0},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 18"',code:'O04',S:220,M:220,L:220,XL:220,XXL:220,SC:20,SCo:10,cpnWash:0,cpnMonth:0},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 20"',code:'O06',S:240,M:240,L:240,XL:240,XXL:240,SC:20,SCo:10,cpnWash:0,cpnMonth:0},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 22"',code:'O08',S:270,M:270,L:270,XL:270,XXL:270,SC:20,SCo:10,cpnWash:0,cpnMonth:0},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 24"',code:'O09',S:320,M:320,L:320,XL:320,XXL:320,SC:40,SCo:10,cpnWash:0,cpnMonth:0},
+  {cat:'ใบปัดน้ำฝน',name:'ใบปัดน้ำฝน 26"',code:'O10',S:400,M:400,L:400,XL:400,XXL:400,SC:40,SCo:10,cpnWash:0,cpnMonth:0},
 ];
-const CAT_COLORS={'ล้างรถ':'b-blue','เคลือบสี':'b-teal','ภายใน':'b-pink','บริการอื่น':'b-amber','ใบปัดน้ำฝน':'b-gray'};
+const CAT_CL={ล้างรถ:'bb',เคลือบสี:'bt',ภายใน:'bp',บริการอื่น:'ba',ใบปัดน้ำฝน:'bgy'};
 
-// ── STATE ──
-const ST={get(k){try{return JSON.parse(localStorage.getItem(k));}catch{return null;}},set(k,v){localStorage.setItem(k,JSON.stringify(v));}};
-let customers=ST.get('cust')||[
-  {id:1,name:'สมชาย ใจดี',phone:'081-234-5678',plate:'กข 1234',car:'Toyota Camry',size:'M',points:850,visits:12,redeemed:1},
-  {id:2,name:'มาลี ศรีสุข',phone:'089-876-5432',plate:'งด 5678',car:'Honda City',size:'S',points:220,visits:4,redeemed:0},
-  {id:3,name:'ณรงค์ ธนา',phone:'062-111-2233',plate:'ขค 9900',car:'Isuzu D-Max',size:'XL',points:1500,visits:23,redeemed:3},
-];
-let stock=ST.get('stock')||[
-  {id:1,name:'Castrol 10W-40 1L',cat:'Oil',price:350,qty:18,min:5},
-  {id:2,name:'Oil Filter (Toyota)',cat:'Filter',price:180,qty:30,min:8},
-  {id:3,name:'Brake Fluid DOT4',cat:'Fluid',price:220,qty:3,min:5},
-  {id:4,name:'Air Freshener',cat:'Accessory',price:89,qty:0,min:5},
-];
-let transactions=ST.get('txns')||[];
-let txnN=ST.get('txnN')||1000;
-let cart=[],selCust=null,restockId=null;
-let curSize='S',curType='Standard',curCat='all';
+// ══ STATE ══
+let db=null,LM=false;
+let custs=[],stock=[],txns=[],svcs=[],cart=[],selC=null,rsId=null,txnN=1000;
+let CZ='S',CT='Standard',CC='all',PLCat='all';
+let viewCustId=null;
 
-function save(){ST.set('cust',customers);ST.set('stock',stock);ST.set('txns',transactions);ST.set('txnN',txnN);document.getElementById('save-ind').textContent='✓ Saved';}
+function G(id){return document.getElementById(id);}
+function setDot(s,l){G('dot').className='dot '+s;G('sl').textContent=l;}
+function fmtDate(d){return d?new Date(d).toLocaleDateString('th-TH'):'—';}
+function todayTH(){return new Date().toLocaleDateString('th-TH');}
+function isoToday(){return new Date().toISOString().slice(0,10);}
 
-// ── PRICE ──
-function getPrice(s,size,type){
-  const m={S:{Standard:'S','C-Sale':'SC','C-Op.':'SCo'},M:{Standard:'M','C-Sale':'MC','C-Op.':'MCo'},L:{Standard:'L','C-Sale':'LC','C-Op.':'LCo'},XL:{Standard:'XL','C-Sale':'XLC','C-Op.':'XLCo'},XXL:{Standard:'XXL'}};
-  const keys=m[size];if(!keys)return 0;
-  if(type==='C-Sale')return s[keys['C-Sale']]||0;
-  if(type==='C-Op.')return s[keys['C-Op.']]||0;
-  return s[keys.Standard]||0;
+// ══ SETUP ══
+window.connectFirebase=async function(){
+  const k=G('fb-key').value.trim(),p=G('fb-pid').value.trim(),a=G('fb-aid').value.trim();
+  if(!k||!p){alert('กรุณาใส่ API Key และ Project ID');return;}
+  try{
+    const cfg={apiKey:k,authDomain:`${p}.firebaseapp.com`,projectId:p,storageBucket:`${p}.appspot.com`,appId:a};
+    localStorage.setItem('fb',JSON.stringify(cfg));
+    const app=initializeApp(cfg);db=getFirestore(app);
+    startApp();
+  }catch(e){alert('Error: '+e.message);}
+};
+window.goOffline=function(){
+  LM=true;
+  custs=JSON.parse(localStorage.getItem('cu')||'[]');
+  stock=JSON.parse(localStorage.getItem('st')||'[]');
+  txns=JSON.parse(localStorage.getItem('tx')||'[]');
+  svcs=JSON.parse(localStorage.getItem('sv')||JSON.stringify(DEFAULT_SVCS));
+  txnN=parseInt(localStorage.getItem('tn')||'1000');
+  startApp();setDot('off','Offline');
+};
+
+const saved=localStorage.getItem('fb');
+if(saved){
+  try{
+    const cfg=JSON.parse(saved);
+    G('fb-key').value=cfg.apiKey||'';G('fb-pid').value=cfg.projectId||'';G('fb-aid').value=cfg.appId||'';
+    const app=initializeApp(cfg);db=getFirestore(app);startApp();
+  }catch(e){console.log(e);}
 }
 
-// ── RENDER SERVICES ──
-function renderServices(){
-  const grid=document.getElementById('svc-grid');
-  let list=SERVICES;
-  if(curCat!=='all')list=list.filter(s=>s.cat===curCat);
-  const items=list.map(s=>{
-    const price=getPrice(s,curSize,curType);
-    if(!price)return '';
-    const d=JSON.stringify({id:s.code+'_'+curSize+'_'+curType,name:s.name,cat:s.cat,price,size:curSize,type:curType,code:s.code});
-    return `<div class="svc-card" onclick='addCart(${d.replace(/'/g,"&apos;")})'>
-      <div class="svc-cat-badge badge ${CAT_COLORS[s.cat]||'b-gray'}">${s.cat}</div>
-      <div class="svc-name">${s.name}</div>
-      <div class="svc-code">${s.code} · ${curSize}</div>
-      <div class="svc-price">฿${price.toLocaleString()}</div>
+function startApp(){
+  G('setup').style.display='none';G('app').style.display='flex';
+  setDot('sy','Connecting...');
+  setRange('today');
+  if(db&&!LM) subscribe(); else{rSvcs();rLoy();rSt();rHist();rToday();rPL();}
+}
+
+function subscribe(){
+  onSnapshot(collection(db,'customers'),s=>{custs=s.docs.map(d=>({...d.data(),_id:d.id}));rLoy();setDot('on','Synced ✓');},()=>setDot('off','Offline'));
+  onSnapshot(collection(db,'stock'),s=>{stock=s.docs.map(d=>({...d.data(),_id:d.id}));rSt();});
+  onSnapshot(query(collection(db,'transactions'),orderBy('createdAt','desc'),limit(200)),s=>{txns=s.docs.map(d=>({...d.data(),_id:d.id}));rHist();rToday();});
+  onSnapshot(collection(db,'services'),s=>{
+    if(s.empty){seedSvcs();}else{svcs=s.docs.map(d=>({...d.data(),_id:d.id}));rSvcs();rPL();}
+  });
+}
+
+async function seedSvcs(){
+  for(const s of DEFAULT_SVCS) await addDoc(collection(db,'services'),s);
+}
+
+// ══ PRICE HELPER ══
+function gp(s,size,type){
+  if(type==='C-Sale')return s.SC||0;
+  if(type==='C-Op.')return s.SCo||0;
+  return s[size]||0;
+}
+
+// ══ RENDER SERVICES ══
+function rSvcs(){
+  const list=svcs.filter(s=>CC==='all'||s.cat===CC);
+  G('sg').innerHTML=list.map(s=>{
+    const p=gp(s,CZ,CT);if(!p)return'';
+    const inc=CT==='Standard'?'':`<div class="sc2-inc">💰 ค่า${CT==='C-Sale'?'ขาย':'ทำ'}: ฿${p.toLocaleString()}</div>`;
+    const cpn=(s.cpnWash||0)+(s.cpnMonth||0)>0?`<div class="sc2-cpn">🎫 คูปอง${s.cpnWash?s.cpnWash+' ล้างฟรี':''}${s.cpnMonth?' '+s.cpnMonth+' เดือน':''}</div>`:'';
+    const hasCpn=(s.cpnWash||0)+(s.cpnMonth||0)>0;
+    const d=JSON.stringify({id:(s._id||s.code)+'_'+CZ+'_'+CT,name:s.name,cat:s.cat,price:p,size:CZ,type:CT,code:s.code,cpnWash:s.cpnWash||0,cpnMonth:s.cpnMonth||0,svcRef:s._id||s.code});
+    return`<div class="sc2" onclick='addCart(${d.replace(/'/g,"&apos;")})'>
+      ${hasCpn?'<div class="cpn-tag">🎫</div>':''}
+      <div class="sc2-cat badge ${CAT_CL[s.cat]||'bgy'}">${s.cat}</div>
+      <div class="sc2-name">${s.name}</div>
+      <div class="sc2-code">${s.code}·${CZ}</div>
+      <div class="sc2-price">฿${p.toLocaleString()}</div>
+      ${cpn}
     </div>`;
-  }).filter(Boolean).join('');
-  grid.innerHTML=items||'<div class="empty" style="grid-column:1/-1;">ไม่มีบริการในหมวดนี้</div>';
+  }).filter(Boolean).join('')||'<div class="empty" style="grid-column:1/-1;">ไม่มีบริการ</div>';
 }
 
-function setSize(s,el){curSize=s;document.querySelectorAll('.size-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderServices();}
-function setType(t,el){curType=t;document.querySelectorAll('.type-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderServices();}
-function setCat(c,el){curCat=c;document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderServices();}
+window.setSz=function(s,el){CZ=s;document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));el.classList.add('active');rSvcs();};
+window.setTp=function(t,el){CT=t;document.querySelectorAll('.ttab').forEach(x=>x.classList.remove('active'));el.classList.add('active');rSvcs();};
+window.setCat=function(c,el){CC=c;document.querySelectorAll('#cat-chips .chip').forEach(x=>x.classList.remove('active'));el.classList.add('active');rSvcs();};
 
-// ── CART ──
-function addCart(item){
+// ══ CART ══
+window.addCart=function(item){
   const ex=cart.find(c=>c.id===item.id);
   if(ex)ex.qty++;else cart.push({...item,qty:1});
-  renderCart();
-}
-function removeCart(i){cart.splice(i,1);renderCart();}
-function clearCart(){cart=[];selCust=null;document.getElementById('cust-q').value='';document.getElementById('cust-chip').style.display='none';document.getElementById('cust-dd').style.display='none';renderCart();}
+  rCart();updateFloat();
+};
+window.rC=function(i){cart.splice(i,1);rCart();updateFloat();};
+window.clrCart=function(){
+  cart=[];selC=null;G('cq').value='';G('cch').style.display='none';G('cdd').style.display='none';
+  rCart();updateFloat();
+};
 
-function renderCart(){
-  const sec=document.getElementById('cart-section');
-  const el=document.getElementById('cart-items');
-  if(!cart.length){sec.style.display='none';updateTotals();return;}
+function rCart(){
+  const sec=G('cart-sec');
+  if(!cart.length){sec.style.display='none';uTot();return;}
   sec.style.display='block';
-  el.innerHTML=cart.map((c,i)=>`<div class="cart-item">
-    <div class="ci-info">
-      <div class="ci-name">${c.name}</div>
-      <div class="ci-sub">${c.code} · ${c.size} · ${c.type} × ${c.qty}</div>
+  G('ci-list').innerHTML=cart.map((c,i)=>`<div class="ci">
+    <div class="ci-i">
+      <div class="ci-n">${c.name}</div>
+      <div class="ci-s">${c.code}·${c.size}·${c.type}×${c.qty}</div>
     </div>
-    <div class="ci-price">฿${(c.price*c.qty).toLocaleString()}</div>
-    <button class="ci-rm" onclick="removeCart(${i})">×</button>
+    <div class="ci-p">฿${(c.price*c.qty).toLocaleString()}</div>
+    <button class="ci-x" onclick="rC(${i})">×</button>
   </div>`).join('');
-  updateTotals();
+  uTot();
 }
 
-function updateTotals(){
+function uTot(){
   const sub=cart.reduce((a,c)=>a+c.price*c.qty,0);
-  let disc=0;
-  if(selCust&&selCust.points>=500)disc=Math.min(Math.floor(selCust.points/500)*50,Math.floor(sub*0.15));
-  const tax=Math.round((sub-disc)*0.07);
-  const tot=sub-disc+tax;
-  document.getElementById('ct-sub').textContent='฿'+sub.toLocaleString();
-  document.getElementById('ct-tax').textContent='฿'+tax.toLocaleString();
-  document.getElementById('ct-tot').textContent='฿'+tot.toLocaleString();
-  const dr=document.getElementById('ct-disc-row');
-  if(disc>0){dr.style.display='flex';document.getElementById('ct-disc').textContent='-฿'+disc.toLocaleString();}
+  let d=0;if(selC&&(selC.points||0)>=500)d=Math.min(Math.floor((selC.points||0)/500)*50,Math.floor(sub*.15));
+  const tax=Math.round((sub-d)*.07),tot=sub-d+tax;
+  G('csub').textContent='฿'+sub.toLocaleString();
+  G('ctx').textContent='฿'+tax.toLocaleString();
+  G('ctot').textContent='฿'+tot.toLocaleString();
+  const dr=G('cdr');
+  if(d>0){dr.style.display='flex';G('cdv').textContent='-฿'+d.toLocaleString();}
   else dr.style.display='none';
+  return{sub,d,tax,tot};
 }
 
-// ── CUSTOMER SEARCH ──
-function custSearch(){
-  const q=document.getElementById('cust-q').value.toLowerCase().trim();
-  const dd=document.getElementById('cust-dd');
-  if(!q){dd.style.display='none';selCust=null;document.getElementById('cust-chip').style.display='none';updateTotals();return;}
-  const res=customers.filter(c=>c.name.toLowerCase().includes(q)||c.phone.includes(q)||c.plate.toLowerCase().includes(q));
-  dd.style.display=res.length?'block':'none';
-  dd.innerHTML=res.map(c=>`<div class="cust-opt" onclick="selectCust(${c.id})">
-    <div><div style="font-weight:700;font-size:13px;">${c.name}</div><div style="font-size:11px;color:var(--text3);">${c.plate} · ${c.car} · ${c.size}</div></div>
-    <span class="pts-chip">${c.points} pts</span>
+// Feature 7: floating total
+function updateFloat(){
+  const fl=G('cart-float');
+  if(!cart.length){fl.style.display='none';return;}
+  const tot=cart.reduce((a,c)=>a+c.price*c.qty,0);
+  const cnt=cart.reduce((a,c)=>a+c.qty,0);
+  fl.style.display='block';
+  G('cf-amt').textContent='฿'+tot.toLocaleString();
+  G('cf-cnt').textContent=cnt+' รายการ';
+}
+window.scrollToCart=function(){
+  const el=G('cart-sec');if(!el)return;
+  el.scrollIntoView({behavior:'smooth'});
+};
+
+// ══ CUSTOMER ══
+window.cSearch=function(){
+  const q=G('cq').value.toLowerCase().trim(),dd=G('cdd');
+  if(!q){dd.style.display='none';return;}
+  const r=custs.filter(c=>c.name.toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.plate||'').toLowerCase().includes(q));
+  dd.style.display=r.length?'block':'none';
+  dd.innerHTML=r.map(c=>`<div class="co" onclick="selCust('${c._id||c.id}')">
+    <div><div style="font-weight:700;font-size:13px;">${c.name}</div>
+    <div style="font-size:11px;color:var(--tx3);">${c.plate||''}·${c.car||''}·${c.size||''}</div></div>
+    <span class="pc">${c.points||0} pts</span>
   </div>`).join('');
-}
+};
 
-function selectCust(id){
-  selCust=customers.find(c=>c.id===id);
-  document.getElementById('cust-dd').style.display='none';
-  document.getElementById('cust-q').value=selCust.name;
-  document.getElementById('cust-chip').style.display='block';
-  document.getElementById('cc-name').textContent=selCust.name;
-  document.getElementById('cc-pts').textContent=selCust.points+' pts';
-  document.getElementById('cc-info').textContent=selCust.car+' · '+tier(selCust.points)+' · '+selCust.visits+' visits';
-  document.getElementById('cc-bar').style.width=Math.min((selCust.points%500)/500*100,100)+'%';
-  document.getElementById('cc-next').textContent=(500-selCust.points%500)+' pts ถึงส่วนลด ฿50';
-  document.getElementById('plate-inp').value=selCust.plate;
-  setSize(selCust.size,document.querySelector(`.size-tab[onclick*="'${selCust.size}'"]`)||document.querySelectorAll('.size-tab')[0]);
-  updateTotals();
-}
+window.selCust=function(id){
+  selC=custs.find(c=>(c._id||c.id)==id);if(!selC)return;
+  G('cdd').style.display='none';G('cq').value=selC.name;G('cch').style.display='block';
+  G('ccn').textContent=selC.name;
+  G('ccp').textContent=(selC.points||0)+' pts';
+  G('cci').textContent=(selC.car||'')+'·'+tier(selC.points||0)+'·'+(selC.visits||0)+' visits';
+  G('ccb').style.width=Math.min(((selC.points||0)%500)/500*100,100)+'%';
+  G('ccnxt').textContent=(500-(selC.points||0)%500)+' pts ถึงส่วนลด ฿50';
+  G('plate').value=selC.plate||'';
+  // Show coupons
+  const cpns=selC.coupons||[];
+  const now=new Date();
+  const activeCpns=cpns.filter(c=>{
+    if(c.type==='wash'&&c.remaining>0)return true;
+    if(c.type==='month'&&new Date(c.expires)>now)return true;
+    return false;
+  });
+  G('cust-cpns').innerHTML=activeCpns.length?
+    `<div style="font-size:10px;font-weight:700;color:var(--pur);margin-bottom:4px;">🎫 คูปองที่มี:</div>`+
+    activeCpns.map(c=>c.type==='wash'?
+      `<span class="badge bpu" style="margin-right:4px;">ล้างฟรี ${c.remaining} ครั้ง</span>`:
+      `<span class="badge bpu" style="margin-right:4px;">ล้างฟรีถึง ${fmtDate(c.expires)}</span>`
+    ).join(''):'';
+  // Auto-set car size
+  if(selC.size){
+    CZ=selC.size;
+    document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+    const el=document.querySelector(`.stab[onclick*="'${selC.size}'"]`);
+    if(el)el.classList.add('active');
+    rSvcs();
+  }
+  uTot();
+};
 
-function tier(pts){return pts>=1000?'Gold ★':pts>=400?'Silver ✦':'Bronze ◆';}
+function tier(p){return p>=1000?'Gold ★':p>=400?'Silver ✦':'Bronze ◆';}
 
-// ── CHECKOUT ──
-function checkout(){
+// ══ CHECKOUT ══
+window.checkout=async function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
-  const plate=document.getElementById('plate-inp').value||(selCust?selCust.plate:'—');
-  const pay=document.getElementById('pay-method').value;
-  const sub=cart.reduce((a,c)=>a+c.price*c.qty,0);
-  let disc=0;
-  if(selCust&&selCust.points>=500)disc=Math.min(Math.floor(selCust.points/500)*50,Math.floor(sub*0.15));
-  const tax=Math.round((sub-disc)*0.07);
-  const tot=sub-disc+tax;
+  const plate=G('plate').value||(selC?selC.plate:'—'),pay=G('pay').value;
+  const{sub,d,tax,tot}=uTot();
   const pts=Math.floor(tot/10);
   const now=new Date();
   const recId='#'+String(++txnN);
-  if(selCust){const used=Math.floor(selCust.points/500);selCust.points=selCust.points-(used*500)+pts;selCust.visits++;if(disc>0)selCust.redeemed++;}
-  transactions.unshift({id:recId,customer:selCust?selCust.name:'Walk-in',plate,size:curSize,payment:pay,items:cart.map(c=>c.name).join(', '),total:tot,pts:selCust?pts:0,date:now.toLocaleDateString('th-TH'),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})});
-  save();
-  document.getElementById('ok-sub').textContent=recId+' · '+(selCust?selCust.name:'Walk-in')+' · '+plate;
-  document.getElementById('ok-receipt').innerHTML=
-    `<div class="receipt-line"><span>Subtotal</span><span>฿${sub.toLocaleString()}</span></div>`+
-    (disc?`<div class="receipt-line" style="color:var(--success);"><span>Loyalty discount</span><span>-฿${disc.toLocaleString()}</span></div>`:'')+
-    `<div class="receipt-line"><span>Tax (7%)</span><span>฿${tax.toLocaleString()}</span></div>`+
-    `<div class="receipt-total"><span>รวม</span><span>฿${tot.toLocaleString()}</span></div>`+
-    (selCust?`<div style="margin-top:8px;font-size:11px;color:var(--gold);">+${pts} pts · ยอด ${selCust.points} pts</div>`:'');
-  showSheet('sh-ok');
-  cart=[];selCust=null;
-  document.getElementById('cust-q').value='';
-  document.getElementById('cust-chip').style.display='none';
-  document.getElementById('plate-inp').value='';
-  renderCart();
+  const dateStr=now.toLocaleDateString('th-TH');
+  const timeStr=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+
+  // Build service history entries (Feature 3)
+  const svcEntries=cart.map(c=>({name:c.name,code:c.code,cat:c.cat,size:c.size,price:c.price,date:now.toISOString()}));
+  const hasCeramic=cart.some(c=>c.code==='P07'||c.code==='S11');
+  const ceramicDate=hasCeramic?now.toISOString():null;
+
+  // Build coupons to issue (Feature 4)
+  let newCoupons=[];
+  let cpnMsg=[];
+  for(const ci of cart){
+    if((ci.cpnWash||0)>0){
+      newCoupons.push({type:'wash',remaining:ci.cpnWash,from:now.toISOString(),service:ci.name});
+      cpnMsg.push(`ล้างรถฟรี ${ci.cpnWash} ครั้ง`);
+    }
+    if((ci.cpnMonth||0)>0){
+      const exp=new Date(now);exp.setMonth(exp.getMonth()+(ci.cpnMonth||1));
+      newCoupons.push({type:'month',expires:exp.toISOString(),from:now.toISOString(),service:ci.name});
+      cpnMsg.push(`ล้างรถฟรี ${ci.cpnMonth} เดือน (ถึง ${fmtDate(exp)})`);
+    }
+  }
+
+  // Incentive totals
+  const csaleTotal=cart.filter(c=>c.type==='C-Sale').reduce((a,c)=>a+c.price*c.qty,0);
+  const copTotal=cart.filter(c=>c.type==='C-Op.').reduce((a,c)=>a+c.price*c.qty,0);
+
+  const tdata={
+    id:recId,customer:selC?selC.name:'Walk-in',
+    plate,size:CZ,payment:pay,
+    items:cart.map(c=>c.name).join(', '),
+    itemDetails:svcEntries,
+    total:tot,pts:selC?pts:0,
+    csaleTotal,copTotal,
+    date:dateStr,time:timeStr,
+    createdAt:serverTimestamp()
+  };
+
+  setDot('sy','Saving...');
+  try{
+    if(db&&!LM){
+      await addDoc(collection(db,'transactions'),tdata);
+      if(selC){
+        const used=Math.floor((selC.points||0)/500);
+        const newPts=(selC.points||0)-(used*500)+pts;
+        const existCpns=selC.coupons||[];
+        const svcHistory=selC.serviceHistory||[];
+        const updates={
+          points:newPts,visits:(selC.visits||0)+1,
+          redeemed:(selC.redeemed||0)+(d>0?1:0),
+          coupons:[...existCpns,...newCoupons],
+          serviceHistory:[...svcHistory,...svcEntries],
+          lastVisit:now.toISOString()
+        };
+        if(ceramicDate)updates.lastCeramic=ceramicDate;
+        await updateDoc(doc(db,'customers',selC._id),updates);
+      }
+    }else{
+      txns.unshift({...tdata,createdAt:now});
+      if(selC){
+        const used=Math.floor((selC.points||0)/500);
+        selC.points=(selC.points||0)-(used*500)+pts;
+        selC.visits=(selC.visits||0)+1;
+        selC.coupons=[...(selC.coupons||[]),...newCoupons];
+        selC.serviceHistory=[...(selC.serviceHistory||[]),...svcEntries];
+        selC.lastVisit=now.toISOString();
+        if(ceramicDate)selC.lastCeramic=ceramicDate;
+        localStorage.setItem('cu',JSON.stringify(custs));
+      }
+      localStorage.setItem('tx',JSON.stringify(txns));
+      localStorage.setItem('tn',String(txnN));
+      rHist();rToday();
+    }
+    setDot('on','Synced ✓');
+  }catch(e){setDot('off','Error');console.error(e);}
+
+  // Show receipt
+  G('oks').textContent=recId+'·'+(selC?selC.name:'Walk-in')+'·'+plate;
+  G('okr').innerHTML=
+    `<div class="rl"><span>Subtotal</span><span>฿${sub.toLocaleString()}</span></div>`+
+    (d?`<div class="rl" style="color:var(--ok)"><span>ส่วนลด Loyalty</span><span>-฿${d.toLocaleString()}</span></div>`:'')+
+    `<div class="rl"><span>Tax 7%</span><span>฿${tax.toLocaleString()}</span></div>`+
+    `<div class="rt"><span>รวม</span><span>฿${tot.toLocaleString()}</span></div>`+
+    (selC?`<div style="margin-top:8px;font-size:11px;color:var(--gold)">+${pts} pts earned · ยอด ${((selC.points||0))}  pts</div>`:'');
+  const cpnEl=G('ok-cpn');
+  if(cpnMsg.length){cpnEl.style.display='block';cpnEl.innerHTML='🎫 คูปองที่ได้รับ:<br>'+cpnMsg.join('<br>');}
+  else cpnEl.style.display='none';
+
+  sh('sh-ok');
+  cart=[];selC=null;G('cq').value='';G('cch').style.display='none';G('plate').value='';
+  rCart();updateFloat();
+};
+
+// ══ TODAY DASHBOARD (Feature 6) ══
+function rToday(){
+  const td=todayTH();
+  const today=txns.filter(t=>t.date===td);
+  const tot=today.reduce((a,t)=>a+(t.total||0),0);
+  const n=today.length;
+  G('td-total').textContent='฿'+tot.toLocaleString();
+  G('td-txn').textContent=n;
+  G('td-avg').textContent=n?'฿'+Math.round(tot/n).toLocaleString():'฿0';
+  G('td-pts').textContent=today.reduce((a,t)=>a+(t.pts||0),0);
+  G('td-cpn').textContent=today.reduce((a,t)=>a+(t.itemDetails||[]).filter(i=>(i.cpnWash||0)+(i.cpnMonth||0)>0).length,0);
+  // Payment breakdown
+  ['เงินสด','โอน','บุญถอด','บัตร'].forEach((p,i)=>{
+    const ids=['td-cash','td-transfer','td-boon','td-card'];
+    G(ids[i]).textContent='฿'+today.filter(t=>t.payment===p).reduce((a,t)=>a+(t.total||0),0).toLocaleString();
+  });
+  // Incentives
+  G('td-csale').textContent='฿'+today.reduce((a,t)=>a+(t.csaleTotal||0),0).toLocaleString();
+  G('td-cop').textContent='฿'+today.reduce((a,t)=>a+(t.copTotal||0),0).toLocaleString();
+  // Top services
+  const svcCount={};
+  today.forEach(t=>(t.items||'').split(',').forEach(s=>{const k=s.trim();if(k)svcCount[k]=(svcCount[k]||0)+1;}));
+  const top=Object.entries(svcCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  G('td-top').innerHTML=top.map(([n,c])=>`<div style="display:flex;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--bdr);font-size:12px;"><span>${n}</span><span class="badge bb">${c} ครั้ง</span></div>`).join('')||'<div class="empty">ยังไม่มีรายการ</div>';
+  G('today-date-lbl').textContent='วันที่: '+td;
+  // Recent list
+  G('td-list').innerHTML=today.slice(0,10).map(t=>`<div class="card" style="margin-bottom:8px;">
+    <div style="display:flex;justify-content:space-between;">
+      <div><div style="font-weight:700;">${t.id}·${t.customer}</div><div style="font-size:11px;color:var(--tx3);">${t.plate||''}·${t.payment||''}</div></div>
+      <div style="text-align:right;font-size:16px;font-weight:700;">฿${(t.total||0).toLocaleString()}</div>
+    </div>
+  </div>`).join('')||'<div class="empty">ยังไม่มีรายการวันนี้</div>';
 }
 
-// ── LOYALTY ──
-function renderLoyalty(){
-  const q=(document.getElementById('loy-q')||{value:''}).value.toLowerCase();
-  document.getElementById('ls-mem').textContent=customers.length;
-  document.getElementById('ls-pts').textContent=customers.reduce((a,c)=>a+c.points,0).toLocaleString();
-  document.getElementById('ls-gold').textContent=customers.filter(c=>c.points>=1000).length;
-  const list=customers.filter(c=>!q||c.name.toLowerCase().includes(q)||c.phone.includes(q)||c.plate.toLowerCase().includes(q));
-  document.getElementById('loy-list').innerHTML=list.map(c=>`
-    <div class="card" style="margin-bottom:8px;">
+// ══ LOYALTY ══
+function rLoy(){
+  const q=(G('lq')||{value:''}).value.toLowerCase();
+  const list=custs.filter(c=>!q||c.name.toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.plate||'').toLowerCase().includes(q));
+  G('lm').textContent=custs.length;
+  G('lp').textContent=custs.reduce((a,c)=>a+(c.points||0),0).toLocaleString();
+  G('lg').textContent=custs.filter(c=>(c.points||0)>=1000).length;
+  G('ll').innerHTML=list.map(c=>{
+    const cpns=c.coupons||[];const now=new Date();
+    const activeCpns=cpns.filter(x=>(x.type==='wash'&&x.remaining>0)||(x.type==='month'&&new Date(x.expires)>now));
+    // Ceramic due check (Feature 3)
+    let ceramicBadge='';
+    if(c.lastCeramic){
+      const last=new Date(c.lastCeramic);const months=(now-last)/(1000*60*60*24*30);
+      if(months>=5)ceramicBadge='<span class="badge bpu" style="margin-left:4px;">🔔 ต้องทำ ceramic</span>';
+    }
+    return`<div class="card" style="margin-bottom:8px;cursor:pointer;" onclick="showCustDetail('${c._id||c.id}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
         <div>
-          <div style="font-weight:700;font-size:14px;">${c.name}</div>
-          <div style="font-size:11px;color:var(--text3);">${c.car} · ${c.plate} · <span class="badge b-blue">${c.size}</span></div>
+          <div style="font-weight:700;font-size:14px;">${c.name}${ceramicBadge}</div>
+          <div style="font-size:11px;color:var(--tx3);">${c.car||''}·${c.plate||''}·<span class="badge bb">${c.size||''}</span></div>
         </div>
-        <span class="pts-chip">${c.points} pts</span>
+        <span class="pc">${c.points||0} pts</span>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:11px;color:var(--text2);">${tier(c.points)} · ${c.visits} visits · ${c.phone}</div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-sm btn-success" onclick="addPts(${c.id})">+ Pts</button>
-          <button class="btn btn-sm btn-danger" onclick="delCust(${c.id})">Del</button>
-        </div>
-      </div>
-    </div>`).join('');
+      ${activeCpns.length?`<div style="margin-bottom:5px;">`+activeCpns.map(x=>x.type==='wash'?`<span class="badge bpu" style="margin-right:3px;">🎫 ล้างฟรี ${x.remaining} ครั้ง</span>`:`<span class="badge bpu" style="margin-right:3px;">🎫 ฟรีถึง ${fmtDate(x.expires)}</span>`).join('')+`</div>`:''}
+      <div style="font-size:11px;color:var(--tx2);">${tier(c.points||0)}·${c.visits||0} visits·${c.phone||''}</div>
+    </div>`;
+  }).join('')||'<div class="empty">ไม่พบสมาชิก</div>';
 }
 
-function addPts(id){
-  const pts=parseInt(prompt('เพิ่ม bonus points:','50'));
-  if(pts>0){customers.find(c=>c.id===id).points+=pts;save();renderLoyalty();}
-}
-function delCust(id){if(confirm('ลบสมาชิกนี้?')){customers=customers.filter(c=>c.id!==id);save();renderLoyalty();}}
+// Customer detail (Feature 3)
+window.showCustDetail=function(id){
+  viewCustId=id;
+  const c=custs.find(x=>(x._id||x.id)==id);if(!c)return;
+  G('cust-detail-name').textContent=c.name;
+  const svcHist=(c.serviceHistory||[]).slice(-10).reverse();
+  const cpns=c.coupons||[];const now=new Date();
+  const activeCpns=cpns.filter(x=>(x.type==='wash'&&x.remaining>0)||(x.type==='month'&&new Date(x.expires)>now));
+  let ceramicSection='';
+  if(c.lastCeramic){
+    const last=new Date(c.lastCeramic);const months=Math.round((now-last)/(1000*60*60*24*30));
+    const due=months>=5;
+    ceramicSection=`<div class="${due?'ceramic-alert':'svc-hist'}" style="margin-bottom:10px;">
+      🛡 Ceramic ล่าสุด: ${fmtDate(c.lastCeramic)} (${months} เดือนที่แล้ว)
+      ${due?' — ถึงเวลา Maintain แล้ว!':''}
+    </div>`;
+  }
+  G('cust-detail-body').innerHTML=
+    `<div style="font-size:12px;color:var(--tx2);margin-bottom:10px;">${c.car||''}·${c.plate||''}·${c.size||''}·${c.phone||''}</div>`+
+    `<div class="row3" style="margin-bottom:10px;">
+      <div class="sc-card"><div class="sc-v">${c.points||0}</div><div class="sc-l">Points</div></div>
+      <div class="sc-card"><div class="sc-v">${c.visits||0}</div><div class="sc-l">Visits</div></div>
+      <div class="sc-card"><div class="sc-v">${tier(c.points||0)}</div><div class="sc-l">Tier</div></div>
+    </div>`+
+    ceramicSection+
+    (activeCpns.length?`<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--pur);">🎫 คูปองที่มี</div><div class="card" style="padding:0;overflow:hidden;margin-bottom:10px;">
+      ${activeCpns.map(x=>`<div class="cpn-item" style="padding:8px 12px;">${x.type==='wash'?`ล้างรถฟรี — เหลือ ${x.remaining} ครั้ง`:`ล้างรถฟรีถึง ${fmtDate(x.expires)}`} <span style="font-size:10px;color:var(--tx3);">จาก ${x.service}</span></div>`).join('')}
+    </div>`:'')+
+    `<div style="font-size:12px;font-weight:700;margin-bottom:6px;">📋 ประวัติบริการล่าสุด</div>`+
+    (svcHist.length?`<div class="svc-hist">${svcHist.map(s=>`<div class="svc-hist-row"><span>${s.name}</span><span>${fmtDate(s.date)}</span></div>`).join('')}</div>`:'<div style="font-size:12px;color:var(--tx3);">ยังไม่มีประวัติ</div>');
+  sh('sh-cust');
+};
 
-// ── STOCK ──
-function renderStockStats(){
-  document.getElementById('st-skus').textContent=stock.length;
-  document.getElementById('st-low').textContent=stock.filter(s=>s.qty>0&&s.qty<=s.min).length;
-  document.getElementById('st-out').textContent=stock.filter(s=>s.qty===0).length;
-  renderStock();
-}
-function renderStock(){
-  const q=(document.getElementById('st-q')||{value:''}).value.toLowerCase();
+window.addBonusPts=async function(){
+  if(!viewCustId)return;
+  const p=parseInt(prompt('เพิ่ม bonus points:','50'));if(!p||p<1)return;
+  const c=custs.find(x=>(x._id||x.id)==viewCustId);if(!c)return;
+  if(db&&!LM)await updateDoc(doc(db,'customers',viewCustId),{points:(c.points||0)+p});
+  else{c.points=(c.points||0)+p;localStorage.setItem('cu',JSON.stringify(custs));rLoy();}
+};
+
+window.delCustDetail=async function(){
+  if(!viewCustId)return;
+  if(!confirm('ลบสมาชิกนี้?'))return;
+  if(db&&!LM)await deleteDoc(doc(db,'customers',viewCustId));
+  else{custs=custs.filter(c=>(c._id||c.id)!=viewCustId);localStorage.setItem('cu',JSON.stringify(custs));rLoy();}
+  hs('sh-cust');
+};
+
+window.addCust=async function(){
+  const fn=G('cf').value.trim();if(!fn){alert('กรุณาระบุชื่อ');return;}
+  const data={name:fn+' '+G('cl2').value.trim(),phone:G('cp').value,plate:G('cpl').value,car:G('cc2').value,size:G('csz').value,note:G('cnote').value,points:0,visits:0,redeemed:0,coupons:[],serviceHistory:[],createdAt:serverTimestamp()};
+  if(db&&!LM)await addDoc(collection(db,'customers'),data);
+  else{custs.push({...data,id:Date.now(),createdAt:new Date()});localStorage.setItem('cu',JSON.stringify(custs));rLoy();}
+  hs('sh-nc');['cf','cl2','cp','cpl','cc2','cnote'].forEach(i=>G(i).value='');
+};
+
+// ══ STOCK ══
+function rSt(){
+  G('ssk').textContent=stock.length;
+  G('slo').textContent=stock.filter(s=>s.qty>0&&s.qty<=(s.min||5)).length;
+  G('sou').textContent=stock.filter(s=>s.qty===0).length;
+  const q=(G('stq')||{value:''}).value.toLowerCase();
   const list=stock.filter(s=>!q||s.name.toLowerCase().includes(q));
-  document.getElementById('st-list').innerHTML=list.map(s=>{
-    const pct=Math.min(s.qty/Math.max(s.min*3,10)*100,100);
-    const col=s.qty===0?'var(--danger)':s.qty<=s.min?'var(--amber)':'var(--success)';
-    const badge=s.qty===0?'<span class="badge b-red">หมด</span>':s.qty<=s.min?'<span class="badge b-amber">ใกล้หมด</span>':'<span class="badge b-green">มีสต็อก</span>';
-    return `<div class="card" style="margin-bottom:8px;">
+  G('stl').innerHTML=list.map(s=>{
+    const pct=Math.min((s.qty||0)/Math.max((s.min||5)*3,10)*100,100);
+    const col=s.qty===0?'var(--err)':s.qty<=(s.min||5)?'var(--amb)':'var(--ok)';
+    const bd=s.qty===0?'<span class="badge br">หมด</span>':s.qty<=(s.min||5)?'<span class="badge ba">ใกล้หมด</span>':'<span class="badge bg2">มีสต็อก</span>';
+    return`<div class="card" style="margin-bottom:8px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-        <div>
-          <div style="font-weight:700;font-size:13px;">${s.name}</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:2px;"><span class="badge b-blue">${s.cat}</span> · ฿${s.price.toLocaleString()}</div>
-        </div>
-        ${badge}
+        <div><div style="font-weight:700;font-size:13px;">${s.name}</div><div style="font-size:11px;color:var(--tx3);margin-top:2px;"><span class="badge bb">${s.cat||''}</span>·฿${(s.price||0).toLocaleString()}</div></div>${bd}
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="stock-bar"><div class="stock-fill" style="width:${Math.round(pct)}%;background:${col};"></div></div>
-          <span style="font-size:13px;font-weight:700;">${s.qty}</span><span style="font-size:11px;color:var(--text3);">/ min ${s.min}</span>
-        </div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-sm btn-success" onclick="openRestock(${s.id})">เติม</button>
-          <button class="btn btn-sm btn-danger" onclick="delStock(${s.id})">ลบ</button>
-        </div>
+        <div style="display:flex;align-items:center;gap:6px;"><div class="sb2"><div class="sf" style="width:${Math.round(pct)}%;background:${col};"></div></div><span style="font-size:13px;font-weight:700;">${s.qty||0}</span><span style="font-size:11px;color:var(--tx3);">/min ${s.min||5}</span></div>
+        <div style="display:flex;gap:5px;"><button class="btn btn-s btn-ok" onclick="oRs('${s._id||s.id}')">เติม</button><button class="btn btn-s btn-d" onclick="dSt('${s._id||s.id}')">ลบ</button></div>
       </div>
     </div>`;
   }).join('')||'<div class="empty">ไม่พบสินค้า</div>';
 }
+window.oRs=function(id){rsId=id;const s=stock.find(x=>(x._id||x.id)==id);G('rsl').textContent=(s?s.name:'')+'  —  สต็อก: '+(s?s.qty:0);G('rq').value='';sh('sh-rs');};
+window.doRs=async function(){
+  const q=parseInt(G('rq').value);if(!q||q<1){alert('ระบุจำนวน');return;}
+  const s=stock.find(x=>(x._id||x.id)==rsId);if(!s)return;
+  if(db&&!LM)await updateDoc(doc(db,'stock',rsId),{qty:(s.qty||0)+q});
+  else{s.qty=(s.qty||0)+q;localStorage.setItem('st',JSON.stringify(stock));rSt();}
+  hs('sh-rs');
+};
+window.dSt=async function(id){
+  if(!confirm('ลบสินค้านี้?'))return;
+  if(db&&!LM)await deleteDoc(doc(db,'stock',id));
+  else{stock=stock.filter(s=>(s._id||s.id)!=id);localStorage.setItem('st',JSON.stringify(stock));rSt();}
+};
+window.addSt=async function(){
+  const n=G('sn').value.trim();if(!n){alert('ระบุชื่อสินค้า');return;}
+  const data={name:n,cat:G('sc3').value,price:parseInt(G('sp').value)||0,qty:parseInt(G('sq').value)||0,min:parseInt(G('sm').value)||5};
+  if(db&&!LM)await addDoc(collection(db,'stock'),data);
+  else{stock.push({...data,id:Date.now()});localStorage.setItem('st',JSON.stringify(stock));rSt();}
+  hs('sh-ns');['sn','sp','sq','sm'].forEach(i=>G(i).value='');
+};
 
-function openRestock(id){
-  restockId=id;
-  const s=stock.find(i=>i.id===id);
-  document.getElementById('rst-label').textContent=s.name+' — สต็อกปัจจุบัน: '+s.qty;
-  document.getElementById('rq').value='';
-  showSheet('sh-restock');
-}
-function doRestock(){
-  const qty=parseInt(document.getElementById('rq').value);
-  if(!qty||qty<1){alert('กรุณาระบุจำนวน');return;}
-  stock.find(s=>s.id===restockId).qty+=qty;
-  save();closeSheet('sh-restock');renderStockStats();
-}
-function delStock(id){if(confirm('ลบสินค้านี้?')){stock=stock.filter(s=>s.id!==id);save();renderStockStats();}}
+// ══ PRICE LIST (Feature 2) ══
+window.setPLCat=function(c,el){PLCat=c;document.querySelectorAll('#pl-chips .chip').forEach(x=>x.classList.remove('active'));el.classList.add('active');rPL();};
 
-// ── HISTORY ──
-function renderHistory(){
-  const today=new Date().toLocaleDateString('th-TH');
-  const todayT=transactions.filter(t=>t.date===today);
-  const tot=todayT.reduce((a,t)=>a+t.total,0);
-  document.getElementById('hs-tot').textContent='฿'+tot.toLocaleString();
-  document.getElementById('hs-txn').textContent=todayT.length;
-  const all=transactions.slice(0,50);
-  document.getElementById('hist-list').innerHTML=all.map(t=>`
-    <div class="card" style="margin-bottom:8px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
-        <div>
-          <div style="font-weight:700;font-size:13px;">${t.id} · ${t.customer}</div>
-          <div style="font-size:11px;color:var(--text3);">${t.plate} · <span class="badge b-blue">${t.size}</span> · ${t.payment}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:16px;font-weight:700;">฿${t.total.toLocaleString()}</div>
-          ${t.pts?`<span class="pts-chip">+${t.pts} pts</span>`:''}
-        </div>
+function rPL(){
+  const q=(G('plq')||{value:''}).value.toLowerCase();
+  const list=svcs.filter(s=>(PLCat==='all'||s.cat===PLCat)&&(!q||s.name.toLowerCase().includes(q)||s.code.toLowerCase().includes(q)));
+  G('pl-list').innerHTML=list.map(s=>`<div class="card" style="margin-bottom:8px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:13px;">${s.name} <span class="badge ${CAT_CL[s.cat]||'bgy'}" style="margin-left:4px;">${s.cat}</span></div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:2px;">Code: ${s.code}</div>
       </div>
-      <div style="font-size:10px;color:var(--text3);">${t.items}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:3px;">${t.date} ${t.time}</div>
-    </div>`).join('')||'<div class="empty">ไม่มีรายการ</div>';
+      <div style="display:flex;gap:5px;flex-shrink:0;">
+        <button class="btn btn-s" onclick="editSvc('${s._id||s.code}')">แก้ไข</button>
+        <button class="btn btn-s btn-d" onclick="delSvc('${s._id||s.code}')">ลบ</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:6px;">
+      ${['S','M','L','XL','XXL'].map(sz=>`<div style="background:var(--bg);border-radius:var(--rs);padding:5px;text-align:center;"><div style="font-size:9px;color:var(--tx3);">${sz}</div><div style="font-size:12px;font-weight:700;">฿${(s[sz]||0).toLocaleString()}</div></div>`).join('')}
+    </div>
+    <div class="inc-row">
+      <div class="inc-box"><b>฿${(s.SC||0).toLocaleString()}</b>C-Sale ค่าขาย</div>
+      <div class="inc-box" style="background:var(--inf-bg);color:var(--inf);"><b>฿${(s.SCo||0).toLocaleString()}</b>C-Op. ค่าทำ</div>
+      ${(s.cpnWash||0)>0?`<div class="inc-box" style="background:var(--pur-bg);color:var(--pur);"><b>${s.cpnWash}</b>ล้างฟรี (ครั้ง)</div>`:''}
+      ${(s.cpnMonth||0)>0?`<div class="inc-box" style="background:var(--pur-bg);color:var(--pur);"><b>${s.cpnMonth}</b>ล้างฟรี (เดือน)</div>`:''}
+    </div>
+  </div>`).join('')||'<div class="empty">ไม่พบบริการ</div>';
 }
 
-// ── EXPORT REPORT ──
-function exportReport(){
-  const today=new Date();
-  const todayStr=today.toLocaleDateString('th-TH');
-  const txns=transactions.filter(t=>t.date===todayStr);
-  if(!txns.length&&!confirm('ไม่มีรายการวันนี้ ต้องการ export ทั้งหมดหรือไม่?'))return;
-  const all=txns.length?txns:transactions;
-  const grand=all.reduce((a,t)=>a+t.total,0);
-  const cash=all.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+t.total,0);
-  const transfer=all.filter(t=>t.payment==='โอน').reduce((a,t)=>a+t.total,0);
-  const boon=all.filter(t=>t.payment==='บุญถอด').reduce((a,t)=>a+t.total,0);
-  const MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-  let csv='\uFEFF';
-  csv+=`รายงานสรุปบัญชีประจำวัน V.04\t\tสาขา\tMK\tผู้จัดทำ\t\tวันที่\t${today.getDate()}\t${MONTHS[today.getMonth()]}\t-\t${today.getFullYear()}\r\n`;
-  csv+=`ลำดับ\tเลขใบจ่าย\tขนาด\tรวม\tวิธีจ่าย\tลูกค้า\tทะเบียน\tบริการ\r\n`;
-  all.forEach((t,i)=>{csv+=`${i+1}\t${t.id}\t${t.size}\t${t.total}\t${t.payment}\t${t.customer}\t${t.plate}\t"${t.items}"\r\n`;});
-  csv+=`รวม\t\t\t${grand}\r\n\r\n`;
-  csv+=`ยอดเงินสด\t${cash}\r\nยอดโอน\t${transfer}\r\nยอดบุญถอด\t${boon}\r\nรวมทั้งหมด\t${grand}\r\n`;
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=`CarCare-Report-${today.toISOString().slice(0,10)}.csv`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+window.editSvc=function(id){
+  const s=svcs.find(x=>(x._id||x.code)==id);if(!s)return;
+  G('nsvc-title').textContent='แก้ไขบริการ';
+  G('sv-name').value=s.name;G('sv-code').value=s.code;G('sv-cat').value=s.cat;
+  G('sv-s').value=s.S||0;G('sv-m').value=s.M||0;G('sv-l').value=s.L||0;
+  G('sv-xl').value=s.XL||0;G('sv-xxl').value=s.XXL||0;
+  G('sv-sc').value=s.SC||0;G('sv-sco').value=s.SCo||0;
+  G('sv-cpn').value=s.cpnWash||0;G('sv-cpnm').value=s.cpnMonth||0;
+  G('sv-edit-id').value=id;
+  sh('sh-nsvc');
+};
+
+window.saveSvc=async function(){
+  const name=G('sv-name').value.trim();if(!name){alert('ระบุชื่อบริการ');return;}
+  const data={name,code:G('sv-code').value.trim(),cat:G('sv-cat').value,S:parseInt(G('sv-s').value)||0,M:parseInt(G('sv-m').value)||0,L:parseInt(G('sv-l').value)||0,XL:parseInt(G('sv-xl').value)||0,XXL:parseInt(G('sv-xxl').value)||0,SC:parseInt(G('sv-sc').value)||0,SCo:parseInt(G('sv-sco').value)||0,cpnWash:parseInt(G('sv-cpn').value)||0,cpnMonth:parseInt(G('sv-cpnm').value)||0};
+  const editId=G('sv-edit-id').value;
+  if(db&&!LM){
+    if(editId){await updateDoc(doc(db,'services',editId),data);}
+    else{await addDoc(collection(db,'services'),data);}
+  }else{
+    if(editId){const i=svcs.findIndex(x=>(x._id||x.code)==editId);if(i>=0)svcs[i]={...svcs[i],...data};}
+    else{svcs.push({...data,_id:'local_'+Date.now()});}
+    localStorage.setItem('sv',JSON.stringify(svcs));rSvcs();rPL();
+  }
+  hs('sh-nsvc');G('sv-edit-id').value='';G('nsvc-title').textContent='เพิ่มบริการ';
+  ['sv-name','sv-code','sv-s','sv-m','sv-l','sv-xl','sv-xxl','sv-sc','sv-sco','sv-cpn','sv-cpnm'].forEach(i=>G(i).value='');
+};
+
+window.delSvc=async function(id){
+  if(!confirm('ลบบริการนี้?'))return;
+  if(db&&!LM)await deleteDoc(doc(db,'services',id));
+  else{svcs=svcs.filter(s=>(s._id||s.code)!=id);localStorage.setItem('sv',JSON.stringify(svcs));rSvcs();rPL();}
+};
+
+// ══ HISTORY (Feature 5) ══
+function getDateFilter(){
+  const f=G('d-from').value,t=G('d-to').value;
+  return{from:f?new Date(f):null,to:t?new Date(t+' 23:59:59'):null};
 }
 
-// ── FORMS ──
-function addCust(){
-  const fn=document.getElementById('cf').value.trim();
-  if(!fn){alert('กรุณาระบุชื่อ');return;}
-  customers.push({id:Date.now(),name:fn+' '+document.getElementById('cl').value.trim(),phone:document.getElementById('cp').value,plate:document.getElementById('cpl').value,car:document.getElementById('cc').value,size:document.getElementById('csz').value,points:0,visits:0,redeemed:0});
-  save();closeSheet('sh-newcust');['cf','cl','cp','cpl','cc'].forEach(i=>document.getElementById(i).value='');renderLoyalty();
-}
-function addStock(){
-  const name=document.getElementById('sn').value.trim();
-  if(!name){alert('กรุณาระบุชื่อสินค้า');return;}
-  stock.push({id:Date.now(),name,cat:document.getElementById('sc').value,price:parseInt(document.getElementById('sp').value)||0,qty:parseInt(document.getElementById('sq').value)||0,min:parseInt(document.getElementById('sm').value)||5});
-  save();closeSheet('sh-newstock');['sn','sp','sq','sm'].forEach(i=>document.getElementById(i).value='');renderStockStats();
+function txnInRange(t){
+  const{from,to}=getDateFilter();
+  if(!from&&!to)return true;
+  const d=new Date(t.date?t.date.split('/').reverse().join('-'):0);
+  if(from&&d<from)return false;
+  if(to&&d>to)return false;
+  return true;
 }
 
-// ── NAV ──
-function switchScreen(id,el){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.bn-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('screen-'+id).classList.add('active');
-  el.classList.add('active');
-  document.getElementById('main-content').scrollTop=0;
-  if(id==='loyalty')renderLoyalty();
-  if(id==='stock')renderStockStats();
-  if(id==='history')renderHistory();
+window.setRange=function(r){
+  const now=new Date(),fmt=d=>d.toISOString().slice(0,10);
+  if(r==='today'){const s=fmt(now);G('d-from').value=s;G('d-to').value=s;}
+  else if(r==='week'){const s=new Date(now);s.setDate(s.getDate()-6);G('d-from').value=fmt(s);G('d-to').value=fmt(now);}
+  else if(r==='month'){G('d-from').value=fmt(new Date(now.getFullYear(),now.getMonth(),1));G('d-to').value=fmt(now);}
+  else{G('d-from').value='';G('d-to').value='';}
+  rHist();
+};
+
+function rHist(){
+  const filtered=txns.filter(txnInRange);
+  const tot=filtered.reduce((a,t)=>a+(t.total||0),0);
+  G('hs-tot').textContent='฿'+tot.toLocaleString();
+  G('hs-n').textContent=filtered.length;
+  G('hl').innerHTML=filtered.slice(0,100).map(t=>`<div class="card" style="margin-bottom:8px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+      <div><div style="font-weight:700;font-size:13px;">${t.id}·${t.customer}</div>
+      <div style="font-size:11px;color:var(--tx3);">${t.plate||''}·<span class="badge bb">${t.size||''}</span>·${t.payment||''}</div></div>
+      <div style="text-align:right;"><div style="font-size:16px;font-weight:700;">฿${(t.total||0).toLocaleString()}</div>${t.pts?`<span class="pc">+${t.pts}pts</span>`:''}</div>
+    </div>
+    <div style="font-size:10px;color:var(--tx3);">${t.items||''}</div>
+    <div style="font-size:10px;color:var(--tx3);margin-top:3px;">${t.date||''} ${t.time||''}</div>
+  </div>`).join('')||'<div class="empty">ไม่มีรายการในช่วงนี้</div>';
 }
 
-// ── SHEETS ──
-function showSheet(id){document.getElementById(id).style.display='flex';}
-function closeSheet(id){document.getElementById(id).style.display='none';}
-function closeSBg(e,id){if(e.target===document.getElementById(id))closeSheet(id);}
+window.exportRange=function(){
+  const filtered=txns.filter(txnInRange);
+  if(!filtered.length){alert('ไม่มีข้อมูลในช่วงที่เลือก');return;}
+  const from=G('d-from').value||'all',to=G('d-to').value||'all';
+  const grand=filtered.reduce((a,t)=>a+(t.total||0),0);
+  const cash=filtered.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0);
+  const transfer=filtered.filter(t=>t.payment==='โอน').reduce((a,t)=>a+(t.total||0),0);
+  const boon=filtered.filter(t=>t.payment==='บุญถอด').reduce((a,t)=>a+(t.total||0),0);
+  const csale=filtered.reduce((a,t)=>a+(t.csaleTotal||0),0);
+  const cop=filtered.reduce((a,t)=>a+(t.copTotal||0),0);
+  let c='\uFEFF';
+  c+=`รายงาน CarCare POS\tช่วงวันที่: ${from} - ${to}\r\n\r\n`;
+  c+=`ลำดับ\tReceipt\tลูกค้า\tทะเบียน\tขนาด\tวิธีชำระ\tรายการ\tรวม\tPoints\tวันที่\tเวลา\r\n`;
+  filtered.forEach((t,i)=>{c+=`${i+1}\t${t.id}\t${t.customer}\t${t.plate||''}\t${t.size||''}\t${t.payment||''}\t"${t.items||''}"\t${t.total||0}\t${t.pts||0}\t${t.date||''}\t${t.time||''}\r\n`;});
+  c+=`\r\nสรุป\r\nรวมทั้งหมด\t฿${grand.toLocaleString()}\r\nเงินสด\t฿${cash.toLocaleString()}\r\nโอน\t฿${transfer.toLocaleString()}\r\nบุญถอด\t฿${boon.toLocaleString()}\r\nค่าขาย C-Sale รวม\t฿${csale.toLocaleString()}\r\nค่าทำ C-Op. รวม\t฿${cop.toLocaleString()}\r\n`;
+  const b=new Blob([c],{type:'text/csv;charset=utf-8'});
+  const u=URL.createObjectURL(b);const a=document.createElement('a');
+  a.href=u;a.download=`CarCare-${from}-${to}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+};
 
-// ── PWA INSTALL ──
-let deferredPrompt=null;
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();deferredPrompt=e;
-  document.getElementById('install-banner').style.display='flex';
-});
-function installApp(){
-  if(!deferredPrompt)return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('install-banner').style.display='none';});
-}
+// ══ NAV ══
+window.sw=function(id,el){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('active'));
+  G('sc-'+id).classList.add('active');el.classList.add('active');
+  G('content').scrollTop=0;
+  if(id==='loyalty')rLoy();
+  if(id==='stock')rSt();
+  if(id==='today')rToday();
+  if(id==='prices')rPL();
+  if(id==='history')rHist();
+};
 
-// ── SERVICE WORKER ──
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js').catch(()=>{});
-}
+window.sh=function(id){G(id).style.display='flex';};
+window.hs=function(id){G(id).style.display='none';};
+window.csbg=function(e,id){if(e.target===G(id))hs(id);};
 
-// ── INIT ──
-renderServices();
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
 </html>
