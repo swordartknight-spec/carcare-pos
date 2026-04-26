@@ -730,7 +730,8 @@ if(saved){
 function startApp(){
   G('setup').style.display='none';G('app').style.display='flex';
   setDot('sy','Connecting...');
-  setRange('today');
+  // setRange called after module loads via window.setRange
+  setTimeout(function(){if(window.setRange)window.setRange('today');else{var n=new Date(),f=n.toISOString().slice(0,10);document.getElementById('d-from').value=f;document.getElementById('d-to').value=f;}},200);
   initStaffDropdown();
   // Set current month/year in incentive tab
   const now=new Date();
