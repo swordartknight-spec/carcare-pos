@@ -47,23 +47,22 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Segoe UI
 .dot.on{background:#4ade80;}.dot.sy{background:var(--gold);animation:pl 1s infinite;}.dot.off{background:#f87171;}
 @keyframes pl{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* FLOATING CART TOTAL (feature 7) */
-.cart-float{position:fixed;bottom:calc(56px + var(--sb) + 8px);right:12px;background:var(--blk);color:var(--gold);border-radius:var(--r);padding:10px 14px;display:none;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.25);min-width:130px;cursor:pointer;}
-.cf-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#aaa;margin-bottom:2px;}
+/* FLOATING CART */
+.cart-float{position:fixed;bottom:calc(56px + var(--sb) + 8px);right:12px;background:var(--blk);color:var(--gold);border-radius:var(--r);padding:10px 14px;display:none;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.3);min-width:120px;cursor:pointer;border:1px solid #333;}
+.cf-lbl{font-size:9px;font-weight:700;text-transform:uppercase;color:#aaa;margin-bottom:2px;}
 .cf-amt{font-size:20px;font-weight:700;}
 .cf-cnt{font-size:10px;color:#aaa;margin-top:1px;}
 
 /* CONTENT */
 .content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-
 /* BOTTOM NAV */
 .nav{background:var(--sur);border-top:1px solid var(--bdr);display:flex;flex-shrink:0;padding-bottom:var(--sb);}
-.nt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 6px;cursor:pointer;border:none;background:none;color:var(--tx3);font-size:8px;font-weight:700;gap:2px;text-transform:uppercase;letter-spacing:.03em;}
+.nt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 6px;cursor:pointer;border:none;background:none;color:var(--tx3);font-size:8px;font-weight:700;gap:2px;text-transform:uppercase;}
 .nt.active{color:var(--gold);}
 .ni{font-size:18px;}
 
 /* SCREENS */
-.sc{display:none;padding:12px;padding-bottom:80px;}
+.sc{display:none;padding:12px;padding-bottom:90px;}
 .sc.active{display:block;}
 
 /* CARDS */
@@ -84,16 +83,17 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Segoe UI
 .btn-d{background:var(--err-bg);color:var(--err);border-color:var(--err);}
 .btn-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok);}
 .btn-pur{background:var(--pur-bg);color:var(--pur);border-color:var(--pur);}
+.btn-inf{background:var(--inf-bg);color:var(--inf);border-color:var(--inf);}
 
 /* INPUTS */
 input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--bdr2);border-radius:var(--rs);font-size:14px;background:var(--sur);color:var(--tx);font-family:inherit;outline:none;-webkit-appearance:none;}
-input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.2);}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.2);}
 .lbl{font-size:10px;color:var(--tx2);margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;}
 .fr{margin-bottom:11px;}
 .fr2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px;}
 .fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:11px;}
 
-/* SERVICE GRID */
+/* SERVICES */
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:9px;}
 .chips::-webkit-scrollbar{display:none;}
 .chip{padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer;border:1px solid var(--bdr2);background:var(--sur);color:var(--tx2);flex-shrink:0;}
@@ -105,16 +105,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
 .sc2-name{font-size:11px;font-weight:700;line-height:1.3;margin-bottom:3px;}
 .sc2-code{font-size:9px;color:var(--tx3);}
 .sc2-price{font-size:13px;font-weight:700;color:var(--gold);margin-top:4px;}
-.sc2-inc{font-size:9px;color:var(--ok);margin-top:2px;}
 .sc2-cpn{font-size:9px;color:var(--pur);margin-top:1px;}
+.cpn-tag{position:absolute;top:5px;right:5px;background:var(--pur-bg);color:var(--pur);font-size:8px;font-weight:700;padding:1px 5px;border-radius:99px;}
 
-/* SIZE/TYPE TABS */
+/* SIZE TABS */
 .stabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
 .stab{padding:6px 13px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--bdr2);background:var(--sur);color:var(--tx2);}
 .stab.active{background:var(--blk);color:var(--gold);border-color:var(--blk);}
-.ttabs{display:flex;gap:5px;margin-bottom:9px;}
-.ttab{flex:1;padding:7px;border-radius:var(--rs);font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--bdr2);background:var(--sur);color:var(--tx2);text-align:center;}
-.ttab.active{background:var(--gold);color:var(--blk);border-color:var(--gold-dk);}
 
 /* CART */
 .cart-sec{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
@@ -129,7 +126,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
 .ci-x{width:28px;height:28px;border-radius:50%;background:var(--err-bg);color:var(--err);font-size:15px;cursor:pointer;border:none;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .ctf{padding:12px 14px;border-top:1px solid var(--bdr);}
 .cl{display:flex;justify-content:space-between;font-size:12px;color:var(--tx2);margin-bottom:5px;}
-.ctot{display:flex;justify-content:space-between;font-size:18px;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr);}
+.ctot{display:flex;justify-content:space-between;font-size:20px;font-weight:700;margin-top:8px;padding-top:8px;border-top:2px solid var(--blk);}
 
 /* CUSTOMER BAR */
 .cb{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;}
@@ -169,44 +166,43 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
 .ss{text-align:center;font-size:12px;color:var(--tx2);margin-bottom:14px;}
 .rb{background:var(--bg);border-radius:var(--r);padding:12px 14px;font-size:13px;}
 .rl{display:flex;justify-content:space-between;margin-bottom:6px;}
-.rt{display:flex;justify-content:space-between;font-size:16px;font-weight:700;border-top:1px solid var(--bdr);padding-top:8px;margin-top:6px;}
+.rt{display:flex;justify-content:space-between;font-size:18px;font-weight:700;border-top:2px solid var(--blk);padding-top:8px;margin-top:6px;}
 
-/* SECTION HEAD */
 .sh2{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 .sh2 h2{font-size:16px;font-weight:700;}
-
-/* COUPON BADGE on card */
-.cpn-tag{position:absolute;top:6px;right:6px;background:var(--pur-bg);color:var(--pur);font-size:8px;font-weight:700;padding:1px 5px;border-radius:99px;}
-
-/* INCENTIVE INFO */
-.inc-row{display:flex;gap:8px;margin-top:4px;}
-.inc-box{flex:1;background:var(--ok-bg);border-radius:var(--rs);padding:5px 8px;font-size:10px;color:var(--ok);text-align:center;}
-.inc-box b{display:block;font-size:13px;}
-
-/* DATE RANGE */
-.date-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;}
-.date-row input[type=date]{padding:8px 10px;font-size:12px;}
-.date-row .btn{flex-shrink:0;padding:8px 12px;font-size:12px;}
-
-/* TODAY DASHBOARD */
-.big-stat{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:10px;}
-.big-num{font-size:36px;font-weight:700;color:var(--blk);}
-.big-lbl{font-size:12px;color:var(--tx2);margin-top:4px;}
-.pay-row{display:flex;gap:8px;margin-bottom:10px;}
-.pay-box{flex:1;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:10px;text-align:center;}
-.pay-v{font-size:16px;font-weight:700;}
-.pay-l{font-size:10px;color:var(--tx3);margin-top:2px;}
-.inc-summary{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;}
-.inc-row2{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:13px;}
-.inc-row2:last-child{border-bottom:none;}
-
-/* COUPON LIST */
-.cpn-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px;}
-.cpn-item:last-child{border-bottom:none;}
-
 .empty{text-align:center;padding:36px 20px;color:var(--tx3);font-size:13px;}
 
-/* CUSTOMER RECORD */
+/* PAYMENT BUTTONS */
+.pay-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.pay-btn{padding:12px;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;border:2px solid var(--bdr2);background:var(--sur);color:var(--tx);text-align:center;transition:all .15s;}
+.pay-btn.active{border-color:var(--gold);background:var(--gold-lt);color:var(--blk);}
+
+/* COUPON USE SECTION */
+.cpn-use{background:var(--pur-bg);border:1px solid var(--pur);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;}
+.cpn-use-title{font-size:11px;font-weight:700;color:var(--pur);margin-bottom:8px;}
+.cpn-opt{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(83,74,183,.15);font-size:12px;color:var(--pur);}
+.cpn-opt:last-child{border-bottom:none;}
+
+/* INCENTIVE TABLE */
+.inc-table{width:100%;border-collapse:collapse;font-size:12px;}
+.inc-table th{padding:8px 10px;background:var(--bg);border-bottom:1px solid var(--bdr);font-size:10px;text-align:left;color:var(--tx2);font-weight:700;text-transform:uppercase;}
+.inc-table td{padding:9px 10px;border-bottom:1px solid var(--bdr);}
+.inc-table tr:last-child td{border-bottom:none;font-weight:700;background:var(--gold-lt);}
+
+/* EXPENSE */
+.exp-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bdr);font-size:13px;}
+.exp-item:last-child{border-bottom:none;}
+
+/* INVOICE PREVIEW */
+.inv-box{background:#fff;border:1px solid var(--bdr);border-radius:var(--r);padding:16px;font-size:12px;margin-bottom:12px;}
+.inv-logo{font-size:20px;font-weight:700;color:var(--gold);margin-bottom:4px;}
+.inv-line{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0efe8;}
+.inv-total{display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-top:8px;padding-top:8px;border-top:2px solid var(--blk);}
+
+/* STAFF CHIP */
+.staff-chip{background:var(--inf-bg);color:var(--inf);font-size:11px;padding:3px 9px;border-radius:99px;font-weight:700;display:inline-block;}
+
+/* SERVICE HISTORY */
 .svc-hist{background:var(--bg);border-radius:var(--rs);padding:8px 10px;font-size:11px;margin-top:6px;}
 .svc-hist-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr);color:var(--tx2);}
 .svc-hist-row:last-child{border-bottom:none;}
@@ -219,7 +215,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
 <div class="setup" id="setup">
   <div style="font-size:42px;">⚙</div>
   <h1>CarCare POS</h1>
-  <p>ใส่ Firebase Config เพื่อ sync ข้อมูลแบบ real-time<br>ระหว่างมือถือ แท็บเล็ต และ PC</p>
+  <p>ใส่ Firebase Config เพื่อ sync ข้อมูลแบบ real-time</p>
   <div class="setup-form">
     <label class="slbl">API Key</label>
     <input class="sinput" id="fb-key" placeholder="AIzaSy..." autocomplete="off"/>
@@ -228,14 +224,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
     <label class="slbl">App ID</label>
     <input class="sinput" id="fb-aid" placeholder="1:123:web:abc" autocomplete="off"/>
     <button class="sbtn" onclick="connectFirebase()">เชื่อมต่อ Firebase →</button>
-    <button class="sskip" onclick="goOffline()">ใช้งานแบบ Offline (ไม่ sync) →</button>
+    <button class="sskip" onclick="goOffline()">ใช้งานแบบ Offline →</button>
   </div>
-  <div class="snote">Firebase Console → Project Settings → Your apps → SDK snippet<br>ข้อมูลจะถูกจำในเครื่อง ไม่ต้องใส่ซ้ำ</div>
+  <div class="snote">Firebase Console → Project Settings → Your apps → SDK snippet</div>
 </div>
 
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
-
 <div class="topbar">
   <div class="logo">⚙ CarCare POS</div>
   <div class="sync">
@@ -245,16 +240,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
   </div>
 </div>
 
-<!-- FLOATING CART TOTAL (Feature 7) -->
+<!-- FLOATING CART TOTAL -->
 <div class="cart-float" id="cart-float" onclick="scrollToCart()">
-  <div class="cf-lbl">Cart Total</div>
+  <div class="cf-lbl">ยอดรวม</div>
   <div class="cf-amt" id="cf-amt">฿0</div>
-  <div class="cf-cnt" id="cf-cnt">0 items</div>
+  <div class="cf-cnt" id="cf-cnt">0 รายการ</div>
 </div>
 
 <div class="content" id="content">
 
-  <!-- ═══ POS SCREEN ═══ -->
+  <!-- ═══ POS ═══ -->
   <div id="sc-pos" class="sc active">
     <!-- Customer -->
     <div class="cb">
@@ -271,12 +266,25 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
         <div style="font-size:11px;color:var(--tx2);" id="cci"></div>
         <div class="lb"><div class="lf" id="ccb" style="width:0%"></div></div>
         <div style="font-size:10px;color:var(--tx3);" id="ccnxt"></div>
-        <!-- Coupon display -->
         <div id="cust-cpns" style="margin-top:6px;"></div>
       </div>
     </div>
 
-    <!-- Size + Type -->
+    <!-- Staff selector (Feature 2) -->
+    <div class="card" style="padding:10px 12px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;white-space:nowrap;">คนทำ:</div>
+        <select id="staff-sel" style="flex:1;padding:6px 10px;font-size:13px;" onchange="updateStaffDisplay()">
+          <option value="">-- เลือกคนทำ --</option>
+        </select>
+        <button class="btn btn-s" onclick="sh('sh-staff')" style="flex-shrink:0;">จัดการ</button>
+      </div>
+      <div id="staff-display" style="display:none;margin-top:6px;">
+        <span class="staff-chip" id="staff-name-chip"></span>
+      </div>
+    </div>
+
+    <!-- Size -->
     <div class="card" style="padding:10px 12px;">
       <div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:6px;text-transform:uppercase;">ขนาดรถ</div>
       <div class="stabs" id="size-tabs">
@@ -285,12 +293,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
         <div class="stab" onclick="setSz('L',this)">L</div>
         <div class="stab" onclick="setSz('XL',this)">XL</div>
         <div class="stab" onclick="setSz('XXL',this)">XXL</div>
-      </div>
-      <div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:6px;text-transform:uppercase;">ราคา</div>
-      <div class="ttabs">
-        <div class="ttab active" onclick="setTp('Standard',this)">Standard</div>
-        <div class="ttab" onclick="setTp('C-Sale',this)">C-Sale (ค่าขาย)</div>
-        <div class="ttab" onclick="setTp('C-Op.',this)">C-Op. (ค่าทำ)</div>
       </div>
     </div>
 
@@ -307,27 +309,45 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
     <div class="sg" id="sg"></div>
 
     <!-- Cart -->
-    <div class="cart-sec" id="cart-sec" style="display:none;" id="cart-anchor">
+    <div class="cart-sec" id="cart-sec" style="display:none;">
       <div class="ch"><span>🛒 Cart</span><button class="btn btn-s btn-d" onclick="clrCart()">ล้าง</button></div>
       <div id="ci-list"></div>
+
+      <!-- COUPON USE (Feature 1) -->
+      <div id="cpn-use-section" style="display:none;padding:10px 14px;border-top:1px solid var(--bdr);">
+        <div class="cpn-use">
+          <div class="cpn-use-title">🎫 คูปองที่สามารถใช้ได้</div>
+          <div id="cpn-opts"></div>
+        </div>
+      </div>
+
       <div class="ctf">
-        <div class="cl"><span>Subtotal</span><span id="csub">฿0</span></div>
-        <div class="cl" id="cdr" style="display:none;"><span>ส่วนลด Loyalty</span><span id="cdv" style="color:var(--ok);font-weight:700;"></span></div>
-        <div class="cl"><span>Tax (7%)</span><span id="ctx">฿0</span></div>
-        <div class="ctot"><span>รวม</span><span id="ctot">฿0</span></div>
-        <div class="fr" style="margin-top:10px;"><input id="plate" type="text" placeholder="ทะเบียนรถ (เช่น กข 1234)"/></div>
-        <div class="fr"><select id="pay"><option>เงินสด</option><option>โอน</option><option>บุญถอด</option><option>บัตร</option></select></div>
+        <div class="cl" id="disc-row" style="display:none;"><span>ส่วนลด Loyalty</span><span id="disc-val" style="color:var(--ok);font-weight:700;"></span></div>
+        <div class="cl" id="cpn-disc-row" style="display:none;"><span>🎫 ใช้คูปอง</span><span id="cpn-disc-val" style="color:var(--pur);font-weight:700;"></span></div>
+        <div class="ctot"><span>รวม (รวม VAT)</span><span id="ctot">฿0</span></div>
+
+        <div style="margin:12px 0 8px;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;">วิธีชำระ</div>
+        <!-- Payment buttons (Feature 4) -->
+        <div class="pay-btns">
+          <div class="pay-btn active" onclick="setPay('เงินสด',this)">💵 เงินสด</div>
+          <div class="pay-btn" onclick="setPay('QR',this)">📱 QR PromptPay</div>
+          <div class="pay-btn" onclick="setPay('โอน',this)">🏦 โอน</div>
+          <div class="pay-btn" onclick="setPay('บัตร',this)">💳 บัตร</div>
+        </div>
+
+        <div class="fr"><input id="plate" type="text" placeholder="ทะเบียนรถ (เช่น กข 1234)"/></div>
         <button class="btn btn-g btn-bl" onclick="checkout()">ชำระเงิน →</button>
+        <button class="btn btn-inf btn-bl" style="margin-top:8px;" onclick="previewInvoice()">📄 ดูใบเสร็จก่อนชำระ</button>
       </div>
     </div>
   </div>
 
-  <!-- ═══ TODAY DASHBOARD (Feature 6) ═══ -->
+  <!-- ═══ TODAY DASHBOARD ═══ -->
   <div id="sc-today" class="sc">
-    <div id="today-date-lbl" style="font-size:12px;color:var(--tx2);margin-bottom:10px;font-weight:700;"></div>
-    <div class="big-stat">
-      <div class="big-num" id="td-total">฿0</div>
-      <div class="big-lbl">ยอดขายวันนี้</div>
+    <div id="today-lbl" style="font-size:12px;color:var(--tx2);margin-bottom:10px;font-weight:700;"></div>
+    <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:10px;">
+      <div style="font-size:36px;font-weight:700;" id="td-total">฿0</div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:4px;">ยอดขายวันนี้ (รวม VAT)</div>
     </div>
     <div class="row4">
       <div class="sc-card"><div class="sc-v" id="td-txn">0</div><div class="sc-l">รายการ</div></div>
@@ -335,29 +355,50 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
       <div class="sc-card"><div class="sc-v" id="td-pts" style="color:var(--amb);">0</div><div class="sc-l">Points</div></div>
       <div class="sc-card"><div class="sc-v" id="td-cpn" style="color:var(--pur);">0</div><div class="sc-l">คูปอง</div></div>
     </div>
+
     <!-- Payment breakdown -->
-    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">แยกตามวิธีชำระ</div>
-    <div class="pay-row">
-      <div class="pay-box"><div class="pay-v" id="td-cash">฿0</div><div class="pay-l">เงินสด</div></div>
-      <div class="pay-box"><div class="pay-v" id="td-transfer">฿0</div><div class="pay-l">โอน</div></div>
-      <div class="pay-box"><div class="pay-v" id="td-boon">฿0</div><div class="pay-l">บุญถอด</div></div>
-      <div class="pay-box"><div class="pay-v" id="td-card">฿0</div><div class="pay-l">บัตร</div></div>
+    <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">แยกตามวิธีชำระ</div>
+    <div class="row4" style="margin-bottom:10px;">
+      <div class="sc-card"><div class="sc-v" id="td-cash">฿0</div><div class="sc-l">เงินสด</div></div>
+      <div class="sc-card"><div class="sc-v" id="td-qr">฿0</div><div class="sc-l">QR</div></div>
+      <div class="sc-card"><div class="sc-v" id="td-transfer">฿0</div><div class="sc-l">โอน</div></div>
+      <div class="sc-card"><div class="sc-v" id="td-card">฿0</div><div class="sc-l">บัตร</div></div>
     </div>
-    <!-- Incentive summary (Feature 1) -->
-    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">สรุปค่าสิ่งตอบแทน</div>
-    <div class="inc-summary">
-      <div class="inc-row2"><span style="color:var(--tx2);">ค่าขาย (C-Sale) รวม</span><span id="td-csale" style="font-weight:700;color:var(--ok);">฿0</span></div>
-      <div class="inc-row2"><span style="color:var(--tx2);">ค่าทำ (C-Op.) รวม</span><span id="td-cop" style="font-weight:700;color:var(--inf);">฿0</span></div>
+
+    <!-- Incentive by staff (Feature 2) -->
+    <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">สรุปค่าสิ่งตอบแทนรายคน</div>
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:10px;">
+      <table class="inc-table">
+        <thead><tr><th>ชื่อ</th><th>ค่าขาย (C-Sale)</th><th>ค่าทำ (C-Op.)</th><th>รวม</th></tr></thead>
+        <tbody id="td-staff-inc"></tbody>
+      </table>
     </div>
+
+    <!-- Expenses (Feature 5) -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;">รายจ่ายวันนี้</div>
+      <button class="btn btn-s btn-d" onclick="sh('sh-exp')">+ รายจ่าย</button>
+    </div>
+    <div class="card" style="padding:12px 14px;margin-bottom:10px;">
+      <div id="exp-list"><div style="font-size:12px;color:var(--tx3);">ยังไม่มีรายจ่าย</div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr);font-weight:700;">
+        <span>รวมรายจ่าย</span><span id="exp-total" style="color:var(--err);">฿0</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid var(--bdr);font-size:15px;font-weight:700;">
+        <span>ยอดสุทธิ</span><span id="net-total" style="color:var(--ok);">฿0</span>
+      </div>
+    </div>
+
     <!-- Top services -->
-    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">บริการยอดนิยมวันนี้</div>
-    <div class="card" style="padding:0;overflow:hidden;"><div id="td-top"></div></div>
+    <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">บริการยอดนิยมวันนี้</div>
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:10px;"><div id="td-top"></div></div>
+
     <!-- Recent txns -->
-    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.04em;">รายการล่าสุด</div>
+    <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">รายการล่าสุด</div>
     <div id="td-list"></div>
   </div>
 
-  <!-- ═══ LOYALTY SCREEN ═══ -->
+  <!-- ═══ LOYALTY ═══ -->
   <div id="sc-loyalty" class="sc">
     <div class="row3">
       <div class="sc-card"><div class="sc-v" id="lm">—</div><div class="sc-l">Members</div></div>
@@ -369,7 +410,29 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
     <div id="ll"><div class="empty">กำลังโหลด...</div></div>
   </div>
 
-  <!-- ═══ STOCK SCREEN ═══ -->
+  <!-- ═══ STAFF INCENTIVE (Feature 2 - monthly view) ═══ -->
+  <div id="sc-staff" class="sc">
+    <div class="sh2">
+      <h2>ค่าสิ่งตอบแทนรายคน</h2>
+      <button class="btn btn-s btn-g" onclick="sh('sh-staff')">จัดการพนักงาน</button>
+    </div>
+    <div class="fr2">
+      <div><label class="lbl">เดือน</label>
+        <select id="inc-month" onchange="rStaffInc()">
+          <option value="0">มกราคม</option><option value="1">กุมภาพันธ์</option>
+          <option value="2">มีนาคม</option><option value="3">เมษายน</option>
+          <option value="4">พฤษภาคม</option><option value="5">มิถุนายน</option>
+          <option value="6">กรกฎาคม</option><option value="7">สิงหาคม</option>
+          <option value="8">กันยายน</option><option value="9">ตุลาคม</option>
+          <option value="10">พฤศจิกายน</option><option value="11">ธันวาคม</option>
+        </select>
+      </div>
+      <div><label class="lbl">ปี</label><input type="number" id="inc-year" value="2026" onchange="rStaffInc()"/></div>
+    </div>
+    <div id="staff-inc-body"></div>
+  </div>
+
+  <!-- ═══ STOCK ═══ -->
   <div id="sc-stock" class="sc">
     <div class="row3">
       <div class="sc-card"><div class="sc-v" id="ssk">—</div><div class="sc-l">SKUs</div></div>
@@ -381,9 +444,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
     <div id="stl"><div class="empty">กำลังโหลด...</div></div>
   </div>
 
-  <!-- ═══ PRICE LIST SCREEN (Feature 2) ═══ -->
+  <!-- ═══ PRICE LIST ═══ -->
   <div id="sc-prices" class="sc">
-    <div class="sh2"><h2>ราคาบริการ</h2><button class="btn btn-s btn-g" onclick="sh('sh-nsvc')">+ เพิ่มบริการ</button></div>
+    <div class="sh2"><h2>ราคาบริการ</h2><button class="btn btn-s btn-g" onclick="openNewSvc()">+ เพิ่ม</button></div>
     <div class="chips" id="pl-chips">
       <div class="chip active" onclick="setPLCat('all',this)">ทั้งหมด</div>
       <div class="chip" onclick="setPLCat('ล้างรถ',this)">ล้างรถ</div>
@@ -396,9 +459,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
     <div id="pl-list"></div>
   </div>
 
-  <!-- ═══ HISTORY SCREEN ═══ -->
+  <!-- ═══ HISTORY ═══ -->
   <div id="sc-history" class="sc">
-    <!-- Date range filter (Feature 5) -->
     <div class="card" style="padding:10px 12px;margin-bottom:10px;">
       <div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">กรองตามวันที่</div>
       <div class="fr2">
@@ -410,7 +472,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
         <button class="btn btn-s" onclick="setRange('week')">7 วัน</button>
         <button class="btn btn-s" onclick="setRange('month')">เดือนนี้</button>
         <button class="btn btn-s" onclick="setRange('all')">ทั้งหมด</button>
-        <button class="btn btn-s btn-g" onclick="exportRange()" style="margin-left:auto;">📊 Export CSV</button>
+        <button class="btn btn-s btn-g" onclick="exportRange()" style="margin-left:auto;">📊 Export</button>
       </div>
     </div>
     <div class="row2">
@@ -427,13 +489,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
   <button class="nt active" onclick="sw('pos',this)"><span class="ni">🛒</span>POS</button>
   <button class="nt" onclick="sw('today',this)"><span class="ni">📊</span>Today</button>
   <button class="nt" onclick="sw('loyalty',this)"><span class="ni">⭐</span>Loyalty</button>
+  <button class="nt" onclick="sw('staff',this)"><span class="ni">👤</span>Incentive</button>
   <button class="nt" onclick="sw('stock',this)"><span class="ni">📦</span>Stock</button>
   <button class="nt" onclick="sw('prices',this)"><span class="ni">📋</span>Prices</button>
   <button class="nt" onclick="sw('history',this)"><span class="ni">🕐</span>History</button>
 </div>
 </div><!-- app -->
 
-<!-- ══════════ SHEETS ══════════ -->
+<!-- ══════ SHEETS ══════ -->
 
 <!-- New Customer -->
 <div id="sh-nc" class="sbg" style="display:none;" onclick="csbg(event,'sh-nc')">
@@ -443,7 +506,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
     <div><label class="lbl">ชื่อ</label><input id="cf" type="text" placeholder="สมชาย"/></div>
     <div><label class="lbl">นามสกุล</label><input id="cl2" type="text" placeholder="ใจดี"/></div>
   </div>
-  <div class="fr"><label class="lbl">เบอร์โทร</label><input id="cp" type="tel" placeholder="08x-xxx-xxxx"/></div>
+  <div class="fr"><label class="lbl">เบอร์โทร / Line ID</label><input id="cp" type="text" placeholder="08x-xxx-xxxx"/></div>
   <div class="fr2">
     <div><label class="lbl">ทะเบียน</label><input id="cpl" type="text" placeholder="กข 1234"/></div>
     <div><label class="lbl">รุ่นรถ</label><input id="cc2" type="text" placeholder="Toyota Camry"/></div>
@@ -451,8 +514,19 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
   <div class="fr"><label class="lbl">ขนาดรถ</label>
     <select id="csz"><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select>
   </div>
-  <div class="fr"><label class="lbl">หมายเหตุ</label><input id="cnote" type="text" placeholder="ข้อมูลเพิ่มเติม"/></div>
   <div class="sbt"><button class="btn" onclick="hs('sh-nc')">ยกเลิก</button><button class="btn btn-g" onclick="addCust()">บันทึก</button></div>
+</div></div>
+
+<!-- Staff Management -->
+<div id="sh-staff" class="sbg" style="display:none;" onclick="csbg(event,'sh-staff')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div><h3>จัดการพนักงาน</h3>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <input id="new-staff-name" type="text" placeholder="ชื่อพนักงาน..." style="flex:1;"/>
+    <button class="btn btn-g btn-s" onclick="addStaff()">เพิ่ม</button>
+  </div>
+  <div id="staff-list-manage"></div>
+  <div class="sbt"><button class="btn btn-g" style="flex:1;" onclick="hs('sh-staff')">เสร็จสิ้น</button></div>
 </div></div>
 
 <!-- New Stock -->
@@ -480,18 +554,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
   <div class="sbt"><button class="btn" onclick="hs('sh-rs')">ยกเลิก</button><button class="btn btn-g" onclick="doRs()">ยืนยัน</button></div>
 </div></div>
 
-<!-- New Service (Feature 2) -->
+<!-- New/Edit Service -->
 <div id="sh-nsvc" class="sbg" style="display:none;" onclick="csbg(event,'sh-nsvc')">
 <div class="sht" onclick="event.stopPropagation()">
   <div class="sh"></div><h3 id="nsvc-title">เพิ่มบริการ</h3>
-  <div class="fr"><label class="lbl">ชื่อบริการ</label><input id="sv-name" type="text" placeholder="เช่น ขัดสีพิเศษ"/></div>
+  <div class="fr"><label class="lbl">ชื่อบริการ</label><input id="sv-name" type="text" placeholder="ชื่อบริการ"/></div>
   <div class="fr2">
     <div><label class="lbl">Code</label><input id="sv-code" type="text" placeholder="X01"/></div>
     <div><label class="lbl">หมวดหมู่</label>
       <select id="sv-cat"><option>ล้างรถ</option><option>เคลือบสี</option><option>ภายใน</option><option>บริการอื่น</option><option>ใบปัดน้ำฝน</option></select>
     </div>
   </div>
-  <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">ราคา Standard (฿)</div>
+  <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">ราคา Standard (฿) รวม VAT แล้ว</div>
   <div class="fr3">
     <div><label class="lbl">S</label><input id="sv-s" type="number" placeholder="0"/></div>
     <div><label class="lbl">M</label><input id="sv-m" type="number" placeholder="0"/></div>
@@ -502,18 +576,46 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
     <div><label class="lbl">XXL</label><input id="sv-xxl" type="number" placeholder="0"/></div>
     <div></div>
   </div>
-  <div style="font-size:11px;font-weight:700;color:var(--ok);margin-bottom:8px;text-transform:uppercase;">ค่าขาย C-Sale / ค่าทำ C-Op. (S size)</div>
+  <div style="font-size:11px;font-weight:700;color:var(--ok);margin-bottom:8px;text-transform:uppercase;">ค่าสิ่งตอบแทน (฿)</div>
   <div class="fr2">
-    <div><label class="lbl">C-Sale (ค่าขาย)</label><input id="sv-sc" type="number" placeholder="0"/></div>
-    <div><label class="lbl">C-Op. (ค่าทำ)</label><input id="sv-sco" type="number" placeholder="0"/></div>
+    <div><label class="lbl">C-Sale — ค่าขาย</label><input id="sv-sc" type="number" placeholder="0"/></div>
+    <div><label class="lbl">C-Op. — ค่าทำ</label><input id="sv-sco" type="number" placeholder="0"/></div>
   </div>
-  <div style="font-size:11px;font-weight:700;color:var(--pur);margin-bottom:8px;text-transform:uppercase;">คูปองฟรี (Feature 4)</div>
+  <div style="font-size:11px;font-weight:700;color:var(--pur);margin-bottom:8px;text-transform:uppercase;">คูปองฟรีที่ได้รับ</div>
   <div class="fr2">
-    <div><label class="lbl">คูปองล้างรถฟรี (ครั้ง)</label><input id="sv-cpn" type="number" placeholder="0"/></div>
-    <div><label class="lbl">คูปองล้างรถฟรี (เดือน)</label><input id="sv-cpnm" type="number" placeholder="0"/></div>
+    <div><label class="lbl">ล้างรถฟรี (ครั้ง)</label><input id="sv-cpn" type="number" placeholder="0"/></div>
+    <div><label class="lbl">ล้างรถฟรี (เดือน)</label><input id="sv-cpnm" type="number" placeholder="0"/></div>
   </div>
   <input type="hidden" id="sv-edit-id"/>
   <div class="sbt"><button class="btn" onclick="hs('sh-nsvc')">ยกเลิก</button><button class="btn btn-g" onclick="saveSvc()">บันทึก</button></div>
+</div></div>
+
+<!-- Expense (Feature 5) -->
+<div id="sh-exp" class="sbg" style="display:none;" onclick="csbg(event,'sh-exp')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div><h3>เพิ่มรายจ่าย</h3>
+  <div class="fr"><label class="lbl">รายการ</label><input id="exp-name" type="text" placeholder="เช่น ค่าน้ำยา, ค่าไฟ..."/></div>
+  <div class="fr"><label class="lbl">จำนวนเงิน (฿)</label><input id="exp-amount" type="number" placeholder="500"/></div>
+  <div class="fr"><label class="lbl">หมวดหมู่</label>
+    <select id="exp-cat">
+      <option>ค่าน้ำยา/วัสดุ</option><option>ค่าแรง</option><option>ค่าสาธารณูปโภค</option>
+      <option>ค่าเดินทาง</option><option>อื่นๆ</option>
+    </select>
+  </div>
+  <div class="fr"><label class="lbl">หมายเหตุ</label><input id="exp-note" type="text" placeholder="(ไม่จำเป็น)"/></div>
+  <div class="sbt"><button class="btn" onclick="hs('sh-exp')">ยกเลิก</button><button class="btn btn-d" onclick="addExpense()">บันทึกรายจ่าย</button></div>
+</div></div>
+
+<!-- Invoice Preview -->
+<div id="sh-inv" class="sbg" style="display:none;" onclick="csbg(event,'sh-inv')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div><h3>ใบเสร็จ / Invoice</h3>
+  <div id="inv-content"></div>
+  <div class="sbt">
+    <button class="btn" onclick="hs('sh-inv')">ปิด</button>
+    <button class="btn btn-g" onclick="shareInvoice()">📤 Share / Line</button>
+  </div>
+  <div style="font-size:10px;color:var(--tx3);text-align:center;margin-top:10px;">กด Share แล้วเลือก Line เพื่อส่งให้ลูกค้า</div>
 </div></div>
 
 <!-- Customer Detail -->
@@ -522,7 +624,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
   <div class="sh"></div>
   <h3 id="cust-detail-name">ประวัติลูกค้า</h3>
   <div id="cust-detail-body"></div>
-  <div class="sbt" style="margin-top:10px;">
+  <div class="sbt">
     <button class="btn" onclick="hs('sh-cust')">ปิด</button>
     <button class="btn btn-ok" onclick="addBonusPts()">+ Pts</button>
     <button class="btn btn-d" onclick="delCustDetail()">ลบ</button>
@@ -539,13 +641,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
   <div class="rb" id="okr"></div>
   <div id="ok-cpn" style="display:none;margin-top:10px;background:var(--pur-bg);border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--pur);font-weight:700;"></div>
   <button class="btn btn-g btn-bl" style="margin-top:14px;" onclick="hs('sh-ok')">รายการใหม่</button>
+  <button class="btn btn-inf btn-bl" style="margin-top:8px;" onclick="shareLastInvoice()">📤 ส่งใบเสร็จ (Line)</button>
 </div></div>
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import{getFirestore,collection,addDoc,onSnapshot,doc,updateDoc,deleteDoc,query,orderBy,limit,serverTimestamp,getDocs}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+import{getFirestore,collection,addDoc,onSnapshot,doc,updateDoc,deleteDoc,query,orderBy,limit,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 
-// ══ DEFAULT SERVICES (editable) ══
+// ══ DEFAULT SERVICES ══
 const DEFAULT_SVCS=[
   {cat:'ล้างรถ',name:'ล้างสี & ดูดฝุ่น',code:'-',S:200,M:220,L:240,XL:270,XXL:320,SC:0,SCo:0,cpnWash:0,cpnMonth:0},
   {cat:'ล้างรถ',name:'Rainy Season Pass',code:'W02',S:800,M:880,L:960,XL:1080,XXL:0,SC:60,SCo:0,cpnWash:0,cpnMonth:1},
@@ -583,9 +686,11 @@ const CAT_CL={ล้างรถ:'bb',เคลือบสี:'bt',ภายใ
 
 // ══ STATE ══
 let db=null,LM=false;
-let custs=[],stock=[],txns=[],svcs=[],cart=[],selC=null,rsId=null,txnN=1000;
-let CZ='S',CT='Standard',CC='all',PLCat='all';
-let viewCustId=null;
+let custs=[],stock=[],txns=[],svcs=[],expenses=[],staffList=[];
+let cart=[],selC=null,rsId=null,txnN=1000;
+let CZ='S',CC='all',PLCat='all';
+let selPayMethod='เงินสด',usedCoupon=null;
+let viewCustId=null,lastTxnData=null;
 
 function G(id){return document.getElementById(id);}
 function setDot(s,l){G('dot').className='dot '+s;G('sl').textContent=l;}
@@ -593,31 +698,30 @@ function fmtDate(d){return d?new Date(d).toLocaleDateString('th-TH'):'—';}
 function todayTH(){return new Date().toLocaleDateString('th-TH');}
 function isoToday(){return new Date().toISOString().slice(0,10);}
 
+function LS(k,v){if(v===undefined)try{return JSON.parse(localStorage.getItem(k));}catch{return null;}else localStorage.setItem(k,JSON.stringify(v));}
+
 // ══ SETUP ══
 window.connectFirebase=async function(){
   const k=G('fb-key').value.trim(),p=G('fb-pid').value.trim(),a=G('fb-aid').value.trim();
   if(!k||!p){alert('กรุณาใส่ API Key และ Project ID');return;}
   try{
     const cfg={apiKey:k,authDomain:`${p}.firebaseapp.com`,projectId:p,storageBucket:`${p}.appspot.com`,appId:a};
-    localStorage.setItem('fb',JSON.stringify(cfg));
-    const app=initializeApp(cfg);db=getFirestore(app);
-    startApp();
+    LS('fb',cfg);
+    const app=initializeApp(cfg);db=getFirestore(app);startApp();
   }catch(e){alert('Error: '+e.message);}
 };
 window.goOffline=function(){
   LM=true;
-  custs=JSON.parse(localStorage.getItem('cu')||'[]');
-  stock=JSON.parse(localStorage.getItem('st')||'[]');
-  txns=JSON.parse(localStorage.getItem('tx')||'[]');
-  svcs=JSON.parse(localStorage.getItem('sv')||JSON.stringify(DEFAULT_SVCS));
-  txnN=parseInt(localStorage.getItem('tn')||'1000');
+  custs=LS('cu')||[];stock=LS('st')||[];txns=LS('tx')||[];
+  svcs=LS('sv')||DEFAULT_SVCS;expenses=LS('exp')||[];
+  staffList=LS('stf')||[];txnN=parseInt(LS('tn')||'1000');
   startApp();setDot('off','Offline');
 };
 
-const saved=localStorage.getItem('fb');
+const saved=LS('fb');
 if(saved){
   try{
-    const cfg=JSON.parse(saved);
+    const cfg=saved;
     G('fb-key').value=cfg.apiKey||'';G('fb-pid').value=cfg.projectId||'';G('fb-aid').value=cfg.appId||'';
     const app=initializeApp(cfg);db=getFirestore(app);startApp();
   }catch(e){console.log(e);}
@@ -627,38 +731,141 @@ function startApp(){
   G('setup').style.display='none';G('app').style.display='flex';
   setDot('sy','Connecting...');
   setRange('today');
-  if(db&&!LM) subscribe(); else{rSvcs();rLoy();rSt();rHist();rToday();rPL();}
+  initStaffDropdown();
+  // Set current month/year in incentive tab
+  const now=new Date();
+  G('inc-month').value=now.getMonth();
+  G('inc-year').value=now.getFullYear();
+  if(db&&!LM)subscribe();
+  else{rSvcs();rLoy();rSt();rHist();rToday();rPL();rStaffInc();}
 }
 
 function subscribe(){
   onSnapshot(collection(db,'customers'),s=>{custs=s.docs.map(d=>({...d.data(),_id:d.id}));rLoy();setDot('on','Synced ✓');},()=>setDot('off','Offline'));
   onSnapshot(collection(db,'stock'),s=>{stock=s.docs.map(d=>({...d.data(),_id:d.id}));rSt();});
-  onSnapshot(query(collection(db,'transactions'),orderBy('createdAt','desc'),limit(200)),s=>{txns=s.docs.map(d=>({...d.data(),_id:d.id}));rHist();rToday();});
+  onSnapshot(query(collection(db,'transactions'),orderBy('createdAt','desc'),limit(300)),s=>{txns=s.docs.map(d=>({...d.data(),_id:d.id}));rHist();rToday();rStaffInc();});
   onSnapshot(collection(db,'services'),s=>{
-    if(s.empty){seedSvcs();}else{svcs=s.docs.map(d=>({...d.data(),_id:d.id}));rSvcs();rPL();}
+    if(s.empty)seedSvcs();else{svcs=s.docs.map(d=>({...d.data(),_id:d.id}));rSvcs();rPL();}
   });
+  onSnapshot(query(collection(db,'expenses'),orderBy('createdAt','desc'),limit(100)),s=>{expenses=s.docs.map(d=>({...d.data(),_id:d.id}));rExpenses();});
+  onSnapshot(collection(db,'staff'),s=>{staffList=s.docs.map(d=>({...d.data(),_id:d.id}));initStaffDropdown();});
 }
 
-async function seedSvcs(){
-  for(const s of DEFAULT_SVCS) await addDoc(collection(db,'services'),s);
+async function seedSvcs(){for(const s of DEFAULT_SVCS)await addDoc(collection(db,'services'),s);}
+
+// ══ STAFF MANAGEMENT (Feature 2) ══
+function initStaffDropdown(){
+  const sel=G('staff-sel');const val=sel.value;
+  sel.innerHTML='<option value="">-- เลือกคนทำ --</option>'+staffList.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+  if(val)sel.value=val;
 }
 
-// ══ PRICE HELPER ══
-function gp(s,size,type){
-  if(type==='C-Sale')return s.SC||0;
-  if(type==='C-Op.')return s.SCo||0;
-  return s[size]||0;
+window.updateStaffDisplay=function(){
+  const v=G('staff-sel').value;
+  const d=G('staff-display');
+  if(v){d.style.display='block';G('staff-name-chip').textContent='👤 '+v;}
+  else d.style.display='none';
+};
+
+window.addStaff=async function(){
+  const n=G('new-staff-name').value.trim();if(!n)return;
+  if(db&&!LM)await addDoc(collection(db,'staff'),{name:n,createdAt:serverTimestamp()});
+  else{staffList.push({name:n,_id:'l'+Date.now()});LS('stf',staffList);initStaffDropdown();}
+  G('new-staff-name').value='';rStaffManage();
+};
+
+function rStaffManage(){
+  G('staff-list-manage').innerHTML=staffList.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);">
+    <span style="font-weight:700;">👤 ${s.name}</span>
+    <button class="btn btn-s btn-d" onclick="delStaff('${s._id}')">ลบ</button>
+  </div>`).join('')||'<div class="empty" style="padding:20px;">ยังไม่มีพนักงาน</div>';
 }
 
-// ══ RENDER SERVICES ══
+window.delStaff=async function(id){
+  if(!confirm('ลบพนักงานนี้?'))return;
+  if(db&&!LM)await deleteDoc(doc(db,'staff',id));
+  else{staffList=staffList.filter(s=>s._id!=id);LS('stf',staffList);initStaffDropdown();rStaffManage();}
+};
+
+// Staff incentive monthly report (Feature 2)
+function rStaffInc(){
+  const month=parseInt(G('inc-month').value);
+  const year=parseInt(G('inc-year').value);
+  // Filter txns for this month/year
+  const filtered=txns.filter(t=>{
+    try{
+      const parts=(t.date||'').split('/');// dd/mm/yyyy th format
+      const d=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
+      return d.getMonth()===month&&d.getFullYear()===year;
+    }catch{return false;}
+  });
+
+  // Build per-staff totals
+  const staffTotals={};
+  filtered.forEach(t=>{
+    const name=t.staff||'ไม่ระบุ';
+    if(!staffTotals[name])staffTotals[name]={csale:0,cop:0,txns:0};
+    staffTotals[name].csale+=(t.csaleTotal||0);
+    staffTotals[name].cop+=(t.copTotal||0);
+    staffTotals[name].txns++;
+  });
+
+  const rows=Object.entries(staffTotals);
+  const totalCSale=rows.reduce((a,[,v])=>a+v.csale,0);
+  const totalCOp=rows.reduce((a,[,v])=>a+v.cop,0);
+
+  const MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+  G('staff-inc-body').innerHTML=`
+    <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px;">${MONTHS[month]} ${year} · ${filtered.length} รายการ</div>
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px;">
+      <table class="inc-table">
+        <thead><tr><th>ชื่อ</th><th>รายการ</th><th>ค่าขาย (C-Sale)</th><th>ค่าทำ (C-Op.)</th><th>รวม</th></tr></thead>
+        <tbody>
+          ${rows.length?rows.map(([name,v])=>`<tr>
+            <td><span class="staff-chip">${name}</span></td>
+            <td>${v.txns}</td>
+            <td style="color:var(--ok);font-weight:700;">฿${v.csale.toLocaleString()}</td>
+            <td style="color:var(--inf);font-weight:700;">฿${v.cop.toLocaleString()}</td>
+            <td style="font-weight:700;">฿${(v.csale+v.cop).toLocaleString()}</td>
+          </tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--tx3);padding:20px;">ไม่มีข้อมูล</td></tr>'}
+          ${rows.length?`<tr>
+            <td><b>รวมทั้งหมด</b></td><td><b>${filtered.length}</b></td>
+            <td style="color:var(--ok);"><b>฿${totalCSale.toLocaleString()}</b></td>
+            <td style="color:var(--inf);"><b>฿${totalCOp.toLocaleString()}</b></td>
+            <td><b>฿${(totalCSale+totalCOp).toLocaleString()}</b></td>
+          </tr>`:''}
+        </tbody>
+      </table>
+    </div>
+    <button class="btn btn-g btn-bl" onclick="exportStaffInc(${month},${year})">📊 Export ค่าสิ่งตอบแทน</button>
+  `;
+}
+
+window.exportStaffInc=function(month,year){
+  const filtered=txns.filter(t=>{
+    try{const p=(t.date||'').split('/');const d=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));return d.getMonth()===month&&d.getFullYear()===year;}catch{return false;}
+  });
+  const staffTotals={};
+  filtered.forEach(t=>{const n=t.staff||'ไม่ระบุ';if(!staffTotals[n])staffTotals[n]={csale:0,cop:0,txns:0};staffTotals[n].csale+=(t.csaleTotal||0);staffTotals[n].cop+=(t.copTotal||0);staffTotals[n].txns++;});
+  const MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  let c='\uFEFF';
+  c+=`สรุปค่าสิ่งตอบแทน ${MONTHS[month]} ${year}\r\n\r\n`;
+  c+=`ชื่อ\tรายการ\tค่าขาย (C-Sale)\tค่าทำ (C-Op.)\tรวม\r\n`;
+  Object.entries(staffTotals).forEach(([n,v])=>{c+=`${n}\t${v.txns}\t${v.csale}\t${v.cop}\t${v.csale+v.cop}\r\n`;});
+  const b=new Blob([c],{type:'text/csv;charset=utf-8'});const u=URL.createObjectURL(b);
+  const a=document.createElement('a');a.href=u;a.download=`incentive-${MONTHS[month]}-${year}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+};
+
+// ══ SERVICES ══
 function rSvcs(){
-  const list=svcs.filter(s=>CC==='all'||s.cat===CC);
+  let list=svcs;if(CC!=='all')list=list.filter(s=>s.cat===CC);
   G('sg').innerHTML=list.map(s=>{
-    const p=gp(s,CZ,CT);if(!p)return'';
-    const inc=CT==='Standard'?'':`<div class="sc2-inc">💰 ค่า${CT==='C-Sale'?'ขาย':'ทำ'}: ฿${p.toLocaleString()}</div>`;
-    const cpn=(s.cpnWash||0)+(s.cpnMonth||0)>0?`<div class="sc2-cpn">🎫 คูปอง${s.cpnWash?s.cpnWash+' ล้างฟรี':''}${s.cpnMonth?' '+s.cpnMonth+' เดือน':''}</div>`:'';
+    const p=s[CZ]||0;if(!p)return'';
+    const cpn=(s.cpnWash||0)+(s.cpnMonth||0)>0?`<div class="sc2-cpn">🎫${s.cpnWash?s.cpnWash+'ครั้งฟรี':''}${s.cpnMonth?' '+s.cpnMonth+'เดือนฟรี':''}</div>`:'';
     const hasCpn=(s.cpnWash||0)+(s.cpnMonth||0)>0;
-    const d=JSON.stringify({id:(s._id||s.code)+'_'+CZ+'_'+CT,name:s.name,cat:s.cat,price:p,size:CZ,type:CT,code:s.code,cpnWash:s.cpnWash||0,cpnMonth:s.cpnMonth||0,svcRef:s._id||s.code});
+    const d=JSON.stringify({id:(s._id||s.code)+'_'+CZ,name:s.name,cat:s.cat,price:p,size:CZ,code:s.code,SC:s.SC||0,SCo:s.SCo||0,cpnWash:s.cpnWash||0,cpnMonth:s.cpnMonth||0});
     return`<div class="sc2" onclick='addCart(${d.replace(/'/g,"&apos;")})'>
       ${hasCpn?'<div class="cpn-tag">🎫</div>':''}
       <div class="sc2-cat badge ${CAT_CL[s.cat]||'bgy'}">${s.cat}</div>
@@ -671,8 +878,14 @@ function rSvcs(){
 }
 
 window.setSz=function(s,el){CZ=s;document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));el.classList.add('active');rSvcs();};
-window.setTp=function(t,el){CT=t;document.querySelectorAll('.ttab').forEach(x=>x.classList.remove('active'));el.classList.add('active');rSvcs();};
 window.setCat=function(c,el){CC=c;document.querySelectorAll('#cat-chips .chip').forEach(x=>x.classList.remove('active'));el.classList.add('active');rSvcs();};
+
+// ══ PAYMENT METHOD ══
+window.setPay=function(m,el){
+  selPayMethod=m;
+  document.querySelectorAll('.pay-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+};
 
 // ══ CART ══
 window.addCart=function(item){
@@ -682,7 +895,8 @@ window.addCart=function(item){
 };
 window.rC=function(i){cart.splice(i,1);rCart();updateFloat();};
 window.clrCart=function(){
-  cart=[];selC=null;G('cq').value='';G('cch').style.display='none';G('cdd').style.display='none';
+  cart=[];selC=null;usedCoupon=null;
+  G('cq').value='';G('cch').style.display='none';G('cdd').style.display='none';
   rCart();updateFloat();
 };
 
@@ -693,41 +907,71 @@ function rCart(){
   G('ci-list').innerHTML=cart.map((c,i)=>`<div class="ci">
     <div class="ci-i">
       <div class="ci-n">${c.name}</div>
-      <div class="ci-s">${c.code}·${c.size}·${c.type}×${c.qty}</div>
+      <div class="ci-s">${c.code}·${c.size}×${c.qty}</div>
     </div>
     <div class="ci-p">฿${(c.price*c.qty).toLocaleString()}</div>
     <button class="ci-x" onclick="rC(${i})">×</button>
   </div>`).join('');
+  rCouponSection();
   uTot();
 }
 
-function uTot(){
-  const sub=cart.reduce((a,c)=>a+c.price*c.qty,0);
-  let d=0;if(selC&&(selC.points||0)>=500)d=Math.min(Math.floor((selC.points||0)/500)*50,Math.floor(sub*.15));
-  const tax=Math.round((sub-d)*.07),tot=sub-d+tax;
-  G('csub').textContent='฿'+sub.toLocaleString();
-  G('ctx').textContent='฿'+tax.toLocaleString();
-  G('ctot').textContent='฿'+tot.toLocaleString();
-  const dr=G('cdr');
-  if(d>0){dr.style.display='flex';G('cdv').textContent='-฿'+d.toLocaleString();}
-  else dr.style.display='none';
-  return{sub,d,tax,tot};
+// Feature 1: Show available coupons for selected customer
+function rCouponSection(){
+  const sec=G('cpn-use-section');
+  if(!selC||(selC.coupons||[]).length===0){sec.style.display='none';return;}
+  const now=new Date();
+  const active=(selC.coupons||[]).filter(c=>
+    (c.type==='wash'&&c.remaining>0)||(c.type==='month'&&new Date(c.expires)>now)
+  );
+  if(!active.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  G('cpn-opts').innerHTML=active.map((c,i)=>`<div class="cpn-opt">
+    <span>${c.type==='wash'?`🎫 ล้างรถฟรี — เหลือ ${c.remaining} ครั้ง`:`🎫 ล้างรถฟรีถึง ${fmtDate(c.expires)}`}</span>
+    <button class="btn btn-s btn-pur" onclick="useCoupon(${i})">${usedCoupon&&usedCoupon.idx===i?'✓ ใช้แล้ว':'ใช้'}</button>
+  </div>`).join('');
 }
 
-// Feature 7: floating total
+window.useCoupon=function(idx){
+  const now=new Date();
+  const active=(selC.coupons||[]).filter(c=>
+    (c.type==='wash'&&c.remaining>0)||(c.type==='month'&&new Date(c.expires)>now)
+  );
+  const cpn=active[idx];if(!cpn)return;
+  if(usedCoupon&&usedCoupon.idx===idx){usedCoupon=null;}// toggle off
+  else{usedCoupon={...cpn,idx};}
+  rCouponSection();uTot();
+};
+
+function uTot(){
+  const sub=cart.reduce((a,c)=>a+c.price*c.qty,0);
+  let disc=0;
+  if(selC&&(selC.points||0)>=500)disc=Math.min(Math.floor((selC.points||0)/500)*50,Math.floor(sub*.15));
+  // Coupon discount — free car wash = deduct cheapest wash price
+  let cpnDisc=0;
+  if(usedCoupon){
+    const washSvc=svcs.find(s=>s.code==='-'||s.name.includes('ล้างสี & ดูดฝุ่น'));
+    cpnDisc=washSvc?(washSvc[CZ]||200):200;
+    cpnDisc=Math.min(cpnDisc,sub);
+  }
+  const tot=Math.max(0,sub-disc-cpnDisc);
+  G('ctot').textContent='฿'+tot.toLocaleString();
+  const dr=G('disc-row');
+  if(disc>0){dr.style.display='flex';G('disc-val').textContent='-฿'+disc.toLocaleString();}else dr.style.display='none';
+  const cr=G('cpn-disc-row');
+  if(cpnDisc>0){cr.style.display='flex';G('cpn-disc-val').textContent='-฿'+cpnDisc.toLocaleString();}else cr.style.display='none';
+  return{sub,disc,cpnDisc,tot};
+}
+
 function updateFloat(){
   const fl=G('cart-float');
   if(!cart.length){fl.style.display='none';return;}
-  const tot=cart.reduce((a,c)=>a+c.price*c.qty,0);
-  const cnt=cart.reduce((a,c)=>a+c.qty,0);
+  const{tot}=uTot();
   fl.style.display='block';
   G('cf-amt').textContent='฿'+tot.toLocaleString();
-  G('cf-cnt').textContent=cnt+' รายการ';
+  G('cf-cnt').textContent=cart.reduce((a,c)=>a+c.qty,0)+' รายการ';
 }
-window.scrollToCart=function(){
-  const el=G('cart-sec');if(!el)return;
-  el.scrollIntoView({behavior:'smooth'});
-};
+window.scrollToCart=function(){G('cart-sec')?.scrollIntoView({behavior:'smooth'});};
 
 // ══ CUSTOMER ══
 window.cSearch=function(){
@@ -745,35 +989,19 @@ window.cSearch=function(){
 window.selCust=function(id){
   selC=custs.find(c=>(c._id||c.id)==id);if(!selC)return;
   G('cdd').style.display='none';G('cq').value=selC.name;G('cch').style.display='block';
-  G('ccn').textContent=selC.name;
-  G('ccp').textContent=(selC.points||0)+' pts';
+  G('ccn').textContent=selC.name;G('ccp').textContent=(selC.points||0)+' pts';
   G('cci').textContent=(selC.car||'')+'·'+tier(selC.points||0)+'·'+(selC.visits||0)+' visits';
   G('ccb').style.width=Math.min(((selC.points||0)%500)/500*100,100)+'%';
   G('ccnxt').textContent=(500-(selC.points||0)%500)+' pts ถึงส่วนลด ฿50';
   G('plate').value=selC.plate||'';
-  // Show coupons
-  const cpns=selC.coupons||[];
+  // Show coupons in chip
   const now=new Date();
-  const activeCpns=cpns.filter(c=>{
-    if(c.type==='wash'&&c.remaining>0)return true;
-    if(c.type==='month'&&new Date(c.expires)>now)return true;
-    return false;
-  });
-  G('cust-cpns').innerHTML=activeCpns.length?
-    `<div style="font-size:10px;font-weight:700;color:var(--pur);margin-bottom:4px;">🎫 คูปองที่มี:</div>`+
-    activeCpns.map(c=>c.type==='wash'?
-      `<span class="badge bpu" style="margin-right:4px;">ล้างฟรี ${c.remaining} ครั้ง</span>`:
-      `<span class="badge bpu" style="margin-right:4px;">ล้างฟรีถึง ${fmtDate(c.expires)}</span>`
-    ).join(''):'';
-  // Auto-set car size
-  if(selC.size){
-    CZ=selC.size;
-    document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
-    const el=document.querySelector(`.stab[onclick*="'${selC.size}'"]`);
-    if(el)el.classList.add('active');
-    rSvcs();
-  }
-  uTot();
+  const active=(selC.coupons||[]).filter(c=>(c.type==='wash'&&c.remaining>0)||(c.type==='month'&&new Date(c.expires)>now));
+  G('cust-cpns').innerHTML=active.length?
+    `<div style="font-size:10px;font-weight:700;color:var(--pur);margin-bottom:3px;">🎫 คูปองที่มี:</div>`+
+    active.map(c=>c.type==='wash'?`<span class="badge bpu" style="margin:2px;">ล้างฟรี ${c.remaining} ครั้ง</span>`:`<span class="badge bpu" style="margin:2px;">ฟรีถึง ${fmtDate(c.expires)}</span>`).join(''):'';
+  if(selC.size){CZ=selC.size;document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));const el=document.querySelector(`.stab[onclick*="'${selC.size}'"]`);if(el)el.classList.add('active');rSvcs();}
+  rCouponSection();uTot();
 };
 
 function tier(p){return p>=1000?'Gold ★':p>=400?'Silver ✦':'Bronze ◆';}
@@ -781,46 +1009,33 @@ function tier(p){return p>=1000?'Gold ★':p>=400?'Silver ✦':'Bronze ◆';}
 // ══ CHECKOUT ══
 window.checkout=async function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
-  const plate=G('plate').value||(selC?selC.plate:'—'),pay=G('pay').value;
-  const{sub,d,tax,tot}=uTot();
+  const plate=G('plate').value||(selC?selC.plate:'—');
+  const staffName=G('staff-sel').value||'ไม่ระบุ';
+  const{sub,disc,cpnDisc,tot}=uTot();
   const pts=Math.floor(tot/10);
   const now=new Date();
   const recId='#'+String(++txnN);
-  const dateStr=now.toLocaleDateString('th-TH');
-  const timeStr=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-
-  // Build service history entries (Feature 3)
   const svcEntries=cart.map(c=>({name:c.name,code:c.code,cat:c.cat,size:c.size,price:c.price,date:now.toISOString()}));
   const hasCeramic=cart.some(c=>c.code==='P07'||c.code==='S11');
-  const ceramicDate=hasCeramic?now.toISOString():null;
+  const csaleTotal=cart.reduce((a,c)=>a+(c.SC||0)*c.qty,0);
+  const copTotal=cart.reduce((a,c)=>a+(c.SCo||0)*c.qty,0);
 
-  // Build coupons to issue (Feature 4)
-  let newCoupons=[];
-  let cpnMsg=[];
+  // Build new coupons
+  let newCoupons=[],cpnMsg=[];
   for(const ci of cart){
-    if((ci.cpnWash||0)>0){
-      newCoupons.push({type:'wash',remaining:ci.cpnWash,from:now.toISOString(),service:ci.name});
-      cpnMsg.push(`ล้างรถฟรี ${ci.cpnWash} ครั้ง`);
-    }
-    if((ci.cpnMonth||0)>0){
-      const exp=new Date(now);exp.setMonth(exp.getMonth()+(ci.cpnMonth||1));
-      newCoupons.push({type:'month',expires:exp.toISOString(),from:now.toISOString(),service:ci.name});
-      cpnMsg.push(`ล้างรถฟรี ${ci.cpnMonth} เดือน (ถึง ${fmtDate(exp)})`);
-    }
+    if((ci.cpnWash||0)>0){newCoupons.push({type:'wash',remaining:ci.cpnWash,from:now.toISOString(),service:ci.name});cpnMsg.push(`ล้างรถฟรี ${ci.cpnWash} ครั้ง`);}
+    if((ci.cpnMonth||0)>0){const exp=new Date(now);exp.setMonth(exp.getMonth()+ci.cpnMonth);newCoupons.push({type:'month',expires:exp.toISOString(),from:now.toISOString(),service:ci.name});cpnMsg.push(`ล้างรถฟรี ${ci.cpnMonth} เดือน (ถึง ${fmtDate(exp)})`);}
   }
 
-  // Incentive totals
-  const csaleTotal=cart.filter(c=>c.type==='C-Sale').reduce((a,c)=>a+c.price*c.qty,0);
-  const copTotal=cart.filter(c=>c.type==='C-Op.').reduce((a,c)=>a+c.price*c.qty,0);
-
   const tdata={
-    id:recId,customer:selC?selC.name:'Walk-in',
-    plate,size:CZ,payment:pay,
+    id:recId,customer:selC?selC.name:'Walk-in',plate,size:CZ,
+    payment:selPayMethod,staff:staffName,
     items:cart.map(c=>c.name).join(', '),
-    itemDetails:svcEntries,
-    total:tot,pts:selC?pts:0,
-    csaleTotal,copTotal,
-    date:dateStr,time:timeStr,
+    itemDetails:svcEntries,total:tot,pts:selC?pts:0,
+    csaleTotal,copTotal,discount:disc,cpnDiscount:cpnDisc,
+    couponUsed:usedCoupon?usedCoupon.type:'none',
+    date:now.toLocaleDateString('th-TH'),
+    time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
     createdAt:serverTimestamp()
   };
 
@@ -831,55 +1046,153 @@ window.checkout=async function(){
       if(selC){
         const used=Math.floor((selC.points||0)/500);
         const newPts=(selC.points||0)-(used*500)+pts;
-        const existCpns=selC.coupons||[];
-        const svcHistory=selC.serviceHistory||[];
-        const updates={
-          points:newPts,visits:(selC.visits||0)+1,
-          redeemed:(selC.redeemed||0)+(d>0?1:0),
-          coupons:[...existCpns,...newCoupons],
-          serviceHistory:[...svcHistory,...svcEntries],
-          lastVisit:now.toISOString()
-        };
-        if(ceramicDate)updates.lastCeramic=ceramicDate;
-        await updateDoc(doc(db,'customers',selC._id),updates);
+        let updCpns=[...(selC.coupons||[]),...newCoupons];
+        // Deduct used coupon
+        if(usedCoupon){
+          const cpnIdx=(selC.coupons||[]).findIndex(c=>c.type===usedCoupon.type&&(c.type==='wash'?c.remaining===usedCoupon.remaining:c.expires===usedCoupon.expires));
+          if(cpnIdx>=0){
+            if(updCpns[cpnIdx].type==='wash')updCpns[cpnIdx].remaining=Math.max(0,(updCpns[cpnIdx].remaining||0)-1);
+            else updCpns[cpnIdx].used=true;
+          }
+        }
+        await updateDoc(doc(db,'customers',selC._id),{
+          points:newPts,visits:(selC.visits||0)+1,redeemed:(selC.redeemed||0)+(disc>0?1:0),
+          coupons:updCpns,serviceHistory:[...(selC.serviceHistory||[]),...svcEntries],
+          lastVisit:now.toISOString(),...(hasCeramic?{lastCeramic:now.toISOString()}:{})
+        });
       }
     }else{
-      txns.unshift({...tdata,createdAt:now});
+      txns.unshift({...tdata,createdAt:now});LS('tx',txns);LS('tn',txnN);
       if(selC){
-        const used=Math.floor((selC.points||0)/500);
-        selC.points=(selC.points||0)-(used*500)+pts;
-        selC.visits=(selC.visits||0)+1;
-        selC.coupons=[...(selC.coupons||[]),...newCoupons];
+        const used=Math.floor((selC.points||0)/500);selC.points=(selC.points||0)-(used*500)+pts;
+        selC.visits=(selC.visits||0)+1;selC.coupons=[...(selC.coupons||[]),...newCoupons];
         selC.serviceHistory=[...(selC.serviceHistory||[]),...svcEntries];
-        selC.lastVisit=now.toISOString();
-        if(ceramicDate)selC.lastCeramic=ceramicDate;
-        localStorage.setItem('cu',JSON.stringify(custs));
+        if(usedCoupon){const ci=selC.coupons.find(c=>c.type===usedCoupon.type);if(ci&&ci.type==='wash')ci.remaining=Math.max(0,(ci.remaining||0)-1);}
+        LS('cu',custs);
       }
-      localStorage.setItem('tx',JSON.stringify(txns));
-      localStorage.setItem('tn',String(txnN));
-      rHist();rToday();
+      rHist();rToday();rStaffInc();
     }
     setDot('on','Synced ✓');
   }catch(e){setDot('off','Error');console.error(e);}
 
+  // Store last txn for invoice sharing
+  lastTxnData={...tdata,customerObj:selC?{...selC}:null,staffName,items:cart.map(c=>({...c}))};
+
   // Show receipt
   G('oks').textContent=recId+'·'+(selC?selC.name:'Walk-in')+'·'+plate;
-  G('okr').innerHTML=
-    `<div class="rl"><span>Subtotal</span><span>฿${sub.toLocaleString()}</span></div>`+
-    (d?`<div class="rl" style="color:var(--ok)"><span>ส่วนลด Loyalty</span><span>-฿${d.toLocaleString()}</span></div>`:'')+
-    `<div class="rl"><span>Tax 7%</span><span>฿${tax.toLocaleString()}</span></div>`+
-    `<div class="rt"><span>รวม</span><span>฿${tot.toLocaleString()}</span></div>`+
-    (selC?`<div style="margin-top:8px;font-size:11px;color:var(--gold)">+${pts} pts earned · ยอด ${((selC.points||0))}  pts</div>`:'');
+  G('okr').innerHTML=buildReceiptHTML(cart,sub,disc,cpnDisc,tot,selC,pts,selPayMethod,staffName,recId);
   const cpnEl=G('ok-cpn');
   if(cpnMsg.length){cpnEl.style.display='block';cpnEl.innerHTML='🎫 คูปองที่ได้รับ:<br>'+cpnMsg.join('<br>');}
   else cpnEl.style.display='none';
 
   sh('sh-ok');
-  cart=[];selC=null;G('cq').value='';G('cch').style.display='none';G('plate').value='';
+  cart=[];selC=null;usedCoupon=null;
+  G('cq').value='';G('cch').style.display='none';G('plate').value='';G('cust-cpns').innerHTML='';
+  document.querySelector('.pay-btn').classList.add('active');
+  document.querySelectorAll('.pay-btn').forEach((b,i)=>{if(i>0)b.classList.remove('active');});
+  selPayMethod='เงินสด';
   rCart();updateFloat();
 };
 
-// ══ TODAY DASHBOARD (Feature 6) ══
+function buildReceiptHTML(cartItems,sub,disc,cpnDisc,tot,cust,pts,pay,staff,recId){
+  const now=new Date();
+  return`
+    <div class="rl"><span>Receipt</span><span>${recId}</span></div>
+    <div class="rl"><span>วันที่</span><span>${now.toLocaleDateString('th-TH')} ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</span></div>
+    <div class="rl"><span>คนทำ</span><span>${staff}</span></div>
+    <div class="rl"><span>วิธีชำระ</span><span>${pay}</span></div>
+    ${disc>0?`<div class="rl" style="color:var(--ok)"><span>ส่วนลด Loyalty</span><span>-฿${disc.toLocaleString()}</span></div>`:''}
+    ${cpnDisc>0?`<div class="rl" style="color:var(--pur)"><span>🎫 คูปอง</span><span>-฿${cpnDisc.toLocaleString()}</span></div>`:''}
+    <div class="rt"><span>รวม (รวม VAT)</span><span>฿${tot.toLocaleString()}</span></div>
+    ${cust?`<div style="margin-top:8px;font-size:11px;color:var(--gold)">+${pts} pts · คงเหลือ ${cust.points||0} pts</div>`:''}
+  `;
+}
+
+// ══ INVOICE PREVIEW (Feature 6 - Line sharing) ══
+window.previewInvoice=function(){
+  if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
+  const{sub,disc,cpnDisc,tot}=uTot();
+  const now=new Date();
+  G('inv-content').innerHTML=`<div class="inv-box">
+    <div class="inv-logo">⚙ CarCare POS</div>
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:12px;">${now.toLocaleDateString('th-TH')} ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</div>
+    ${selC?`<div style="font-size:12px;margin-bottom:8px;">ลูกค้า: <b>${selC.name}</b> · ทะเบียน: ${G('plate').value||selC.plate||'—'}</div>`:''}
+    ${cart.map(c=>`<div class="inv-line"><span>${c.name} (${c.size})×${c.qty}</span><span>฿${(c.price*c.qty).toLocaleString()}</span></div>`).join('')}
+    ${disc>0?`<div class="inv-line" style="color:var(--ok)"><span>ส่วนลด Loyalty</span><span>-฿${disc.toLocaleString()}</span></div>`:''}
+    ${cpnDisc>0?`<div class="inv-line" style="color:var(--pur)"><span>🎫 คูปอง</span><span>-฿${cpnDisc.toLocaleString()}</span></div>`:''}
+    <div class="inv-total"><span>รวม (รวม VAT)</span><span>฿${tot.toLocaleString()}</span></div>
+    <div style="margin-top:10px;font-size:10px;color:var(--tx3);text-align:center;">ราคารวม VAT แล้ว · ขอบคุณที่ใช้บริการ 🙏</div>
+  </div>`;
+  sh('sh-inv');
+};
+
+window.shareInvoice=async function(){
+  const text=buildInvoiceText(cart,lastTxnData);
+  if(navigator.share){try{await navigator.share({title:'ใบเสร็จ CarCare POS',text});}catch(e){}}
+  else{navigator.clipboard?.writeText(text).then(()=>alert('คัดลอกใบเสร็จแล้ว!\nวางใน Line ได้เลย 📋'));}
+  hs('sh-inv');
+};
+
+window.shareLastInvoice=async function(){
+  if(!lastTxnData)return;
+  const text=buildInvoiceText(lastTxnData.items||cart,lastTxnData);
+  if(navigator.share){try{await navigator.share({title:'ใบเสร็จ CarCare POS',text});}catch(e){}}
+  else{navigator.clipboard?.writeText(text).then(()=>alert('คัดลอกใบเสร็จแล้ว!\nวางใน Line ได้เลย 📋'));}
+};
+
+function buildInvoiceText(items,txn){
+  const now=new Date();
+  const tot=txn?txn.total:items.reduce((a,c)=>a+c.price*c.qty,0);
+  let t=`🔧 CarCare POS — ใบเสร็จ\n`;
+  t+=`📅 ${txn?.date||now.toLocaleDateString('th-TH')} ${txn?.time||now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}\n`;
+  if(txn?.customer&&txn.customer!=='Walk-in')t+=`👤 ${txn.customer}\n`;
+  if(txn?.plate)t+=`🚗 ทะเบียน: ${txn.plate}\n`;
+  t+=`─────────────────\n`;
+  (items||[]).forEach(c=>t+=`• ${c.name} (${c.size||CZ}) ×${c.qty||1} = ฿${((c.price||0)*(c.qty||1)).toLocaleString()}\n`);
+  t+=`─────────────────\n`;
+  if(txn?.discount>0)t+=`ส่วนลด: -฿${txn.discount.toLocaleString()}\n`;
+  if(txn?.cpnDiscount>0)t+=`🎫 คูปอง: -฿${txn.cpnDiscount.toLocaleString()}\n`;
+  t+=`💰 รวม (รวม VAT): ฿${tot.toLocaleString()}\n`;
+  t+=`💳 ชำระ: ${txn?.payment||selPayMethod}\n`;
+  t+=`─────────────────\n`;
+  t+=`ขอบคุณที่ใช้บริการ 🙏`;
+  return t;
+}
+
+// ══ EXPENSES (Feature 5) ══
+window.addExpense=async function(){
+  const name=G('exp-name').value.trim();const amount=parseInt(G('exp-amount').value);
+  if(!name||!amount){alert('กรุณาระบุรายการและจำนวนเงิน');return;}
+  const now=new Date();
+  const data={name,amount,cat:G('exp-cat').value,note:G('exp-note').value,date:now.toLocaleDateString('th-TH'),createdAt:serverTimestamp()};
+  if(db&&!LM)await addDoc(collection(db,'expenses'),data);
+  else{expenses.unshift({...data,_id:'l'+Date.now(),createdAt:now});LS('exp',expenses);rExpenses();}
+  hs('sh-exp');['exp-name','exp-amount','exp-note'].forEach(i=>G(i).value='');
+};
+
+function rExpenses(){
+  const td=todayTH();
+  const todayExp=expenses.filter(e=>e.date===td);
+  const total=todayExp.reduce((a,e)=>a+(e.amount||0),0);
+  G('exp-list').innerHTML=todayExp.length?todayExp.map(e=>`<div class="exp-item">
+    <div><div style="font-weight:700;">${e.name}</div><div style="font-size:11px;color:var(--tx3);">${e.cat}</div></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="color:var(--err);font-weight:700;">-฿${(e.amount||0).toLocaleString()}</span>
+      <button class="btn btn-s btn-d" onclick="delExp('${e._id}')">×</button>
+    </div>
+  </div>`).join(''):'<div style="font-size:12px;color:var(--tx3);">ยังไม่มีรายจ่าย</div>';
+  G('exp-total').textContent='-฿'+total.toLocaleString();
+  // Net total
+  const todaySales=txns.filter(t=>t.date===td).reduce((a,t)=>a+(t.total||0),0);
+  G('net-total').textContent='฿'+(todaySales-total).toLocaleString();
+}
+
+window.delExp=async function(id){
+  if(db&&!LM)await deleteDoc(doc(db,'expenses',id));
+  else{expenses=expenses.filter(e=>e._id!=id);LS('exp',expenses);rExpenses();}
+};
+
+// ══ TODAY ══
 function rToday(){
   const td=todayTH();
   const today=txns.filter(t=>t.date===td);
@@ -889,238 +1202,169 @@ function rToday(){
   G('td-txn').textContent=n;
   G('td-avg').textContent=n?'฿'+Math.round(tot/n).toLocaleString():'฿0';
   G('td-pts').textContent=today.reduce((a,t)=>a+(t.pts||0),0);
-  G('td-cpn').textContent=today.reduce((a,t)=>a+(t.itemDetails||[]).filter(i=>(i.cpnWash||0)+(i.cpnMonth||0)>0).length,0);
-  // Payment breakdown
-  ['เงินสด','โอน','บุญถอด','บัตร'].forEach((p,i)=>{
-    const ids=['td-cash','td-transfer','td-boon','td-card'];
-    G(ids[i]).textContent='฿'+today.filter(t=>t.payment===p).reduce((a,t)=>a+(t.total||0),0).toLocaleString();
-  });
-  // Incentives
-  G('td-csale').textContent='฿'+today.reduce((a,t)=>a+(t.csaleTotal||0),0).toLocaleString();
-  G('td-cop').textContent='฿'+today.reduce((a,t)=>a+(t.copTotal||0),0).toLocaleString();
+  G('td-cpn').textContent=today.filter(t=>t.couponUsed&&t.couponUsed!=='none').length;
+  G('today-lbl').textContent='วันที่: '+td;
+  // Payment
+  G('td-cash').textContent='฿'+today.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
+  G('td-qr').textContent='฿'+today.filter(t=>t.payment==='QR').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
+  G('td-transfer').textContent='฿'+today.filter(t=>t.payment==='โอน').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
+  G('td-card').textContent='฿'+today.filter(t=>t.payment==='บัตร').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
+  // Staff incentive today
+  const staffTotals={};
+  today.forEach(t=>{const n=t.staff||'ไม่ระบุ';if(!staffTotals[n])staffTotals[n]={csale:0,cop:0};staffTotals[n].csale+=(t.csaleTotal||0);staffTotals[n].cop+=(t.copTotal||0);});
+  const rows=Object.entries(staffTotals);
+  const totalCS=rows.reduce((a,[,v])=>a+v.csale,0),totalCO=rows.reduce((a,[,v])=>a+v.cop,0);
+  G('td-staff-inc').innerHTML=rows.map(([n,v])=>`<tr>
+    <td><span class="staff-chip">${n}</span></td>
+    <td style="color:var(--ok);font-weight:700;">฿${v.csale.toLocaleString()}</td>
+    <td style="color:var(--inf);font-weight:700;">฿${v.cop.toLocaleString()}</td>
+    <td style="font-weight:700;">฿${(v.csale+v.cop).toLocaleString()}</td>
+  </tr>`).join('')+
+  (rows.length?`<tr><td><b>รวม</b></td><td style="color:var(--ok);"><b>฿${totalCS.toLocaleString()}</b></td><td style="color:var(--inf);"><b>฿${totalCO.toLocaleString()}</b></td><td><b>฿${(totalCS+totalCO).toLocaleString()}</b></td></tr>`:'<tr><td colspan="4" style="text-align:center;color:var(--tx3);">ยังไม่มีรายการ</td></tr>');
   // Top services
-  const svcCount={};
-  today.forEach(t=>(t.items||'').split(',').forEach(s=>{const k=s.trim();if(k)svcCount[k]=(svcCount[k]||0)+1;}));
-  const top=Object.entries(svcCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const sc={};today.forEach(t=>(t.items||'').split(',').forEach(s=>{const k=s.trim();if(k)sc[k]=(sc[k]||0)+1;}));
+  const top=Object.entries(sc).sort((a,b)=>b[1]-a[1]).slice(0,5);
   G('td-top').innerHTML=top.map(([n,c])=>`<div style="display:flex;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--bdr);font-size:12px;"><span>${n}</span><span class="badge bb">${c} ครั้ง</span></div>`).join('')||'<div class="empty">ยังไม่มีรายการ</div>';
-  G('today-date-lbl').textContent='วันที่: '+td;
-  // Recent list
-  G('td-list').innerHTML=today.slice(0,10).map(t=>`<div class="card" style="margin-bottom:8px;">
+  // Recent
+  G('td-list').innerHTML=today.slice(0,8).map(t=>`<div class="card" style="margin-bottom:8px;">
     <div style="display:flex;justify-content:space-between;">
-      <div><div style="font-weight:700;">${t.id}·${t.customer}</div><div style="font-size:11px;color:var(--tx3);">${t.plate||''}·${t.payment||''}</div></div>
+      <div><div style="font-weight:700;">${t.id}·${t.customer}</div>
+      <div style="font-size:11px;color:var(--tx3);">${t.plate||''}·${t.payment||''}·${t.staff||''}</div></div>
       <div style="text-align:right;font-size:16px;font-weight:700;">฿${(t.total||0).toLocaleString()}</div>
     </div>
   </div>`).join('')||'<div class="empty">ยังไม่มีรายการวันนี้</div>';
+  rExpenses();
 }
 
 // ══ LOYALTY ══
 function rLoy(){
   const q=(G('lq')||{value:''}).value.toLowerCase();
   const list=custs.filter(c=>!q||c.name.toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.plate||'').toLowerCase().includes(q));
-  G('lm').textContent=custs.length;
-  G('lp').textContent=custs.reduce((a,c)=>a+(c.points||0),0).toLocaleString();
-  G('lg').textContent=custs.filter(c=>(c.points||0)>=1000).length;
+  G('lm').textContent=custs.length;G('lp').textContent=custs.reduce((a,c)=>a+(c.points||0),0).toLocaleString();G('lg').textContent=custs.filter(c=>(c.points||0)>=1000).length;
+  const now=new Date();
   G('ll').innerHTML=list.map(c=>{
-    const cpns=c.coupons||[];const now=new Date();
-    const activeCpns=cpns.filter(x=>(x.type==='wash'&&x.remaining>0)||(x.type==='month'&&new Date(x.expires)>now));
-    // Ceramic due check (Feature 3)
+    const active=(c.coupons||[]).filter(x=>(x.type==='wash'&&x.remaining>0)||(x.type==='month'&&new Date(x.expires)>now));
     let ceramicBadge='';
-    if(c.lastCeramic){
-      const last=new Date(c.lastCeramic);const months=(now-last)/(1000*60*60*24*30);
-      if(months>=5)ceramicBadge='<span class="badge bpu" style="margin-left:4px;">🔔 ต้องทำ ceramic</span>';
-    }
+    if(c.lastCeramic){const months=Math.round((now-new Date(c.lastCeramic))/(1000*60*60*24*30));if(months>=5)ceramicBadge='<span class="badge bpu" style="margin-left:4px;">🔔 ceramic</span>';}
     return`<div class="card" style="margin-bottom:8px;cursor:pointer;" onclick="showCustDetail('${c._id||c.id}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-        <div>
-          <div style="font-weight:700;font-size:14px;">${c.name}${ceramicBadge}</div>
-          <div style="font-size:11px;color:var(--tx3);">${c.car||''}·${c.plate||''}·<span class="badge bb">${c.size||''}</span></div>
-        </div>
+        <div><div style="font-weight:700;font-size:14px;">${c.name}${ceramicBadge}</div>
+        <div style="font-size:11px;color:var(--tx3);">${c.car||''}·${c.plate||''}·<span class="badge bb">${c.size||''}</span>·${c.phone||''}</div></div>
         <span class="pc">${c.points||0} pts</span>
       </div>
-      ${activeCpns.length?`<div style="margin-bottom:5px;">`+activeCpns.map(x=>x.type==='wash'?`<span class="badge bpu" style="margin-right:3px;">🎫 ล้างฟรี ${x.remaining} ครั้ง</span>`:`<span class="badge bpu" style="margin-right:3px;">🎫 ฟรีถึง ${fmtDate(x.expires)}</span>`).join('')+`</div>`:''}
-      <div style="font-size:11px;color:var(--tx2);">${tier(c.points||0)}·${c.visits||0} visits·${c.phone||''}</div>
+      ${active.length?'<div>'+active.map(x=>x.type==='wash'?`<span class="badge bpu" style="margin:2px;">🎫 ${x.remaining} ครั้ง</span>`:`<span class="badge bpu" style="margin:2px;">🎫 ถึง ${fmtDate(x.expires)}</span>`).join('')+'</div>':''}
+      <div style="font-size:11px;color:var(--tx2);margin-top:4px;">${tier(c.points||0)}·${c.visits||0} visits</div>
     </div>`;
   }).join('')||'<div class="empty">ไม่พบสมาชิก</div>';
 }
 
-// Customer detail (Feature 3)
 window.showCustDetail=function(id){
-  viewCustId=id;
-  const c=custs.find(x=>(x._id||x.id)==id);if(!c)return;
+  viewCustId=id;const c=custs.find(x=>(x._id||x.id)==id);if(!c)return;
   G('cust-detail-name').textContent=c.name;
+  const now=new Date();
+  const active=(c.coupons||[]).filter(x=>(x.type==='wash'&&x.remaining>0)||(x.type==='month'&&new Date(x.expires)>now));
   const svcHist=(c.serviceHistory||[]).slice(-10).reverse();
-  const cpns=c.coupons||[];const now=new Date();
-  const activeCpns=cpns.filter(x=>(x.type==='wash'&&x.remaining>0)||(x.type==='month'&&new Date(x.expires)>now));
   let ceramicSection='';
-  if(c.lastCeramic){
-    const last=new Date(c.lastCeramic);const months=Math.round((now-last)/(1000*60*60*24*30));
-    const due=months>=5;
-    ceramicSection=`<div class="${due?'ceramic-alert':'svc-hist'}" style="margin-bottom:10px;">
-      🛡 Ceramic ล่าสุด: ${fmtDate(c.lastCeramic)} (${months} เดือนที่แล้ว)
-      ${due?' — ถึงเวลา Maintain แล้ว!':''}
-    </div>`;
-  }
+  if(c.lastCeramic){const m=Math.round((now-new Date(c.lastCeramic))/(1000*60*60*24*30));const due=m>=5;ceramicSection=`<div class="${due?'ceramic-alert':'svc-hist'}" style="margin-bottom:10px;">🛡 Ceramic ล่าสุด: ${fmtDate(c.lastCeramic)} (${m} เดือน)${due?' — ถึงเวลา Maintain แล้ว!':''}</div>`;}
   G('cust-detail-body').innerHTML=
     `<div style="font-size:12px;color:var(--tx2);margin-bottom:10px;">${c.car||''}·${c.plate||''}·${c.size||''}·${c.phone||''}</div>`+
-    `<div class="row3" style="margin-bottom:10px;">
-      <div class="sc-card"><div class="sc-v">${c.points||0}</div><div class="sc-l">Points</div></div>
-      <div class="sc-card"><div class="sc-v">${c.visits||0}</div><div class="sc-l">Visits</div></div>
-      <div class="sc-card"><div class="sc-v">${tier(c.points||0)}</div><div class="sc-l">Tier</div></div>
-    </div>`+
+    `<div class="row3" style="margin-bottom:10px;"><div class="sc-card"><div class="sc-v">${c.points||0}</div><div class="sc-l">Points</div></div><div class="sc-card"><div class="sc-v">${c.visits||0}</div><div class="sc-l">Visits</div></div><div class="sc-card"><div class="sc-v">${tier(c.points||0)}</div><div class="sc-l">Tier</div></div></div>`+
     ceramicSection+
-    (activeCpns.length?`<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--pur);">🎫 คูปองที่มี</div><div class="card" style="padding:0;overflow:hidden;margin-bottom:10px;">
-      ${activeCpns.map(x=>`<div class="cpn-item" style="padding:8px 12px;">${x.type==='wash'?`ล้างรถฟรี — เหลือ ${x.remaining} ครั้ง`:`ล้างรถฟรีถึง ${fmtDate(x.expires)}`} <span style="font-size:10px;color:var(--tx3);">จาก ${x.service}</span></div>`).join('')}
-    </div>`:'')+
-    `<div style="font-size:12px;font-weight:700;margin-bottom:6px;">📋 ประวัติบริการล่าสุด</div>`+
+    (active.length?`<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--pur);">🎫 คูปองที่มี</div><div class="card" style="padding:0;overflow:hidden;margin-bottom:10px;">${active.map(x=>`<div class="exp-item" style="padding:8px 12px;">${x.type==='wash'?`ล้างรถฟรี — เหลือ ${x.remaining} ครั้ง`:`ล้างรถฟรีถึง ${fmtDate(x.expires)}`}<span style="font-size:10px;color:var(--tx3);display:block;">จาก: ${x.service}</span></div>`).join('')}</div>`:'')+
+    `<div style="font-size:12px;font-weight:700;margin-bottom:6px;">📋 ประวัติบริการ</div>`+
     (svcHist.length?`<div class="svc-hist">${svcHist.map(s=>`<div class="svc-hist-row"><span>${s.name}</span><span>${fmtDate(s.date)}</span></div>`).join('')}</div>`:'<div style="font-size:12px;color:var(--tx3);">ยังไม่มีประวัติ</div>');
   sh('sh-cust');
 };
 
 window.addBonusPts=async function(){
-  if(!viewCustId)return;
-  const p=parseInt(prompt('เพิ่ม bonus points:','50'));if(!p||p<1)return;
+  if(!viewCustId)return;const p=parseInt(prompt('เพิ่ม bonus points:','50'));if(!p||p<1)return;
   const c=custs.find(x=>(x._id||x.id)==viewCustId);if(!c)return;
   if(db&&!LM)await updateDoc(doc(db,'customers',viewCustId),{points:(c.points||0)+p});
-  else{c.points=(c.points||0)+p;localStorage.setItem('cu',JSON.stringify(custs));rLoy();}
+  else{c.points=(c.points||0)+p;LS('cu',custs);rLoy();}
 };
-
 window.delCustDetail=async function(){
-  if(!viewCustId)return;
-  if(!confirm('ลบสมาชิกนี้?'))return;
+  if(!viewCustId||!confirm('ลบสมาชิกนี้?'))return;
   if(db&&!LM)await deleteDoc(doc(db,'customers',viewCustId));
-  else{custs=custs.filter(c=>(c._id||c.id)!=viewCustId);localStorage.setItem('cu',JSON.stringify(custs));rLoy();}
+  else{custs=custs.filter(c=>(c._id||c.id)!=viewCustId);LS('cu',custs);rLoy();}
   hs('sh-cust');
 };
-
 window.addCust=async function(){
   const fn=G('cf').value.trim();if(!fn){alert('กรุณาระบุชื่อ');return;}
-  const data={name:fn+' '+G('cl2').value.trim(),phone:G('cp').value,plate:G('cpl').value,car:G('cc2').value,size:G('csz').value,note:G('cnote').value,points:0,visits:0,redeemed:0,coupons:[],serviceHistory:[],createdAt:serverTimestamp()};
+  const data={name:fn+' '+G('cl2').value.trim(),phone:G('cp').value,plate:G('cpl').value,car:G('cc2').value,size:G('csz').value,points:0,visits:0,redeemed:0,coupons:[],serviceHistory:[],createdAt:serverTimestamp()};
   if(db&&!LM)await addDoc(collection(db,'customers'),data);
-  else{custs.push({...data,id:Date.now(),createdAt:new Date()});localStorage.setItem('cu',JSON.stringify(custs));rLoy();}
-  hs('sh-nc');['cf','cl2','cp','cpl','cc2','cnote'].forEach(i=>G(i).value='');
+  else{custs.push({...data,id:Date.now(),createdAt:new Date()});LS('cu',custs);rLoy();}
+  hs('sh-nc');['cf','cl2','cp','cpl','cc2'].forEach(i=>G(i).value='');
 };
 
 // ══ STOCK ══
 function rSt(){
-  G('ssk').textContent=stock.length;
-  G('slo').textContent=stock.filter(s=>s.qty>0&&s.qty<=(s.min||5)).length;
-  G('sou').textContent=stock.filter(s=>s.qty===0).length;
+  G('ssk').textContent=stock.length;G('slo').textContent=stock.filter(s=>s.qty>0&&s.qty<=(s.min||5)).length;G('sou').textContent=stock.filter(s=>s.qty===0).length;
   const q=(G('stq')||{value:''}).value.toLowerCase();
-  const list=stock.filter(s=>!q||s.name.toLowerCase().includes(q));
-  G('stl').innerHTML=list.map(s=>{
+  G('stl').innerHTML=stock.filter(s=>!q||s.name.toLowerCase().includes(q)).map(s=>{
     const pct=Math.min((s.qty||0)/Math.max((s.min||5)*3,10)*100,100);
     const col=s.qty===0?'var(--err)':s.qty<=(s.min||5)?'var(--amb)':'var(--ok)';
     const bd=s.qty===0?'<span class="badge br">หมด</span>':s.qty<=(s.min||5)?'<span class="badge ba">ใกล้หมด</span>':'<span class="badge bg2">มีสต็อก</span>';
-    return`<div class="card" style="margin-bottom:8px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-        <div><div style="font-weight:700;font-size:13px;">${s.name}</div><div style="font-size:11px;color:var(--tx3);margin-top:2px;"><span class="badge bb">${s.cat||''}</span>·฿${(s.price||0).toLocaleString()}</div></div>${bd}
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;align-items:center;gap:6px;"><div class="sb2"><div class="sf" style="width:${Math.round(pct)}%;background:${col};"></div></div><span style="font-size:13px;font-weight:700;">${s.qty||0}</span><span style="font-size:11px;color:var(--tx3);">/min ${s.min||5}</span></div>
-        <div style="display:flex;gap:5px;"><button class="btn btn-s btn-ok" onclick="oRs('${s._id||s.id}')">เติม</button><button class="btn btn-s btn-d" onclick="dSt('${s._id||s.id}')">ลบ</button></div>
-      </div>
-    </div>`;
+    return`<div class="card" style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;"><div><div style="font-weight:700;font-size:13px;">${s.name}</div><div style="font-size:11px;color:var(--tx3);margin-top:2px;"><span class="badge bb">${s.cat||''}</span>·฿${(s.price||0).toLocaleString()}</div></div>${bd}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:6px;"><div class="sb2"><div class="sf" style="width:${Math.round(pct)}%;background:${col};"></div></div><span style="font-size:13px;font-weight:700;">${s.qty||0}</span></div>
+    <div style="display:flex;gap:5px;"><button class="btn btn-s btn-ok" onclick="oRs('${s._id||s.id}')">เติม</button><button class="btn btn-s btn-d" onclick="dSt('${s._id||s.id}')">ลบ</button></div></div></div>`;
   }).join('')||'<div class="empty">ไม่พบสินค้า</div>';
 }
 window.oRs=function(id){rsId=id;const s=stock.find(x=>(x._id||x.id)==id);G('rsl').textContent=(s?s.name:'')+'  —  สต็อก: '+(s?s.qty:0);G('rq').value='';sh('sh-rs');};
-window.doRs=async function(){
-  const q=parseInt(G('rq').value);if(!q||q<1){alert('ระบุจำนวน');return;}
-  const s=stock.find(x=>(x._id||x.id)==rsId);if(!s)return;
-  if(db&&!LM)await updateDoc(doc(db,'stock',rsId),{qty:(s.qty||0)+q});
-  else{s.qty=(s.qty||0)+q;localStorage.setItem('st',JSON.stringify(stock));rSt();}
-  hs('sh-rs');
-};
-window.dSt=async function(id){
-  if(!confirm('ลบสินค้านี้?'))return;
-  if(db&&!LM)await deleteDoc(doc(db,'stock',id));
-  else{stock=stock.filter(s=>(s._id||s.id)!=id);localStorage.setItem('st',JSON.stringify(stock));rSt();}
-};
-window.addSt=async function(){
-  const n=G('sn').value.trim();if(!n){alert('ระบุชื่อสินค้า');return;}
-  const data={name:n,cat:G('sc3').value,price:parseInt(G('sp').value)||0,qty:parseInt(G('sq').value)||0,min:parseInt(G('sm').value)||5};
-  if(db&&!LM)await addDoc(collection(db,'stock'),data);
-  else{stock.push({...data,id:Date.now()});localStorage.setItem('st',JSON.stringify(stock));rSt();}
-  hs('sh-ns');['sn','sp','sq','sm'].forEach(i=>G(i).value='');
-};
+window.doRs=async function(){const q=parseInt(G('rq').value);if(!q||q<1){alert('ระบุจำนวน');return;}const s=stock.find(x=>(x._id||x.id)==rsId);if(!s)return;if(db&&!LM)await updateDoc(doc(db,'stock',rsId),{qty:(s.qty||0)+q});else{s.qty=(s.qty||0)+q;LS('st',stock);rSt();}hs('sh-rs');};
+window.dSt=async function(id){if(!confirm('ลบ?'))return;if(db&&!LM)await deleteDoc(doc(db,'stock',id));else{stock=stock.filter(s=>(s._id||s.id)!=id);LS('st',stock);rSt();}};
+window.addSt=async function(){const n=G('sn').value.trim();if(!n){alert('ระบุชื่อ');return;}const d={name:n,cat:G('sc3').value,price:parseInt(G('sp').value)||0,qty:parseInt(G('sq').value)||0,min:parseInt(G('sm').value)||5};if(db&&!LM)await addDoc(collection(db,'stock'),d);else{stock.push({...d,id:Date.now()});LS('st',stock);rSt();}hs('sh-ns');['sn','sp','sq','sm'].forEach(i=>G(i).value='');};
 
-// ══ PRICE LIST (Feature 2) ══
+// ══ PRICE LIST ══
 window.setPLCat=function(c,el){PLCat=c;document.querySelectorAll('#pl-chips .chip').forEach(x=>x.classList.remove('active'));el.classList.add('active');rPL();};
-
+window.openNewSvc=function(){G('nsvc-title').textContent='เพิ่มบริการ';G('sv-edit-id').value='';['sv-name','sv-code','sv-s','sv-m','sv-l','sv-xl','sv-xxl','sv-sc','sv-sco','sv-cpn','sv-cpnm'].forEach(i=>G(i).value='');sh('sh-nsvc');};
 function rPL(){
   const q=(G('plq')||{value:''}).value.toLowerCase();
   const list=svcs.filter(s=>(PLCat==='all'||s.cat===PLCat)&&(!q||s.name.toLowerCase().includes(q)||s.code.toLowerCase().includes(q)));
   G('pl-list').innerHTML=list.map(s=>`<div class="card" style="margin-bottom:8px;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-      <div style="flex:1;">
-        <div style="font-weight:700;font-size:13px;">${s.name} <span class="badge ${CAT_CL[s.cat]||'bgy'}" style="margin-left:4px;">${s.cat}</span></div>
-        <div style="font-size:11px;color:var(--tx3);margin-top:2px;">Code: ${s.code}</div>
-      </div>
-      <div style="display:flex;gap:5px;flex-shrink:0;">
-        <button class="btn btn-s" onclick="editSvc('${s._id||s.code}')">แก้ไข</button>
-        <button class="btn btn-s btn-d" onclick="delSvc('${s._id||s.code}')">ลบ</button>
-      </div>
+      <div style="flex:1;"><div style="font-weight:700;font-size:13px;">${s.name} <span class="badge ${CAT_CL[s.cat]||'bgy'}">${s.cat}</span></div><div style="font-size:11px;color:var(--tx3);margin-top:2px;">${s.code}</div></div>
+      <div style="display:flex;gap:5px;flex-shrink:0;"><button class="btn btn-s" onclick="editSvc('${s._id||s.code}')">แก้ไข</button><button class="btn btn-s btn-d" onclick="delSvc('${s._id||s.code}')">ลบ</button></div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:6px;">
       ${['S','M','L','XL','XXL'].map(sz=>`<div style="background:var(--bg);border-radius:var(--rs);padding:5px;text-align:center;"><div style="font-size:9px;color:var(--tx3);">${sz}</div><div style="font-size:12px;font-weight:700;">฿${(s[sz]||0).toLocaleString()}</div></div>`).join('')}
     </div>
-    <div class="inc-row">
-      <div class="inc-box"><b>฿${(s.SC||0).toLocaleString()}</b>C-Sale ค่าขาย</div>
-      <div class="inc-box" style="background:var(--inf-bg);color:var(--inf);"><b>฿${(s.SCo||0).toLocaleString()}</b>C-Op. ค่าทำ</div>
-      ${(s.cpnWash||0)>0?`<div class="inc-box" style="background:var(--pur-bg);color:var(--pur);"><b>${s.cpnWash}</b>ล้างฟรี (ครั้ง)</div>`:''}
-      ${(s.cpnMonth||0)>0?`<div class="inc-box" style="background:var(--pur-bg);color:var(--pur);"><b>${s.cpnMonth}</b>ล้างฟรี (เดือน)</div>`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr${(s.cpnWash||0)>0?' 1fr':''}${(s.cpnMonth||0)>0?' 1fr':''};gap:6px;">
+      <div style="background:var(--ok-bg);border-radius:var(--rs);padding:5px 8px;font-size:10px;color:var(--ok);text-align:center;"><b style="display:block;font-size:13px;">฿${(s.SC||0)}</b>ค่าขาย</div>
+      <div style="background:var(--inf-bg);border-radius:var(--rs);padding:5px 8px;font-size:10px;color:var(--inf);text-align:center;"><b style="display:block;font-size:13px;">฿${(s.SCo||0)}</b>ค่าทำ</div>
+      ${(s.cpnWash||0)>0?`<div style="background:var(--pur-bg);border-radius:var(--rs);padding:5px 8px;font-size:10px;color:var(--pur);text-align:center;"><b style="display:block;font-size:13px;">${s.cpnWash}</b>ล้างฟรี</div>`:''}
+      ${(s.cpnMonth||0)>0?`<div style="background:var(--pur-bg);border-radius:var(--rs);padding:5px 8px;font-size:10px;color:var(--pur);text-align:center;"><b style="display:block;font-size:13px;">${s.cpnMonth}</b>เดือนฟรี</div>`:''}
     </div>
   </div>`).join('')||'<div class="empty">ไม่พบบริการ</div>';
 }
-
 window.editSvc=function(id){
   const s=svcs.find(x=>(x._id||x.code)==id);if(!s)return;
   G('nsvc-title').textContent='แก้ไขบริการ';
   G('sv-name').value=s.name;G('sv-code').value=s.code;G('sv-cat').value=s.cat;
-  G('sv-s').value=s.S||0;G('sv-m').value=s.M||0;G('sv-l').value=s.L||0;
-  G('sv-xl').value=s.XL||0;G('sv-xxl').value=s.XXL||0;
-  G('sv-sc').value=s.SC||0;G('sv-sco').value=s.SCo||0;
-  G('sv-cpn').value=s.cpnWash||0;G('sv-cpnm').value=s.cpnMonth||0;
-  G('sv-edit-id').value=id;
-  sh('sh-nsvc');
+  G('sv-s').value=s.S||0;G('sv-m').value=s.M||0;G('sv-l').value=s.L||0;G('sv-xl').value=s.XL||0;G('sv-xxl').value=s.XXL||0;
+  G('sv-sc').value=s.SC||0;G('sv-sco').value=s.SCo||0;G('sv-cpn').value=s.cpnWash||0;G('sv-cpnm').value=s.cpnMonth||0;
+  G('sv-edit-id').value=id;sh('sh-nsvc');
 };
-
 window.saveSvc=async function(){
-  const name=G('sv-name').value.trim();if(!name){alert('ระบุชื่อบริการ');return;}
+  const name=G('sv-name').value.trim();if(!name){alert('ระบุชื่อ');return;}
   const data={name,code:G('sv-code').value.trim(),cat:G('sv-cat').value,S:parseInt(G('sv-s').value)||0,M:parseInt(G('sv-m').value)||0,L:parseInt(G('sv-l').value)||0,XL:parseInt(G('sv-xl').value)||0,XXL:parseInt(G('sv-xxl').value)||0,SC:parseInt(G('sv-sc').value)||0,SCo:parseInt(G('sv-sco').value)||0,cpnWash:parseInt(G('sv-cpn').value)||0,cpnMonth:parseInt(G('sv-cpnm').value)||0};
-  const editId=G('sv-edit-id').value;
-  if(db&&!LM){
-    if(editId){await updateDoc(doc(db,'services',editId),data);}
-    else{await addDoc(collection(db,'services'),data);}
-  }else{
-    if(editId){const i=svcs.findIndex(x=>(x._id||x.code)==editId);if(i>=0)svcs[i]={...svcs[i],...data};}
-    else{svcs.push({...data,_id:'local_'+Date.now()});}
-    localStorage.setItem('sv',JSON.stringify(svcs));rSvcs();rPL();
-  }
-  hs('sh-nsvc');G('sv-edit-id').value='';G('nsvc-title').textContent='เพิ่มบริการ';
-  ['sv-name','sv-code','sv-s','sv-m','sv-l','sv-xl','sv-xxl','sv-sc','sv-sco','sv-cpn','sv-cpnm'].forEach(i=>G(i).value='');
+  const eid=G('sv-edit-id').value;
+  if(db&&!LM){if(eid)await updateDoc(doc(db,'services',eid),data);else await addDoc(collection(db,'services'),data);}
+  else{if(eid){const i=svcs.findIndex(x=>(x._id||x.code)==eid);if(i>=0)svcs[i]={...svcs[i],...data};}else svcs.push({...data,_id:'l'+Date.now()});LS('sv',svcs);rSvcs();rPL();}
+  hs('sh-nsvc');G('sv-edit-id').value='';
 };
-
 window.delSvc=async function(id){
   if(!confirm('ลบบริการนี้?'))return;
   if(db&&!LM)await deleteDoc(doc(db,'services',id));
-  else{svcs=svcs.filter(s=>(s._id||s.code)!=id);localStorage.setItem('sv',JSON.stringify(svcs));rSvcs();rPL();}
+  else{svcs=svcs.filter(s=>(s._id||s.code)!=id);LS('sv',svcs);rSvcs();rPL();}
 };
 
-// ══ HISTORY (Feature 5) ══
-function getDateFilter(){
-  const f=G('d-from').value,t=G('d-to').value;
-  return{from:f?new Date(f):null,to:t?new Date(t+' 23:59:59'):null};
-}
-
+// ══ HISTORY ══
 function txnInRange(t){
-  const{from,to}=getDateFilter();
-  if(!from&&!to)return true;
-  const d=new Date(t.date?t.date.split('/').reverse().join('-'):0);
-  if(from&&d<from)return false;
-  if(to&&d>to)return false;
+  const f=G('d-from').value,to=G('d-to').value;if(!f&&!to)return true;
+  try{const p=(t.date||'').split('/');const d=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+  if(f&&d<new Date(f))return false;if(to&&d>new Date(to+' 23:59:59'))return false;}catch{return false;}
   return true;
 }
-
 window.setRange=function(r){
   const now=new Date(),fmt=d=>d.toISOString().slice(0,10);
   if(r==='today'){const s=fmt(now);G('d-from').value=s;G('d-to').value=s;}
@@ -1129,42 +1373,32 @@ window.setRange=function(r){
   else{G('d-from').value='';G('d-to').value='';}
   rHist();
 };
-
 function rHist(){
-  const filtered=txns.filter(txnInRange);
-  const tot=filtered.reduce((a,t)=>a+(t.total||0),0);
-  G('hs-tot').textContent='฿'+tot.toLocaleString();
-  G('hs-n').textContent=filtered.length;
-  G('hl').innerHTML=filtered.slice(0,100).map(t=>`<div class="card" style="margin-bottom:8px;">
+  const f=txns.filter(txnInRange);
+  const tot=f.reduce((a,t)=>a+(t.total||0),0);
+  G('hs-tot').textContent='฿'+tot.toLocaleString();G('hs-n').textContent=f.length;
+  G('hl').innerHTML=f.slice(0,100).map(t=>`<div class="card" style="margin-bottom:8px;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
       <div><div style="font-weight:700;font-size:13px;">${t.id}·${t.customer}</div>
-      <div style="font-size:11px;color:var(--tx3);">${t.plate||''}·<span class="badge bb">${t.size||''}</span>·${t.payment||''}</div></div>
+      <div style="font-size:11px;color:var(--tx3);">${t.plate||''}·${t.size||''}·${t.payment||''}·${t.staff||''}</div></div>
       <div style="text-align:right;"><div style="font-size:16px;font-weight:700;">฿${(t.total||0).toLocaleString()}</div>${t.pts?`<span class="pc">+${t.pts}pts</span>`:''}</div>
     </div>
     <div style="font-size:10px;color:var(--tx3);">${t.items||''}</div>
     <div style="font-size:10px;color:var(--tx3);margin-top:3px;">${t.date||''} ${t.time||''}</div>
-  </div>`).join('')||'<div class="empty">ไม่มีรายการในช่วงนี้</div>';
+  </div>`).join('')||'<div class="empty">ไม่มีรายการ</div>';
 }
-
 window.exportRange=function(){
-  const filtered=txns.filter(txnInRange);
-  if(!filtered.length){alert('ไม่มีข้อมูลในช่วงที่เลือก');return;}
+  const f=txns.filter(txnInRange);if(!f.length){alert('ไม่มีข้อมูล');return;}
   const from=G('d-from').value||'all',to=G('d-to').value||'all';
-  const grand=filtered.reduce((a,t)=>a+(t.total||0),0);
-  const cash=filtered.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0);
-  const transfer=filtered.filter(t=>t.payment==='โอน').reduce((a,t)=>a+(t.total||0),0);
-  const boon=filtered.filter(t=>t.payment==='บุญถอด').reduce((a,t)=>a+(t.total||0),0);
-  const csale=filtered.reduce((a,t)=>a+(t.csaleTotal||0),0);
-  const cop=filtered.reduce((a,t)=>a+(t.copTotal||0),0);
+  const g=f.reduce((a,t)=>a+(t.total||0),0);
+  const cs=f.reduce((a,t)=>a+(t.csaleTotal||0),0);const co=f.reduce((a,t)=>a+(t.copTotal||0),0);
   let c='\uFEFF';
-  c+=`รายงาน CarCare POS\tช่วงวันที่: ${from} - ${to}\r\n\r\n`;
-  c+=`ลำดับ\tReceipt\tลูกค้า\tทะเบียน\tขนาด\tวิธีชำระ\tรายการ\tรวม\tPoints\tวันที่\tเวลา\r\n`;
-  filtered.forEach((t,i)=>{c+=`${i+1}\t${t.id}\t${t.customer}\t${t.plate||''}\t${t.size||''}\t${t.payment||''}\t"${t.items||''}"\t${t.total||0}\t${t.pts||0}\t${t.date||''}\t${t.time||''}\r\n`;});
-  c+=`\r\nสรุป\r\nรวมทั้งหมด\t฿${grand.toLocaleString()}\r\nเงินสด\t฿${cash.toLocaleString()}\r\nโอน\t฿${transfer.toLocaleString()}\r\nบุญถอด\t฿${boon.toLocaleString()}\r\nค่าขาย C-Sale รวม\t฿${csale.toLocaleString()}\r\nค่าทำ C-Op. รวม\t฿${cop.toLocaleString()}\r\n`;
-  const b=new Blob([c],{type:'text/csv;charset=utf-8'});
-  const u=URL.createObjectURL(b);const a=document.createElement('a');
-  a.href=u;a.download=`CarCare-${from}-${to}.csv`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+  c+=`รายงาน CarCare POS\t${from} - ${to}\r\n\r\n`;
+  c+=`Receipt\tลูกค้า\tทะเบียน\tขนาด\tวิธีชำระ\tพนักงาน\tรายการ\tรวม\tPoints\tวันที่\r\n`;
+  f.forEach(t=>{c+=`${t.id}\t${t.customer}\t${t.plate||''}\t${t.size||''}\t${t.payment||''}\t${t.staff||''}\t"${t.items||''}"\t${t.total||0}\t${t.pts||0}\t${t.date||''}\r\n`;});
+  c+=`\r\nรวม\t฿${g.toLocaleString()}\r\nC-Sale รวม\t฿${cs.toLocaleString()}\r\nC-Op. รวม\t฿${co.toLocaleString()}\r\n`;
+  const b=new Blob([c],{type:'text/csv;charset=utf-8'});const u=URL.createObjectURL(b);
+  const a=document.createElement('a');a.href=u;a.download=`CarCare-${from}-${to}.csv`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
 };
 
 // ══ NAV ══
@@ -1173,14 +1407,11 @@ window.sw=function(id,el){
   document.querySelectorAll('.nt').forEach(t=>t.classList.remove('active'));
   G('sc-'+id).classList.add('active');el.classList.add('active');
   G('content').scrollTop=0;
-  if(id==='loyalty')rLoy();
-  if(id==='stock')rSt();
-  if(id==='today')rToday();
-  if(id==='prices')rPL();
-  if(id==='history')rHist();
+  if(id==='loyalty')rLoy();if(id==='stock')rSt();if(id==='today')rToday();
+  if(id==='prices')rPL();if(id==='history')rHist();
+  if(id==='staff'){rStaffManage();rStaffInc();}
 };
-
-window.sh=function(id){G(id).style.display='flex';};
+window.sh=function(id){G(id).style.display='flex';if(id==='sh-staff')rStaffManage();};
 window.hs=function(id){G(id).style.display='none';};
 window.csbg=function(e,id){if(e.target===G(id))hs(id);};
 
