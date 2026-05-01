@@ -739,6 +739,23 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <button class="btn btn-inf btn-bl" style="margin-top:8px;" onclick="shareLastInvoice()">📤 ส่งใบเสร็จ (Line)</button>
 </div></div>
 
+<script>
+// Global functions needed by onclick handlers outside module scope
+function saveVercelUrl(){
+  const el=document.getElementById('vercel-url');
+  const url=(el?el.value:'').trim().replace(/\/$/,'');
+  if(!url){alert('กรุณาใส่ URL');return;}
+  try{localStorage.setItem('line_server_url',JSON.stringify(url));}catch(e){}
+  alert('✅ บันทึก Vercel URL แล้ว: '+url);
+}
+// Pre-fill saved vercel URL
+(function(){
+  try{
+    const v=JSON.parse(localStorage.getItem('line_server_url'));
+    if(v){const el=document.getElementById('vercel-url');if(el)el.value=v;}
+  }catch(e){}
+})();
+</script>
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
 import{getFirestore,collection,addDoc,onSnapshot,doc,updateDoc,deleteDoc,query,orderBy,limit,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
@@ -813,15 +830,8 @@ window.goOffline=function(){
   startApp();setDot('off','Offline');
 };
 
-// Save Vercel URL for Line sending
-window.saveVercelUrl=function(){
-  const url=(G('vercel-url').value||'').trim().replace(/\/$/,'');
-  if(!url){alert('กรุณาใส่ URL');return;}
-  LS('line_server_url',url);
-  alert('✅ บันทึก Vercel URL แล้ว: '+url);
-};
-
-// Load saved Vercel URL into input on page load
+// Vercel URL is handled by the global saveVercelUrl() function above the module
+// Load saved vercel URL
 const savedVercel=LS('line_server_url');
 if(savedVercel){const vi=G('vercel-url');if(vi)vi.value=savedVercel;}
 
@@ -1655,19 +1665,18 @@ window.showUsageConfirm=function(txnData,cartItems){
       <div style="text-align:center;">
         <div style="font-size:10px;color:var(--tx3);">ใช้จริง</div>
         <input class="usage-input" id="uqty-${i}" type="number" step="0.01"
-          value="${e.qty.toFixed(2)}" placeholder="${e.qty.toFixed(2)}"/>
+          value="${e.qty.toFixed(2)}" placeholder="${e.qty.toFixed(2)}"
+          oninput="(function(inp,exp){
+            const act=parseFloat(inp.value)||0;const diff=act-exp;
+            const el=document.getElementById('udiff-${i}');
+            if(!el)return;
+            if(Math.abs(diff)<0.001){el.textContent='✓';el.style.color='';}
+            else if(diff>0){el.innerHTML='<span style=color:var(--err)>+'+diff.toFixed(2)+'</span>';}
+            else{el.innerHTML='<span style=color:var(--ok)>'+diff.toFixed(2)+'</span>';}
+          })(this,${e.qty})"/>
       </div>
-      <div id="udiff-${i}" style="width:50px;text-align:center;font-size:11px;"></div>
-    </div>
-    <script>
-      document.getElementById('uqty-${i}').addEventListener('input',function(){
-        const exp=${e.qty};const act=parseFloat(this.value)||0;const diff=act-exp;
-        const el=document.getElementById('udiff-${i}');
-        if(Math.abs(diff)<0.001){el.textContent='✓';el.className='';}
-        else if(diff>0){el.innerHTML='<span class="over">+'+diff.toFixed(2)+'</span>';}
-        else{el.innerHTML='<span class="save">'+diff.toFixed(2)+'</span>';}
-      });
-    </script>`
+      <div id="udiff-${i}" style="width:50px;text-align:center;font-size:11px;">✓</div>
+    </div>`
   ).join('');
   sh('sh-usage');
 };
