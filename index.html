@@ -207,6 +207,22 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .svc-hist-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr);color:var(--tx2);}
 .svc-hist-row:last-child{border-bottom:none;}
 .ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
+/* USAGE TRACKING */
+.usage-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--bdr);font-size:12px;}
+.usage-row:last-child{border-bottom:none;}
+.usage-prod{font-weight:700;flex:1;}
+.usage-bar-wrap{width:80px;height:8px;background:var(--bdr);border-radius:99px;overflow:hidden;}
+.usage-bar-fill{height:100%;border-radius:99px;transition:width .4s;}
+.usage-input{width:70px;padding:5px 8px;font-size:12px;text-align:center;border:1.5px solid var(--bdr2);border-radius:var(--rs);}
+.usage-input:focus{border-color:var(--gold);}
+.over{color:var(--err);font-weight:700;}
+.save{color:var(--ok);font-weight:700;}
+.usage-log-item{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;}
+.usage-prod-tag{display:inline-flex;align-items:center;gap:4px;background:var(--bg);border-radius:var(--rs);padding:4px 8px;font-size:11px;margin:3px 3px 3px 0;}
+.usage-prod-tag.over-tag{background:var(--err-bg);color:var(--err);}
+.usage-prod-tag.save-tag{background:var(--ok-bg);color:var(--ok);}
+.recipe-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px;}
+.recipe-item:last-child{border-bottom:none;}
 </style>
 </head>
 <body>
@@ -225,6 +241,11 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     <input class="sinput" id="fb-aid" placeholder="1:123:web:abc" autocomplete="off"/>
     <button class="sbtn" onclick="connectFirebase()">เชื่อมต่อ Firebase →</button>
     <button class="sskip" onclick="goOffline()">ใช้งานแบบ Offline →</button>
+    <div style="margin-top:20px;border-top:1px solid #333;padding-top:16px;">
+      <label class="slbl">Vercel Server URL (ไม่จำเป็น — สำหรับส่ง Line)</label>
+      <input class="sinput" id="vercel-url" placeholder="https://your-project.vercel.app" autocomplete="off"/>
+      <button style="width:100%;padding:10px;background:#333;color:#aaa;border:none;border-radius:7px;font-size:12px;cursor:pointer;margin-top:8px;" onclick="saveVercelUrl()">บันทึก Vercel URL</button>
+    </div>
   </div>
   <div class="snote">Firebase Console → Project Settings → Your apps → SDK snippet</div>
 </div>
@@ -459,6 +480,47 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     <div id="pl-list"></div>
   </div>
 
+  <!-- ═══ PRODUCT USAGE SCREEN ═══ -->
+  <div id="sc-usage" class="sc">
+    <div class="sh2">
+      <h2>📦 การใช้วัตถุดิบ</h2>
+      <button class="btn btn-s" onclick="sw('prices',document.querySelector('.nt:nth-child(5)'))">ตั้งค่าสูตร →</button>
+    </div>
+
+    <!-- Date range filter -->
+    <div class="card" style="padding:10px 12px;margin-bottom:10px;">
+      <div class="fr2">
+        <div><label class="lbl">จาก</label><input type="date" id="u-from" onchange="rUsage()"/></div>
+        <div><label class="lbl">ถึง</label><input type="date" id="u-to" onchange="rUsage()"/></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-s" onclick="setUsageRange('today')">วันนี้</button>
+        <button class="btn btn-s" onclick="setUsageRange('week')">7 วัน</button>
+        <button class="btn btn-s" onclick="setUsageRange('month')">เดือนนี้</button>
+        <button class="btn btn-s btn-g" onclick="exportUsage()">📊 Export</button>
+      </div>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="row3" style="margin-bottom:10px;">
+      <div class="sc-card"><div class="sc-v" id="u-jobs">0</div><div class="sc-l">งาน</div></div>
+      <div class="sc-card"><div class="sc-v" id="u-over" style="color:var(--err);">0</div><div class="sc-l">ใช้เกิน</div></div>
+      <div class="sc-card"><div class="sc-v" id="u-save" style="color:var(--ok);">0</div><div class="sc-l">ประหยัด</div></div>
+    </div>
+
+    <!-- Per product breakdown -->
+    <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">สรุปแยกตามสินค้า</div>
+    <div id="u-products" class="card" style="padding:0;overflow:hidden;margin-bottom:12px;"></div>
+
+    <!-- Per staff breakdown -->
+    <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">สรุปแยกตามพนักงาน</div>
+    <div id="u-staff" class="card" style="padding:0;overflow:hidden;margin-bottom:12px;"></div>
+
+    <!-- Usage log -->
+    <div style="font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:8px;text-transform:uppercase;">บันทึกการใช้งาน</div>
+    <div id="u-log"></div>
+  </div>
+
   <!-- ═══ HISTORY ═══ -->
   <div id="sc-history" class="sc">
     <div class="card" style="padding:10px 12px;margin-bottom:10px;">
@@ -492,6 +554,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <button class="nt" onclick="sw('staff',this)"><span class="ni">👤</span>Incentive</button>
   <button class="nt" onclick="sw('stock',this)"><span class="ni">📦</span>Stock</button>
   <button class="nt" onclick="sw('prices',this)"><span class="ni">📋</span>Prices</button>
+  <button class="nt" onclick="sw('usage',this)"><span class="ni">🧪</span>Usage</button>
   <button class="nt" onclick="sw('history',this)"><span class="ni">🕐</span>History</button>
 </div>
 </div><!-- app -->
@@ -506,7 +569,8 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     <div><label class="lbl">ชื่อ</label><input id="cf" type="text" placeholder="สมชาย"/></div>
     <div><label class="lbl">นามสกุล</label><input id="cl2" type="text" placeholder="ใจดี"/></div>
   </div>
-  <div class="fr"><label class="lbl">เบอร์โทร / Line ID</label><input id="cp" type="text" placeholder="08x-xxx-xxxx"/></div>
+  <div class="fr"><label class="lbl">เบอร์โทร</label><input id="cp" type="text" placeholder="08x-xxx-xxxx"/></div>
+  <div class="fr"><label class="lbl">Line User ID <span style="font-size:9px;color:var(--tx3);font-weight:400;">(Uxxxxxxxx — ดูวิธีรับ ID ด้านล่าง)</span></label><input id="c-line" type="text" placeholder="Uxxxxxxxx"/></div>
   <div class="fr2">
     <div><label class="lbl">ทะเบียน</label><input id="cpl" type="text" placeholder="กข 1234"/></div>
     <div><label class="lbl">รุ่นรถ</label><input id="cc2" type="text" placeholder="Toyota Camry"/></div>
@@ -554,6 +618,22 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div class="sbt"><button class="btn" onclick="hs('sh-rs')">ยกเลิก</button><button class="btn btn-g" onclick="doRs()">ยืนยัน</button></div>
 </div></div>
 
+<!-- Product Usage Confirm Sheet -->
+<div id="sh-usage" class="sbg" style="display:none;">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div>
+  <h3>📦 ยืนยันการใช้วัตถุดิบ</h3>
+  <div style="font-size:12px;color:var(--tx2);margin-bottom:12px;">กรุณาใส่จำนวนที่ใช้จริง เพื่อตรวจสอบกับมาตรฐาน</div>
+  <div id="usage-items"></div>
+  <div style="margin-top:14px;padding:10px 12px;background:var(--bg);border-radius:var(--rs);font-size:11px;color:var(--tx3);">
+    💡 หากใช้มากกว่ามาตรฐาน = สีแดง · น้อยกว่า = สีเขียว
+  </div>
+  <div class="sbt">
+    <button class="btn" onclick="skipUsage()">ข้าม</button>
+    <button class="btn btn-g" onclick="confirmUsage()">ยืนยัน</button>
+  </div>
+</div></div>
+
 <!-- New/Edit Service -->
 <div id="sh-nsvc" class="sbg" style="display:none;" onclick="csbg(event,'sh-nsvc')">
 <div class="sht" onclick="event.stopPropagation()">
@@ -587,6 +667,21 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     <div><label class="lbl">ล้างรถฟรี (เดือน)</label><input id="sv-cpnm" type="number" placeholder="0"/></div>
   </div>
   <input type="hidden" id="sv-edit-id"/>
+  <div style="font-size:11px;font-weight:700;color:var(--inf);margin-bottom:8px;text-transform:uppercase;">📦 สูตรการใช้วัตถุดิบ (Recipe)</div>
+  <div style="font-size:11px;color:var(--tx2);margin-bottom:10px;">กำหนดว่าบริการนี้ใช้สินค้าในสต็อกเท่าไหร่ต่อครั้ง<br>เช่น เคลือบแก้ว ใช้ M888 = 0.25 ขวด</div>
+  <div id="sv-recipe-list" style="margin-bottom:10px;"></div>
+  <div style="display:flex;gap:6px;align-items:flex-end;">
+    <div style="flex:1;"><label class="lbl">สินค้า</label>
+      <select id="sv-recipe-prod" style="font-size:12px;padding:7px 8px;"></select>
+    </div>
+    <div style="width:80px;"><label class="lbl">จำนวน</label>
+      <input id="sv-recipe-qty" type="number" step="0.01" placeholder="0.25" style="font-size:12px;padding:7px 8px;"/>
+    </div>
+    <div style="width:60px;"><label class="lbl">หน่วย</label>
+      <input id="sv-recipe-unit" type="text" placeholder="ขวด" style="font-size:12px;padding:7px 8px;"/>
+    </div>
+    <button class="btn btn-s btn-inf" onclick="addRecipeItem()" style="margin-bottom:1px;padding:7px 10px;">+</button>
+  </div>
   <div class="sbt"><button class="btn" onclick="hs('sh-nsvc')">ยกเลิก</button><button class="btn btn-g" onclick="saveSvc()">บันทึก</button></div>
 </div></div>
 
@@ -717,6 +812,18 @@ window.goOffline=function(){
   staffList=LS('stf')||[];txnN=parseInt(LS('tn')||'1000');
   startApp();setDot('off','Offline');
 };
+
+// Save Vercel URL for Line sending
+window.saveVercelUrl=function(){
+  const url=(G('vercel-url').value||'').trim().replace(/\/$/,'');
+  if(!url){alert('กรุณาใส่ URL');return;}
+  LS('line_server_url',url);
+  alert('✅ บันทึก Vercel URL แล้ว: '+url);
+};
+
+// Load saved Vercel URL into input on page load
+const savedVercel=LS('line_server_url');
+if(savedVercel){const vi=G('vercel-url');if(vi)vi.value=savedVercel;}
 
 const saved=LS('fb');
 if(saved){
@@ -1269,6 +1376,10 @@ window.showCustDetail=function(id){
   if(c.lastCeramic){const m=Math.round((now-new Date(c.lastCeramic))/(1000*60*60*24*30));const due=m>=5;ceramicSection=`<div class="${due?'ceramic-alert':'svc-hist'}" style="margin-bottom:10px;">🛡 Ceramic ล่าสุด: ${fmtDate(c.lastCeramic)} (${m} เดือน)${due?' — ถึงเวลา Maintain แล้ว!':''}</div>`;}
   G('cust-detail-body').innerHTML=
     `<div style="font-size:12px;color:var(--tx2);margin-bottom:10px;">${c.car||''}·${c.plate||''}·${c.size||''}·${c.phone||''}</div>`+
+    `<div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:11px;color:var(--tx2);">Line User ID:</span>
+      ${c.lineUserId?`<span class="badge bb">${c.lineUserId}</span><span style="font-size:10px;color:var(--ok);">✓ ส่งใบเสร็จได้</span>`:`<span style="font-size:11px;color:var(--tx3);">ยังไม่มี</span><button class="btn btn-s" onclick="addLineId('${c._id||c.id}')">+ เพิ่ม</button>`}
+    </div>`+
     `<div class="row3" style="margin-bottom:10px;"><div class="sc-card"><div class="sc-v">${c.points||0}</div><div class="sc-l">Points</div></div><div class="sc-card"><div class="sc-v">${c.visits||0}</div><div class="sc-l">Visits</div></div><div class="sc-card"><div class="sc-v">${tier(c.points||0)}</div><div class="sc-l">Tier</div></div></div>`+
     ceramicSection+
     (active.length?`<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--pur);">🎫 คูปองที่มี</div><div class="card" style="padding:0;overflow:hidden;margin-bottom:10px;">${active.map(x=>`<div class="exp-item" style="padding:8px 12px;">${x.type==='wash'?`ล้างรถฟรี — เหลือ ${x.remaining} ครั้ง`:`ล้างรถฟรีถึง ${fmtDate(x.expires)}`}<span style="font-size:10px;color:var(--tx3);display:block;">จาก: ${x.service}</span></div>`).join('')}</div>`:'')+
@@ -1283,6 +1394,15 @@ window.addBonusPts=async function(){
   if(db&&!LM)await updateDoc(doc(db,'customers',viewCustId),{points:(c.points||0)+p});
   else{c.points=(c.points||0)+p;LS('cu',custs);rLoy();}
 };
+window.addLineId=async function(id){
+  const lineId=prompt('ใส่ Line User ID ของลูกค้า:\n(เริ่มต้นด้วย U เช่น Uxxxxxxxx)','');
+  if(!lineId||!lineId.trim())return;
+  const c=custs.find(x=>(x._id||x.id)==id);if(!c)return;
+  if(db&&!LM)await updateDoc(doc(db,'customers',id),{lineUserId:lineId.trim()});
+  else{c.lineUserId=lineId.trim();LS('cu',custs);}
+  hs('sh-cust');rLoy();alert('✅ บันทึก Line User ID แล้ว');
+};
+
 window.delCustDetail=async function(){
   if(!viewCustId||!confirm('ลบสมาชิกนี้?'))return;
   if(db&&!LM)await deleteDoc(doc(db,'customers',viewCustId));
@@ -1291,10 +1411,11 @@ window.delCustDetail=async function(){
 };
 window.addCust=async function(){
   const fn=G('cf').value.trim();if(!fn){alert('กรุณาระบุชื่อ');return;}
-  const data={name:fn+' '+G('cl2').value.trim(),phone:G('cp').value,plate:G('cpl').value,car:G('cc2').value,size:G('csz').value,points:0,visits:0,redeemed:0,coupons:[],serviceHistory:[],createdAt:serverTimestamp()};
+  const lineId=(G('c-line').value||'').trim();
+  const data={name:fn+' '+G('cl2').value.trim(),phone:G('cp').value,lineUserId:lineId,plate:G('cpl').value,car:G('cc2').value,size:G('csz').value,points:0,visits:0,redeemed:0,coupons:[],serviceHistory:[],createdAt:serverTimestamp()};
   if(db&&!LM)await addDoc(collection(db,'customers'),data);
   else{custs.push({...data,id:Date.now(),createdAt:new Date()});LS('cu',custs);rLoy();}
-  hs('sh-nc');['cf','cl2','cp','cpl','cc2'].forEach(i=>G(i).value='');
+  hs('sh-nc');['cf','cl2','cp','cpl','cc2','c-line'].forEach(i=>G(i).value='');
 };
 
 // ══ STOCK ══
@@ -1415,6 +1536,340 @@ window.sw=function(id,el){
 window.sh=function(id){G(id).style.display='flex';if(id==='sh-staff')rStaffManage();};
 window.hs=function(id){G(id).style.display='none';};
 window.csbg=function(e,id){if(e.target===G(id))hs(id);};
+
+// ══ PRODUCT USAGE TRACKING ══
+let usageLogs=[]; // {id, txnId, date, staff, serviceId, serviceName, expected:[], actual:[], createdAt}
+let pendingUsage=null; // holds data waiting for staff confirmation
+
+// Load usage logs from Firebase or local
+function subscribeUsage(){
+  if(db&&!LM){
+    onSnapshot(query(collection(db,'usageLogs'),orderBy('createdAt','desc'),limit(500)),s=>{
+      usageLogs=s.docs.map(d=>({...d.data(),_id:d.id}));rUsage();
+    });
+  }else{
+    usageLogs=LS('ul')||[];rUsage();
+  }
+}
+
+// ── RECIPE MANAGEMENT (on service edit sheet) ──
+let editingRecipe=[]; // [{stockId, stockName, qty, unit}]
+
+function populateRecipeProdDropdown(){
+  const sel=G('sv-recipe-prod');
+  if(!sel)return;
+  sel.innerHTML=stock.map(s=>`<option value="${s._id||s.id}">${s.name}</option>`).join('');
+}
+
+window.addRecipeItem=function(){
+  const sel=G('sv-recipe-prod');
+  const qty=parseFloat(G('sv-recipe-qty').value);
+  const unit=G('sv-recipe-unit').value.trim()||'ขวด';
+  if(!sel||!qty){alert('เลือกสินค้าและใส่จำนวน');return;}
+  const stockId=sel.value;
+  const stockName=sel.options[sel.selectedIndex].text;
+  // Remove existing entry for same product
+  editingRecipe=editingRecipe.filter(r=>r.stockId!==stockId);
+  editingRecipe.push({stockId,stockName,qty,unit});
+  G('sv-recipe-qty').value='';
+  renderRecipeList();
+};
+
+function renderRecipeList(){
+  const el=G('sv-recipe-list');if(!el)return;
+  el.innerHTML=editingRecipe.length?editingRecipe.map((r,i)=>`<div class="recipe-item">
+    <div style="flex:1;"><span style="font-weight:700;">${r.stockName}</span></div>
+    <div style="color:var(--inf);font-weight:700;">${r.qty} ${r.unit}</div>
+    <button class="btn btn-s btn-d" onclick="removeRecipeItem(${i})">×</button>
+  </div>`).join(''):'<div style="font-size:11px;color:var(--tx3);padding:8px 0;">ยังไม่มีสูตร — เพิ่มด้านล่าง</div>';
+}
+
+window.removeRecipeItem=function(i){editingRecipe.splice(i,1);renderRecipeList();};
+
+// Load recipe when editing a service
+const _origEditSvc=window.editSvc;
+window.editSvc=function(id){
+  _origEditSvc(id);
+  const s=svcs.find(x=>(x._id||x.code)==id);
+  editingRecipe=s?.recipe?JSON.parse(JSON.stringify(s.recipe)):[];
+  populateRecipeProdDropdown();
+  renderRecipeList();
+};
+
+window.openNewSvc=function(){
+  G('nsvc-title').textContent='เพิ่มบริการ';G('sv-edit-id').value='';
+  ['sv-name','sv-code','sv-s','sv-m','sv-l','sv-xl','sv-xxl','sv-sc','sv-sco','sv-cpn','sv-cpnm'].forEach(i=>G(i).value='');
+  editingRecipe=[];
+  populateRecipeProdDropdown();
+  renderRecipeList();
+  sh('sh-nsvc');
+};
+
+// Patch saveSvc to include recipe
+const _origSaveSvc=window.saveSvc;
+window.saveSvc=async function(){
+  // Add recipe to the data — we patch saveSvc by reading editingRecipe
+  // We override the whole function here
+  const name=G('sv-name').value.trim();if(!name){alert('ระบุชื่อ');return;}
+  const data={name,code:G('sv-code').value.trim(),cat:G('sv-cat').value,
+    S:parseInt(G('sv-s').value)||0,M:parseInt(G('sv-m').value)||0,L:parseInt(G('sv-l').value)||0,
+    XL:parseInt(G('sv-xl').value)||0,XXL:parseInt(G('sv-xxl').value)||0,
+    SC:parseInt(G('sv-sc').value)||0,SCo:parseInt(G('sv-sco').value)||0,
+    cpnWash:parseInt(G('sv-cpn').value)||0,cpnMonth:parseInt(G('sv-cpnm').value)||0,
+    recipe:editingRecipe
+  };
+  const eid=G('sv-edit-id').value;
+  if(db&&!LM){if(eid)await updateDoc(doc(db,'services',eid),data);else await addDoc(collection(db,'services'),data);}
+  else{if(eid){const i=svcs.findIndex(x=>(x._id||x.code)==eid);if(i>=0)svcs[i]={...svcs[i],...data};}
+    else svcs.push({...data,_id:'l'+Date.now()});LS('sv',svcs);rSvcs();rPL();}
+  hs('sh-nsvc');G('sv-edit-id').value='';
+  editingRecipe=[];
+};
+
+// ── USAGE CONFIRMATION AFTER CHECKOUT ──
+function buildExpectedUsage(cartItems){
+  // For each item in cart, look up its recipe, accumulate expected usage
+  const expected={}; // {stockId: {stockName,qty,unit}}
+  cartItems.forEach(ci=>{
+    const svc=svcs.find(s=>(s._id||s.code)===ci.svcRef||(s._id||s.code)===ci.id.split('_')[0]||s.code===ci.code);
+    if(!svc||!svc.recipe)return;
+    svc.recipe.forEach(r=>{
+      if(!expected[r.stockId])expected[r.stockId]={stockId:r.stockId,stockName:r.stockName,unit:r.unit,qty:0};
+      expected[r.stockId].qty+=r.qty*(ci.qty||1);
+    });
+  });
+  return Object.values(expected);
+}
+
+window.showUsageConfirm=function(txnData,cartItems){
+  const expected=buildExpectedUsage(cartItems);
+  if(!expected.length){pendingUsage=null;return;} // no recipe = skip
+  pendingUsage={txnData,cartItems,expected};
+  G('usage-items').innerHTML=expected.map((e,i)=>`
+    <div class="usage-row">
+      <div class="usage-prod">${e.stockName}</div>
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:var(--tx3);">มาตรฐาน</div>
+        <div style="font-weight:700;color:var(--inf);">${e.qty.toFixed(2)} ${e.unit}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:var(--tx3);">ใช้จริง</div>
+        <input class="usage-input" id="uqty-${i}" type="number" step="0.01"
+          value="${e.qty.toFixed(2)}" placeholder="${e.qty.toFixed(2)}"/>
+      </div>
+      <div id="udiff-${i}" style="width:50px;text-align:center;font-size:11px;"></div>
+    </div>
+    <script>
+      document.getElementById('uqty-${i}').addEventListener('input',function(){
+        const exp=${e.qty};const act=parseFloat(this.value)||0;const diff=act-exp;
+        const el=document.getElementById('udiff-${i}');
+        if(Math.abs(diff)<0.001){el.textContent='✓';el.className='';}
+        else if(diff>0){el.innerHTML='<span class="over">+'+diff.toFixed(2)+'</span>';}
+        else{el.innerHTML='<span class="save">'+diff.toFixed(2)+'</span>';}
+      });
+    </script>`
+  ).join('');
+  sh('sh-usage');
+};
+
+window.skipUsage=function(){pendingUsage=null;hs('sh-usage');};
+
+window.confirmUsage=async function(){
+  if(!pendingUsage)return;
+  const{txnData,cartItems,expected}=pendingUsage;
+  const actual=expected.map((e,i)=>({
+    ...e,actualQty:parseFloat(G('uqty-'+i)?.value)||e.qty
+  }));
+  const now=new Date();
+  const logEntry={
+    txnId:txnData.id,date:txnData.date,time:txnData.time,
+    staff:txnData.staff||'ไม่ระบุ',
+    services:cartItems.map(c=>c.name).join(', '),
+    expected:expected,actual:actual,
+    overuse:actual.filter(a=>a.actualQty>a.qty+0.001),
+    savings:actual.filter(a=>a.actualQty<a.qty-0.001),
+    createdAt:serverTimestamp()
+  };
+  try{
+    if(db&&!LM){await addDoc(collection(db,'usageLogs'),logEntry);}
+    else{usageLogs.unshift({...logEntry,_id:'l'+Date.now(),createdAt:now});LS('ul',usageLogs);}
+    // Deduct actual from stock
+    for(const a of actual){
+      const s=stock.find(x=>(x._id||x.id)===a.stockId);
+      if(!s)continue;
+      const newQty=Math.max(0,(s.qty||0)-a.actualQty);
+      if(db&&!LM)await updateDoc(doc(db,'stock',a.stockId),{qty:newQty});
+      else{s.qty=newQty;LS('st',stock);}
+    }
+  }catch(e){console.error(e);}
+  pendingUsage=null;
+  hs('sh-usage');
+  rUsage();rSt();
+};
+
+// ── USAGE REPORT ──
+function usageInRange(u){
+  const f=G('u-from')?.value,t=G('u-to')?.value;if(!f&&!t)return true;
+  try{const p=(u.date||'').split('/');const d=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+  if(f&&d<new Date(f))return false;if(t&&d>new Date(t+' 23:59'))return false;}catch{return false;}
+  return true;
+}
+
+window.setUsageRange=function(r){
+  const now=new Date(),fmt=d=>d.toISOString().slice(0,10);
+  if(r==='today'){const s=fmt(now);G('u-from').value=s;G('u-to').value=s;}
+  else if(r==='week'){const s=new Date(now);s.setDate(s.getDate()-6);G('u-from').value=fmt(s);G('u-to').value=fmt(now);}
+  else if(r==='month'){G('u-from').value=fmt(new Date(now.getFullYear(),now.getMonth(),1));G('u-from').value=fmt(now);}
+  rUsage();
+};
+
+function rUsage(){
+  const logs=usageLogs.filter(usageInRange);
+  const overCount=logs.reduce((a,l)=>a+(l.overuse?.length||0),0);
+  const saveCount=logs.reduce((a,l)=>a+(l.savings?.length||0),0);
+  if(G('u-jobs'))G('u-jobs').textContent=logs.length;
+  if(G('u-over'))G('u-over').textContent=overCount;
+  if(G('u-save'))G('u-save').textContent=saveCount;
+
+  // Per product breakdown
+  const prodMap={};
+  logs.forEach(l=>{
+    (l.actual||[]).forEach(a=>{
+      if(!prodMap[a.stockId])prodMap[a.stockId]={name:a.stockName,unit:a.unit||'',totalExp:0,totalAct:0,count:0};
+      prodMap[a.stockId].totalExp+=a.qty||0;
+      prodMap[a.stockId].totalAct+=a.actualQty||0;
+      prodMap[a.stockId].count++;
+    });
+  });
+
+  const prodEl=G('u-products');
+  if(prodEl){
+    const rows=Object.values(prodMap);
+    prodEl.innerHTML=rows.length?`
+      <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:0;font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;padding:8px 14px;background:var(--bg);border-bottom:1px solid var(--bdr);">
+        <span>สินค้า</span><span style="text-align:center;">มาตรฐาน</span><span style="text-align:center;margin-left:12px;">จริง</span><span style="text-align:center;margin-left:12px;">ส่วนต่าง</span>
+      </div>`+
+      rows.map(r=>{
+        const diff=r.totalAct-r.totalExp;const pct=r.totalExp>0?r.totalAct/r.totalExp*100:100;
+        const barColor=diff>0.01?'var(--err)':diff<-0.01?'var(--ok)':'var(--inf)';
+        const diffStr=diff>0.01?`<span class="over">+${diff.toFixed(2)}</span>`:diff<-0.01?`<span class="save">${diff.toFixed(2)}</span>`:'<span style="color:var(--inf);">±0</span>';
+        return`<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-weight:700;font-size:12px;">${r.name}</span>
+            <span style="font-size:11px;">${r.count} ครั้ง</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:8px;">
+            <div class="usage-bar-wrap" style="width:100%;"><div class="usage-bar-fill" style="width:${Math.min(pct,150)}%;background:${barColor};"></div></div>
+            <span style="font-size:11px;color:var(--tx2);white-space:nowrap;">${r.totalExp.toFixed(2)} ${r.unit}</span>
+            <span style="font-size:11px;font-weight:700;white-space:nowrap;">${r.totalAct.toFixed(2)} ${r.unit}</span>
+            <span style="font-size:11px;white-space:nowrap;">${diffStr}</span>
+          </div>
+        </div>`;
+      }).join(''):'<div class="empty">ไม่มีข้อมูลในช่วงนี้</div>';
+  }
+
+  // Per staff breakdown
+  const staffMap={};
+  logs.forEach(l=>{
+    const n=l.staff||'ไม่ระบุ';
+    if(!staffMap[n])staffMap[n]={name:n,overuse:0,savings:0,normal:0,totalOver:0,totalSave:0};
+    (l.actual||[]).forEach(a=>{
+      const diff=a.actualQty-a.qty;
+      if(diff>0.01){staffMap[n].overuse++;staffMap[n].totalOver+=diff;}
+      else if(diff<-0.01){staffMap[n].savings++;staffMap[n].totalSave+=Math.abs(diff);}
+      else staffMap[n].normal++;
+    });
+  });
+
+  const staffEl=G('u-staff');
+  if(staffEl){
+    const rows=Object.values(staffMap);
+    staffEl.innerHTML=rows.length?rows.map(r=>`<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+        <span class="staff-chip">👤 ${r.name}</span>
+        <span style="font-size:11px;color:var(--tx2);">${r.overuse+r.savings+r.normal} รายการ</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${r.overuse>0?`<span class="badge br">ใช้เกิน ${r.overuse} ครั้ง (+${r.totalOver.toFixed(2)})</span>`:''}
+        ${r.savings>0?`<span class="badge bg2">ประหยัด ${r.savings} ครั้ง (-${r.totalSave.toFixed(2)})</span>`:''}
+        ${r.normal>0?`<span class="badge bb">ตรงมาตรฐาน ${r.normal} ครั้ง</span>`:''}
+      </div>
+    </div>`).join(''):'<div class="empty">ไม่มีข้อมูล</div>';
+  }
+
+  // Usage log list
+  const logEl=G('u-log');
+  if(logEl){
+    logEl.innerHTML=logs.slice(0,30).map(l=>`<div class="usage-log-item">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+        <div><span style="font-weight:700;">${l.txnId}</span> · <span class="staff-chip" style="font-size:10px;">👤 ${l.staff}</span></div>
+        <span style="font-size:11px;color:var(--tx2);">${l.date} ${l.time||''}</span>
+      </div>
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:7px;">${l.services}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;">
+        ${(l.actual||[]).map(a=>{
+          const diff=a.actualQty-a.qty;
+          const cls=diff>0.01?'over-tag':diff<-0.01?'save-tag':'';
+          const sym=diff>0.01?'↑':diff<-0.01?'↓':'✓';
+          return`<span class="usage-prod-tag ${cls}">${sym} ${a.stockName}: ${a.actualQty.toFixed(2)}/${a.qty.toFixed(2)} ${a.unit||''}</span>`;
+        }).join('')}
+      </div>
+    </div>`).join('')||'<div class="empty">ไม่มีบันทึก</div>';
+  }
+}
+
+window.exportUsage=function(){
+  const logs=usageLogs.filter(usageInRange);
+  if(!logs.length){alert('ไม่มีข้อมูล');return;}
+  const from=G('u-from')?.value||'all',to=G('u-to')?.value||'all';
+  let c='﻿';
+  c+=`รายงานการใช้วัตถุดิบ	${from} - ${to}
+
+`;
+  c+=`Receipt	วันที่	พนักงาน	บริการ	สินค้า	มาตรฐาน	ใช้จริง	ส่วนต่าง	หน่วย
+`;
+  logs.forEach(l=>(l.actual||[]).forEach(a=>{
+    const diff=a.actualQty-a.qty;
+    c+=`${l.txnId}	${l.date}	${l.staff}	${l.services}	${a.stockName}	${a.qty.toFixed(2)}	${a.actualQty.toFixed(2)}	${diff.toFixed(2)}	${a.unit||''}
+`;
+  }));
+  const b=new Blob([c],{type:'text/csv;charset=utf-8'});
+  const u=URL.createObjectURL(b);const a=document.createElement('a');
+  a.href=u;a.download=`usage-${from}-${to}.csv`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+};
+
+// ── PATCH CHECKOUT TO SHOW USAGE CONFIRM ──
+// After checkout succeeds, show usage confirmation sheet
+const _origCheckout=window.checkout;
+window.checkout=async function(){
+  // Save cart copy before checkout clears it
+  const cartCopy=cart.map(c=>({...c}));
+  await _origCheckout();
+  // After checkout, if last txn had products with recipes, show usage confirm
+  if(lastTxnData){
+    const expected=buildExpectedUsage(cartCopy);
+    if(expected.length>0){
+      // Small delay to let success sheet appear first
+      setTimeout(()=>showUsageConfirm(lastTxnData,cartCopy),800);
+    }
+  }
+};
+
+// ── PATCH sw() to init usage screen ──
+const _origSw=window.sw;
+window.sw=function(id,el){
+  _origSw(id,el);
+  if(id==='usage'){
+    setUsageRange('month');
+    rUsage();
+  }
+  if(id==='prices'){
+    populateRecipeProdDropdown();
+  }
+};
+
+// Subscribe usage logs
+if(db&&!LM)subscribeUsage();else{usageLogs=LS('ul')||[];rUsage();}
 
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
