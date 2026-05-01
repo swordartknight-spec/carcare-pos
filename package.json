@@ -1,0 +1,9 @@
+{
+  "name": "carcare-line-server",
+  "version": "1.0.0",
+  "description": "CarCare POS - Line receipt sender & webhook",
+  "private": true,
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}
