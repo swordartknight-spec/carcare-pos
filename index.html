@@ -243,7 +243,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     <button class="sskip" onclick="goOffline()">ใช้งานแบบ Offline →</button>
     <div style="margin-top:20px;border-top:1px solid #333;padding-top:16px;">
       <label class="slbl">Vercel Server URL (ไม่จำเป็น — สำหรับส่ง Line)</label>
-      <input class="sinput" id="vercel-url" placeholder="https://your-project.vercel.app" autocomplete="off"/>
+      <input class="sinput" id="vercel-url" placeholder="https://carcare-pos.vercel.app" value="https://carcare-pos.vercel.app" autocomplete="off"/>
       <button style="width:100%;padding:10px;background:#333;color:#aaa;border:none;border-radius:7px;font-size:12px;cursor:pointer;margin-top:8px;" onclick="saveVercelUrl()">บันทึก Vercel URL</button>
     </div>
   </div>
@@ -253,7 +253,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v5e</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v6</span></div>
   <div class="sync">
     <span class="dot" id="dot"></span>
     <span id="sl">offline</span>
@@ -843,18 +843,41 @@ window.goOffline=function(){
 const savedVercel=LS('line_server_url');
 if(savedVercel){const vi=G('vercel-url');if(vi)vi.value=savedVercel;}
 
-const saved=LS('fb');
-if(saved){
-  try{
-    const cfg=saved;
-    G('fb-key').value=cfg.apiKey||'';G('fb-pid').value=cfg.projectId||'';G('fb-aid').value=cfg.appId||'';
-    const app=initializeApp(cfg);db=getFirestore(app);startApp();
-  }catch(e){console.log(e);}
+// ── AUTO-CONNECT: hardcoded Firebase config ──
+const AUTO_CFG={
+  apiKey:'AIzaSyDSuBAXVbzaMwNJEVQYxYDF8Q0zPWYxUhQ',
+  authDomain:'carcare-pos-559ef.firebaseapp.com',
+  projectId:'carcare-pos-559ef',
+  storageBucket:'carcare-pos-559ef.appspot.com',
+  appId:'1:562909364593:web:549e45b521adb45247f6d0'
+};
+try{
+  LS('fb',AUTO_CFG);
+  G('fb-key').value=AUTO_CFG.apiKey;
+  G('fb-pid').value=AUTO_CFG.projectId;
+  G('fb-aid').value=AUTO_CFG.appId;
+  const _autoApp=initializeApp(AUTO_CFG);
+  db=getFirestore(_autoApp);
+  startApp();
+}catch(e){
+  console.log('Auto-connect failed:',e);
+  // Fall back to manual entry
+  const saved=LS('fb');
+  if(saved){
+    try{
+      const cfg=saved;
+      const app=initializeApp(cfg);db=getFirestore(app);startApp();
+    }catch(e2){console.log(e2);}
+  }
 }
 
 function startApp(){
   G('setup').style.display='none';G('app').style.display='flex';
   setDot('sy','Connecting...');
+  // Auto-set Vercel URL if not already set
+  if(!localStorage.getItem('line_server_url')){
+    localStorage.setItem('line_server_url','https://carcare-pos.vercel.app');
+  }
   // setRange called after module loads via window.setRange
   setTimeout(function(){if(window.setRange)window.setRange('today');else{var n=new Date(),f=n.toISOString().slice(0,10);document.getElementById('d-from').value=f;document.getElementById('d-to').value=f;}},200);
   initStaffDropdown();
