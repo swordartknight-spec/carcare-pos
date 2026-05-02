@@ -253,7 +253,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v6</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v6a</span></div>
   <div class="sync">
     <span class="dot" id="dot"></span>
     <span id="sl">offline</span>
@@ -1129,7 +1129,7 @@ window.cSearch=function(){
   const r=custs.filter(c=>c.name.toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.plate||'').toLowerCase().includes(q));
   dd.style.display=r.length?'block':'none';
   dd.innerHTML=r.map(c=>`<div class="co" onclick="selCust('${c._id||c.id}')">
-    <div><div style="font-weight:700;font-size:13px;">${c.name}</div>
+    <div><div style="font-weight:700;font-size:13px;">${c.name}${c.lineUserId?'<span style="background:#00b900;color:#fff;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:4px;">LINE</span>':''}</div>
     <div style="font-size:11px;color:var(--tx3);">${c.plate||''}·${c.car||''}·${c.size||''}</div></div>
     <span class="pc">${c.points||0} pts</span>
   </div>`).join('');
@@ -1138,7 +1138,7 @@ window.cSearch=function(){
 window.selCust=function(id){
   selC=custs.find(c=>(c._id||c.id)==id);if(!selC)return;
   G('cdd').style.display='none';G('cq').value=selC.name;G('cch').style.display='block';
-  G('ccn').textContent=selC.name;G('ccp').textContent=(selC.points||0)+' pts';
+  G('ccn').innerHTML=selC.name+(selC.lineUserId?'<span style="background:#00b900;color:#fff;font-size:9px;padding:1px 6px;border-radius:99px;margin-left:5px;font-weight:700;">LINE ✓</span>':'<span style="background:#ccc;color:#555;font-size:9px;padding:1px 6px;border-radius:99px;margin-left:5px;">ไม่มี LINE</span>');G('ccp').textContent=(selC.points||0)+' pts';
   G('cci').textContent=(selC.car||'')+'·'+tier(selC.points||0)+'·'+(selC.visits||0)+' visits';
   G('ccb').style.width=Math.min(((selC.points||0)%500)/500*100,100)+'%';
   G('ccnxt').textContent=(500-(selC.points||0)%500)+' pts ถึงส่วนลด ฿50';
@@ -1409,7 +1409,7 @@ function rLoy(){
     if(c.lastCeramic){const months=Math.round((now-new Date(c.lastCeramic))/(1000*60*60*24*30));if(months>=5)ceramicBadge='<span class="badge bpu" style="margin-left:4px;">🔔 ceramic</span>';}
     return`<div class="card" style="margin-bottom:8px;cursor:pointer;" onclick="showCustDetail('${c._id||c.id}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-        <div><div style="font-weight:700;font-size:14px;">${c.name}${ceramicBadge}</div>
+        <div><div style="font-weight:700;font-size:14px;">${c.name}${ceramicBadge}${c.lineUserId?'<span style="background:#00b900;color:#fff;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:5px;font-weight:700;">LINE ✓</span>':''}</div>
         <div style="font-size:11px;color:var(--tx3);">${c.car||''}·${c.plate||''}·<span class="badge bb">${c.size||''}</span>·${c.phone||''}</div></div>
         <span class="pc">${c.points||0} pts</span>
       </div>
