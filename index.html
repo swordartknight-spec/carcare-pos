@@ -267,7 +267,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v6e</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v6g</span></div>
   <div class="sync">
     <span class="dot" id="dot"></span>
     <span id="sl">offline</span>
@@ -1178,6 +1178,8 @@ window.selCust=function(id){
   G('cci').textContent=(selC.car||'')+'·'+tier(selC.points||0)+'·'+(selC.visits||0)+' visits';
   G('ccb').style.width=Math.min(((selC.points||0)%500)/500*100,100)+'%';
   G('ccnxt').textContent=(500-(selC.points||0)%500)+' pts ถึงส่วนลด ฿50';
+  const totalW=selC.totalWashes||0;const nextFree=5-((totalW)%5);
+  G('ccnxt').textContent+=' · ล้างรถอีก '+nextFree+' ครั้ง = ฟรี 1 ครั้ง ('+totalW+'/'+( Math.ceil((totalW+1)/5)*5 )+')';
   G('plate').value=selC.plate||'';
   // Show coupons in chip
   const now=new Date();
@@ -1205,11 +1207,30 @@ window.checkout=async function(){
   const csaleTotal=cart.reduce((a,c)=>a+(c.SC||0)*c.qty,0);
   const copTotal=cart.reduce((a,c)=>a+(c.SCo||0)*c.qty,0);
 
-  // Build new coupons
+  // Build new coupons from service recipes
   let newCoupons=[],cpnMsg=[];
   for(const ci of cart){
     if((ci.cpnWash||0)>0){newCoupons.push({type:'wash',remaining:ci.cpnWash,from:now.toISOString(),service:ci.name});cpnMsg.push(`ล้างรถฟรี ${ci.cpnWash} ครั้ง`);}
     if((ci.cpnMonth||0)>0){const exp=new Date(now);exp.setMonth(exp.getMonth()+ci.cpnMonth);newCoupons.push({type:'month',expires:exp.toISOString(),from:now.toISOString(),service:ci.name});cpnMsg.push(`ล้างรถฟรี ${ci.cpnMonth} เดือน (ถึง ${fmtDate(exp)})`);}
+  }
+
+  // ── LOYALTY WASH COUPON: every 5 car washes = 1 free wash ──
+  // Count wash services in this transaction
+  const washCats=['ล้างรถ'];
+  const washCount=cart.filter(c=>washCats.includes(c.cat)).reduce((a,c)=>a+(c.qty||1),0);
+  if(washCount>0&&selC){
+    const prevWashes=selC.totalWashes||0;
+    const newWashes=prevWashes+washCount;
+    // Check if crossed a multiple of 5
+    const prevMilestone=Math.floor(prevWashes/5);
+    const newMilestone=Math.floor(newWashes/5);
+    const freeCouponsEarned=newMilestone-prevMilestone;
+    if(freeCouponsEarned>0){
+      newCoupons.push({type:'wash',remaining:freeCouponsEarned,from:now.toISOString(),service:'ล้างรถครบ 5 ครั้ง'});
+      cpnMsg.push(`🎁 ล้างรถฟรี ${freeCouponsEarned} ครั้ง (สะสมครบ ${newMilestone*5} ครั้ง!)`);
+    }
+    // Store updated wash count in customer update
+    selC._newTotalWashes=newWashes;
   }
 
   const tdata={
