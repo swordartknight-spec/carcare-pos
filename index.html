@@ -253,7 +253,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v5b</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v5c</span></div>
   <div class="sync">
     <span class="dot" id="dot"></span>
     <span id="sl">offline</span>
@@ -1254,6 +1254,18 @@ window.shareInvoice=async function(){
 window.shareLastInvoice=async function(){
   if(!lastTxnData)return;
   const text=buildInvoiceText(lastTxnData.items||cart,lastTxnData);
+  const lineId=lastTxnData.customerObj?.lineUserId;
+  let serverUrl=null;
+  try{const raw=localStorage.getItem('line_server_url');if(raw){serverUrl=raw.replace(/^["']+|["']+$/g,'').trim();}}catch(e){}
+  if(lineId&&serverUrl){
+    try{
+      setDot('sy','Sending...');
+      const r=await fetch(serverUrl+'/api/send-receipt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lineUserId:lineId,message:text})});
+      const d=await r.json();
+      if(d.success){setDot('on','Synced ✓');alert('✅ ส่งใบเสร็จไปยัง Line ลูกค้าสำเร็จ!');return;}
+    }catch(e){console.error('Line send error:',e);}
+    setDot('on','Synced ✓');
+  }
   if(navigator.share){try{await navigator.share({title:'ใบเสร็จ CarCare POS',text});}catch(e){}}
   else{navigator.clipboard?.writeText(text).then(()=>alert('คัดลอกใบเสร็จแล้ว!\nวางใน Line ได้เลย 📋'));}
 };
