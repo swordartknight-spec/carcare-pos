@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 
     if (event.type === 'follow') {
       await reply(TOKEN, event.replyToken,
-        'ยินดีต้อนรับสู่ CarCare! 🚗✨\n\nกรุณาพิมพ์ทะเบียนรถของคุณ\nเพื่อรับใบเสร็จผ่าน Line อัตโนมัติ\n\nตัวอย่าง: กข 1234'
+        'ยินดีต้อนรับสู่ CarCare! 🚗✨\n\nพิมพ์ # ตามด้วยทะเบียนรถ\nเพื่อเชื่อมต่อรับใบเสร็จอัตโนมัติ\n\nตัวอย่าง: #กข1234\n\n(ข้อความปกติสามารถส่งหาเราได้เลย 😊)'
       );
       continue;
     }
@@ -26,7 +26,10 @@ export default async function handler(req, res) {
     if (event.type !== 'message' || event.message?.type !== 'text') continue;
 
     const text = event.message.text.trim();
-    const norm = text.replace(/\s+/g,'').toUpperCase();
+    // Only respond to messages starting with # (hashtag)
+    if(!text.startsWith('#')) continue;
+    const plateText = text.slice(1).trim(); // Remove the # prefix
+    const norm = plateText.replace(/\s+/g,'').toUpperCase();
 
     try {
       const token = await getToken();
@@ -59,7 +62,7 @@ export default async function handler(req, res) {
         );
       } else {
         await reply(TOKEN, event.replyToken,
-          `ไม่พบทะเบียน "${text}"\n\nลองพิมพ์:\n• ทะเบียนรถ เช่น กข1234\n• เบอร์โทร เช่น 0812345678\n\nหรือแจ้งพนักงานเพิ่มข้อมูล`
+          `ไม่พบทะเบียน "${plateText}" ในระบบ\n\nลองพิมพ์:\n• #ทะเบียนรถ เช่น #กข1234\n• #เบอร์โทร เช่น #0812345678\n\nหรือแจ้งพนักงานเพิ่มข้อมูลในระบบ`
         );
       }
     } catch(e) {
