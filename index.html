@@ -253,7 +253,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v5c</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v5e</span></div>
   <div class="sync">
     <span class="dot" id="dot"></span>
     <span id="sl">offline</span>
@@ -548,15 +548,23 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <!-- BOTTOM NAV -->
 <div class="nav">
-  <button class="nt active" onclick="sw('pos',this)"><span class="ni">🛒</span>POS</button>
-  <button class="nt" onclick="sw('today',this)"><span class="ni">📊</span>Today</button>
-  <button class="nt" onclick="sw('loyalty',this)"><span class="ni">⭐</span>Loyalty</button>
-  <button class="nt" onclick="sw('staff',this)"><span class="ni">👤</span>Incentive</button>
-  <button class="nt" onclick="sw('stock',this)"><span class="ni">📦</span>Stock</button>
-  <button class="nt" onclick="sw('prices',this)"><span class="ni">📋</span>Prices</button>
-  <button class="nt" onclick="sw('usage',this)"><span class="ni">🧪</span>Usage</button>
-  <button class="nt" onclick="sw('history',this)"><span class="ni">🕐</span>History</button>
+  <button class="nt active" id="nt-pos" onclick="sw('pos',this)"><span class="ni">🛒</span>POS</button>
+  <button class="nt" id="nt-today" onclick="sw('today',this)"><span class="ni">📊</span>Today</button>
+  <button class="nt" id="nt-loyalty" onclick="sw('loyalty',this)"><span class="ni">⭐</span>Loyalty</button>
+  <button class="nt" id="nt-history" onclick="sw('history',this)"><span class="ni">🕐</span>History</button>
+  <button class="nt" onclick="toggleMoreMenu()"><span class="ni">••••</span>More</button>
 </div>
+
+<!-- MORE MENU -->
+<div id="more-menu" style="display:none;position:fixed;bottom:calc(56px + var(--sb));left:0;right:0;background:var(--sur);border-top:1px solid var(--bdr);z-index:150;padding:8px 0;box-shadow:0 -4px 20px rgba(0,0,0,.12);">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;">
+    <button class="nt" id="nt-staff" onclick="sw('staff',this);toggleMoreMenu()"><span class="ni">👤</span>Incentive</button>
+    <button class="nt" id="nt-stock" onclick="sw('stock',this);toggleMoreMenu()"><span class="ni">📦</span>Stock</button>
+    <button class="nt" id="nt-prices" onclick="sw('prices',this);toggleMoreMenu()"><span class="ni">📋</span>Prices</button>
+    <button class="nt" id="nt-usage" onclick="sw('usage',this);toggleMoreMenu()"><span class="ni">🧪</span>Usage</button>
+  </div>
+</div>
+<div id="more-backdrop" onclick="toggleMoreMenu()" style="display:none;position:fixed;inset:0;z-index:149;"></div>
 </div><!-- app -->
 
 <!-- ══════ SHEETS ══════ -->
@@ -1194,7 +1202,7 @@ window.checkout=async function(){
   }catch(e){setDot('off','Error');console.error(e);}
 
   // Store last txn for invoice sharing
-  lastTxnData={...tdata,customerObj:selC?{...selC}:null,staffName,items:cart.map(c=>({...c}))};
+  lastTxnData={...tdata,customerObj:selC?{...selC}:null,staffName,items:cart.map(c=>({...c})),newCoupons:cpnMsg};
 
   // Show receipt
   G('oks').textContent=recId+'·'+(selC?selC.name:'Walk-in')+'·'+plate;
@@ -1549,13 +1557,30 @@ window.exportRange=function(){
 window.sw=function(id,el){
   document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nt').forEach(t=>t.classList.remove('active'));
-  G('sc-'+id).classList.add('active');el.classList.add('active');
+  G('sc-'+id).classList.add('active');
+  // For more menu items, highlight the More button in main nav
+  const moreIds=['staff','stock','prices','usage'];
+  if(moreIds.includes(id)){
+    // highlight the more button
+    const moreBtns=document.querySelectorAll('.nav .nt');
+    moreBtns[moreBtns.length-1].classList.add('active');
+  } else {
+    if(el)el.classList.add('active');
+  }
   G('content').scrollTop=0;
   if(id==='loyalty')rLoy();if(id==='stock')rSt();if(id==='today')rToday();
   if(id==='prices')rPL();if(id==='history')rHist();
   if(id==='staff'){rStaffManage();rStaffInc();}
 };
 window.sh=function(id){G(id).style.display='flex';if(id==='sh-staff')rStaffManage();};
+
+window.toggleMoreMenu=function(){
+  const menu=G('more-menu');
+  const backdrop=G('more-backdrop');
+  const isOpen=menu.style.display!=='none';
+  menu.style.display=isOpen?'none':'block';
+  backdrop.style.display=isOpen?'none':'block';
+};
 window.hs=function(id){G(id).style.display='none';};
 window.csbg=function(e,id){if(e.target===G(id))hs(id);};
 
