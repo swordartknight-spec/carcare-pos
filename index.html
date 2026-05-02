@@ -267,7 +267,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v6g</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v6h</span></div>
   <div class="sync">
     <span class="dot" id="dot"></span>
     <span id="sl">offline</span>
@@ -1178,8 +1178,21 @@ window.selCust=function(id){
   G('cci').textContent=(selC.car||'')+'·'+tier(selC.points||0)+'·'+(selC.visits||0)+' visits';
   G('ccb').style.width=Math.min(((selC.points||0)%500)/500*100,100)+'%';
   G('ccnxt').textContent=(500-(selC.points||0)%500)+' pts ถึงส่วนลด ฿50';
-  const totalW=selC.totalWashes||0;const nextFree=5-((totalW)%5);
-  G('ccnxt').textContent+=' · ล้างรถอีก '+nextFree+' ครั้ง = ฟรี 1 ครั้ง ('+totalW+'/'+( Math.ceil((totalW+1)/5)*5 )+')';
+  // Wash milestone dots
+  const totalW=selC.totalWashes||0;
+  const posInCycle=totalW%5;
+  const nextFree=posInCycle===0?5:5-posInCycle;
+  const milestoneEl=G('wash-milestone');
+  milestoneEl.style.display='block';
+  G('wash-count-txt').textContent=totalW+' ครั้ง รวม';
+  // Draw 5 dots
+  let dotsHtml='';
+  for(let i=0;i<5;i++){
+    const filled=i<posInCycle;
+    dotsHtml+=`<div style="flex:1;height:10px;border-radius:99px;background:${filled?'var(--gold)':'var(--bdr)'};border:1px solid ${filled?'var(--gold-dk)':'var(--bdr2)'};transition:all .3s;"></div>`;
+  }
+  G('wash-dots').innerHTML=dotsHtml;
+  G('wash-next-txt').textContent=posInCycle===0?'เริ่มรอบใหม่! ล้างอีก 5 ครั้ง = ฟรี 1 ครั้ง':'อีก '+nextFree+' ครั้ง = ล้างฟรี 1 ครั้ง 🎁';
   G('plate').value=selC.plate||'';
   // Show coupons in chip
   const now=new Date();
