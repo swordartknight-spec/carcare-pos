@@ -277,7 +277,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v7b</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v7c</span></div>
   <div class="sync">
     <span class="dot" id="dot"></span>
     <span id="sl">offline</span>
@@ -756,33 +756,19 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- Coupon Template Sheet -->
 <div id="sh-cpn-tmpl" class="sbg" style="display:none;" onclick="csbg(event,'sh-cpn-tmpl')">
 <div class="sht" onclick="event.stopPropagation()">
-  <div class="sh"></div><h3 id="cpn-tmpl-title">🎫 สร้างคูปองสำเร็จรูป</h3>
+  <div class="sh"></div><h3 id="cpn-tmpl-title">🎫 สร้างคูปอง</h3>
   <div class="fr"><label class="lbl">ชื่อคูปอง</label>
-    <input id="ct-name" type="text" placeholder="เช่น ล้างรถฟรี 5 ครั้ง, ส่วนลด ฿200"/>
+    <input id="ct-name" type="text" placeholder="เช่น ล้างรถฟรี, ส่วนลด ฿100"/>
   </div>
   <div class="fr2">
-    <div><label class="lbl">ประเภท</label>
-      <select id="ct-type">
-        <option value="wash">ล้างรถฟรี (ครั้ง)</option>
-        <option value="month">ล้างรถฟรี (เดือน)</option>
-        <option value="discount">ส่วนลด (฿)</option>
-        <option value="free_service">บริการฟรี</option>
-        <option value="other">อื่นๆ</option>
-      </select>
+    <div><label class="lbl">ใช้ได้กี่ครั้ง</label>
+      <input id="ct-uses" type="number" placeholder="1" min="1"/>
     </div>
-    <div><label class="lbl">จำนวน/มูลค่า</label>
-      <input id="ct-val" type="number" placeholder="5"/>
+    <div><label class="lbl">ลดราคา (฿) ต่อครั้ง</label>
+      <input id="ct-discount" type="number" placeholder="0"/>
     </div>
   </div>
-  <div class="fr"><label class="lbl">อายุคูปอง (วัน) — เว้นว่างถ้าไม่หมดอายุ</label>
-    <input id="ct-days" type="number" placeholder="30"/>
-  </div>
-  <div class="fr"><label class="lbl">หมายเหตุ</label>
-    <input id="ct-note" type="text" placeholder="เงื่อนไขการใช้..."/>
-  </div>
-  <div style="background:var(--pur-bg);border-radius:var(--rs);padding:8px 12px;font-size:11px;color:var(--pur);margin-bottom:12px;">
-    💡 หลังสร้างแล้ว ไปที่ Loyalty → แตะลูกค้า → กด "🎫 +คูปอง" → เลือกคูปองนี้ได้เลย
-  </div>
+  <div style="font-size:11px;color:var(--tx3);margin-bottom:10px;">* ถ้าเป็นล้างรถฟรี ใส่ราคาล้างรถปกติ เช่น 200 · ถ้าไม่มีส่วนลดให้ใส่ 0</div>
   <input type="hidden" id="ct-edit-id"/>
   <div class="sbt"><button class="btn" onclick="hs('sh-cpn-tmpl')">ยกเลิก</button><button class="btn btn-g" onclick="saveCpnTmpl()">บันทึก</button></div>
 </div></div>
@@ -2468,69 +2454,76 @@ function subscribeCpnTmpls(){
   }
 }
 
-function cpnTypeLabel(type){
-  const m={wash:'ล้างรถฟรี (ครั้ง)',month:'ล้างรถฟรี (เดือน)',discount:'ส่วนลด (฿)',free_service:'บริการฟรี',other:'อื่นๆ'};
-  return m[type]||type;
-}
-
 function rCpnTmpls(){
   const el=G('cpn-tmpl-list');if(!el)return;
   el.innerHTML=cpnTmpls.length?cpnTmpls.map(t=>`
     <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:8px;">
-      <div style="width:10px;height:36px;border-radius:99px;background:var(--pur);flex-shrink:0;"></div>
+      <div style="width:10px;height:40px;border-radius:99px;background:var(--pur);flex-shrink:0;"></div>
       <div style="flex:1;">
         <div style="font-weight:700;font-size:13px;">${t.name}</div>
-        <div style="font-size:11px;color:var(--tx2);">${cpnTypeLabel(t.type)} · ${t.value} ${t.type==='discount'?'บาท':t.type==='month'?'เดือน':'ครั้ง'}${t.days?' · อายุ '+t.days+' วัน':''}</div>
-        ${t.note?`<div style="font-size:10px;color:var(--tx3);">${t.note}</div>`:''}
+        <div style="font-size:11px;color:var(--tx2);">ใช้ได้ ${t.uses} ครั้ง${t.discount>0?' · ลด ฿'+t.discount.toLocaleString()+' ต่อครั้ง':' · ฟรี'}</div>
       </div>
       <div style="display:flex;gap:5px;flex-shrink:0;">
-        <button class="btn btn-s btn-pur" onclick="quickAddCpnToLoyalty('${t._id}')">+ ให้ลูกค้า</button>
-        <button class="btn btn-s" onclick="editCpnTmpl('${t._id}')">แก้</button>
+        <button class="btn btn-s" onclick="editCpnTmpl('${t._id}')">แก้ไข</button>
         <button class="btn btn-s btn-d" onclick="delCpnTmpl('${t._id}')">ลบ</button>
       </div>
-    </div>`).join(''):'<div style="font-size:12px;color:var(--tx3);padding:8px 0;">ยังไม่มีคูปองสำเร็จรูป</div>';
-  // Also update quick select in paper coupon sheet
-  rPcpnTmplQuick();
+    </div>`).join(''):'<div style="font-size:12px;color:var(--tx3);padding:8px 0;">ยังไม่มีคูปอง — กด + สร้างคูปอง</div>';
 }
 
+// Show coupon list in the add coupon sheet
 function rPcpnTmplQuick(){
   const el=G('pcpn-tmpl-quick');if(!el)return;
-  if(!cpnTmpls.length){el.innerHTML='';return;}
-  el.innerHTML=`<div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;margin-bottom:8px;">เลือกจากคูปองสำเร็จรูป</div>`+
-  cpnTmpls.map(t=>`<div onclick="selectCpnTmpl('${t._id}')" style="padding:10px 12px;background:var(--pur-bg);border:1px solid var(--pur);border-radius:var(--rs);margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+  if(!cpnTmpls.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--tx3);text-align:center;padding:20px 0;">ยังไม่มีคูปอง<br><span style="font-size:11px;">ไปสร้างที่ Prices → 🎫 คูปองสำเร็จรูป</span></div>';
+    return;
+  }
+  el.innerHTML=`<div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;margin-bottom:10px;">เลือกคูปองที่จะให้</div>`+
+  cpnTmpls.map(t=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--pur-bg);border:1.5px solid var(--pur);border-radius:var(--r);margin-bottom:8px;">
     <div>
-      <div style="font-weight:700;font-size:12px;color:var(--pur);">${t.name}</div>
-      <div style="font-size:10px;color:var(--tx2);">${cpnTypeLabel(t.type)} · ${t.value}${t.days?' · '+t.days+' วัน':''}</div>
+      <div style="font-weight:700;font-size:13px;color:var(--pur);">🎫 ${t.name}</div>
+      <div style="font-size:11px;color:var(--tx2);margin-top:2px;">ใช้ได้ ${t.uses} ครั้ง${t.discount>0?' · ลด ฿'+t.discount.toLocaleString()+' ต่อครั้ง':' · ฟรี'}</div>
     </div>
-    <span style="font-size:18px;">→</span>
+    <button class="btn btn-s btn-pur" onclick="giveCpnToCustomer('${t._id}')">+ ให้</button>
   </div>`).join('');
 }
 
-window.selectCpnTmpl=function(id){
-  const t=cpnTmpls.find(x=>x._id===id);if(!t)return;
-  G('pcpn-desc').value=t.name;
-  G('pcpn-type').value=t.type;
-  G('pcpn-val').value=t.value;
-  if(t.days){
-    const exp=new Date();exp.setDate(exp.getDate()+parseInt(t.days));
-    G('pcpn-exp').value=exp.toISOString().slice(0,10);
-  }
+window.giveCpnToCustomer=async function(tmplId){
+  if(!viewCustId)return;
+  const t=cpnTmpls.find(x=>x._id===tmplId);if(!t)return;
+  const c=custs.find(x=>(x._id||x.id)==viewCustId);if(!c)return;
+  const newCpn={
+    type:'template',
+    templateId:tmplId,
+    name:t.name,
+    uses:t.uses,
+    remaining:t.uses,
+    discount:t.discount||0,
+    source:'manual',
+    from:new Date().toISOString()
+  };
+  const updCpns=[...(c.coupons||[]),newCpn];
+  if(db&&!LM)await updateDoc(doc(db,'customers',c._id||c.id),{coupons:updCpns});
+  else{c.coupons=updCpns;LS('cu',custs);}
+  rLoy();
+  alert('✅ ให้คูปอง "'+t.name+'" แก่ '+c.name+' แล้ว!');
 };
 
 window.saveCpnTmpl=async function(){
   const name=G('ct-name').value.trim();if(!name){alert('ระบุชื่อคูปอง');return;}
-  const data={name,type:G('ct-type').value,value:parseInt(G('ct-val').value)||1,days:parseInt(G('ct-days').value)||0,note:G('ct-note').value};
+  const uses=parseInt(G('ct-uses').value)||1;
+  const discount=parseInt(G('ct-discount').value)||0;
+  const data={name,uses,discount};
   const eid=G('ct-edit-id').value;
   if(db&&!LM){if(eid)await updateDoc(doc(db,'couponTemplates',eid),data);else await addDoc(collection(db,'couponTemplates'),data);}
   else{if(eid){const i=cpnTmpls.findIndex(x=>x._id===eid);if(i>=0)cpnTmpls[i]={...cpnTmpls[i],...data};}else cpnTmpls.push({...data,_id:'l'+Date.now()});LS('ct',cpnTmpls);rCpnTmpls();}
-  hs('sh-cpn-tmpl');['ct-name','ct-val','ct-days','ct-note'].forEach(i=>G(i).value='');G('ct-edit-id').value='';
+  hs('sh-cpn-tmpl');['ct-name','ct-uses','ct-discount'].forEach(i=>G(i).value='');G('ct-edit-id').value='';
+  G('cpn-tmpl-title').textContent='🎫 สร้างคูปอง';
 };
 
 window.editCpnTmpl=function(id){
   const t=cpnTmpls.find(x=>x._id===id);if(!t)return;
   G('cpn-tmpl-title').textContent='แก้ไขคูปอง';
-  G('ct-name').value=t.name;G('ct-type').value=t.type;
-  G('ct-val').value=t.value;G('ct-days').value=t.days||'';G('ct-note').value=t.note||'';
+  G('ct-name').value=t.name;G('ct-uses').value=t.uses;G('ct-discount').value=t.discount||0;
   G('ct-edit-id').value=id;sh('sh-cpn-tmpl');
 };
 
@@ -2540,25 +2533,14 @@ window.delCpnTmpl=async function(id){
   else{cpnTmpls=cpnTmpls.filter(x=>x._id!==id);LS('ct',cpnTmpls);rCpnTmpls();}
 };
 
-// Quick add from template directly to a customer (from prices page)
-window.quickAddCpnToLoyalty=function(tmplId){
-  // Switch to loyalty tab and pre-select template
-  sw('loyalty',document.querySelector('#nt-loyalty')||document.querySelector('.nt:nth-child(3)'));
-  alert('เลือกลูกค้าที่ต้องการให้คูปอง แล้วกด 🎫 +คูปอง');
-  window._pendingTmplId=tmplId;
-};
-
-// Patch openPaperCoupon to auto-select pending template
+// Patch openPaperCoupon to show templates
 const _origOpenPaperCoupon=window.openPaperCoupon;
 window.openPaperCoupon=function(id){
-  _origOpenPaperCoupon(id);
-  setTimeout(()=>{
-    rPcpnTmplQuick();
-    if(window._pendingTmplId){
-      selectCpnTmpl(window._pendingTmplId);
-      window._pendingTmplId=null;
-    }
-  },100);
+  viewCustId=id;
+  const c=custs.find(x=>(x._id||x.id)==id);if(!c)return;
+  G('pcpn-cust-name').textContent='👤 '+c.name;
+  setTimeout(rPcpnTmplQuick,50);
+  hs('sh-cust');sh('sh-pcpn');
 };
 
 subscribeCpnTmpls();
