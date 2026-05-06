@@ -206,6 +206,16 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .svc-hist{background:var(--bg);border-radius:var(--rs);padding:8px 10px;font-size:11px;margin-top:6px;}
 .svc-hist-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr);color:var(--tx2);}
 .svc-hist-row:last-child{border-bottom:none;}
+.promo-card{border-radius:var(--r);padding:10px 12px;cursor:pointer;position:relative;overflow:hidden;transition:all .12s;}
+.promo-card:active{transform:scale(.97);opacity:.9;}
+.promo-name{font-size:12px;font-weight:700;color:#fff;line-height:1.3;}
+.promo-desc{font-size:10px;color:rgba(255,255,255,.8);margin-top:2px;}
+.promo-price{font-size:16px;font-weight:700;color:#fff;margin-top:6px;}
+.promo-orig{font-size:10px;color:rgba(255,255,255,.7);text-decoration:line-through;}
+.promo-badge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.25);color:#fff;font-size:9px;padding:2px 6px;border-radius:99px;font-weight:700;}
+.promo-exp{font-size:9px;color:rgba(255,255,255,.6);margin-top:3px;}
+.paper-cpn-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(83,74,183,.15);font-size:12px;color:var(--pur);}
+.paper-cpn-item:last-child{border-bottom:none;}
 .ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
 /* CATEGORY TOP NAV */
 .cat-nav{flex:1;min-width:fit-content;padding:9px 10px;font-size:11px;font-weight:700;cursor:pointer;border:none;border-right:1px solid var(--bdr);background:var(--sur);color:var(--tx2);white-space:nowrap;transition:all .15s;-webkit-appearance:none;}
@@ -267,7 +277,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v6h</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v7a</span></div>
   <div class="sync">
     <span class="dot" id="dot"></span>
     <span id="sl">offline</span>
@@ -333,12 +343,24 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
     <!-- Category top nav bar -->
     <div id="cat-topnav" style="display:flex;overflow-x:auto;gap:0;margin-bottom:10px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;">
-      <button class="cat-nav active" onclick="setCat('all',this)" data-cat="all">ทั้งหมด</button>
       <button class="cat-nav" onclick="setCat('ล้างรถ',this)" data-cat="ล้างรถ">ล้างรถ</button>
       <button class="cat-nav" onclick="setCat('เคลือบสี',this)" data-cat="เคลือบสี">เคลือบสี</button>
       <button class="cat-nav" onclick="setCat('ภายใน',this)" data-cat="ภายใน">ภายใน</button>
       <button class="cat-nav" onclick="setCat('บริการอื่น',this)" data-cat="บริการอื่น">บริการอื่น</button>
       <button class="cat-nav" onclick="setCat('ใบปัดน้ำฝน',this)" data-cat="ใบปัดน้ำฝน">ใบปัดน้ำฝน</button>
+      <button class="cat-nav active" onclick="setCat('all',this)" data-cat="all">ทั้งหมด</button>
+    </div>
+
+    <!-- Active promotions banner -->
+    <div id="promo-banner" style="margin-bottom:10px;display:none;">
+      <div style="font-size:10px;font-weight:700;color:var(--err);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">🔥 โปรโมชั่นพิเศษ</div>
+      <div id="promo-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+    </div>
+
+    <!-- Paper coupon alert when customer selected -->
+    <div id="paper-cpn-alert" style="display:none;margin-bottom:10px;background:var(--pur-bg);border:1px solid var(--pur);border-radius:var(--rs);padding:10px 12px;">
+      <div style="font-size:11px;font-weight:700;color:var(--pur);margin-bottom:6px;">🎫 คูปองกระดาษของลูกค้า</div>
+      <div id="paper-cpn-list"></div>
     </div>
 
     <div class="sq-grid" id="sg"></div>
@@ -481,6 +503,13 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
   <!-- ═══ PRICE LIST ═══ -->
   <div id="sc-prices" class="sc">
+    <!-- Promotions section -->
+    <div class="sh2" style="margin-bottom:8px;">
+      <h2>🔥 โปรโมชั่น</h2>
+      <button class="btn btn-s" style="background:#e74c3c;color:#fff;border-color:#c0392b;" onclick="openNewPromo()">+ เพิ่มโปร</button>
+    </div>
+    <div id="promo-list" style="margin-bottom:14px;"></div>
+    <div style="border-top:1px solid var(--bdr);padding-top:12px;margin-bottom:10px;"></div>
     <div class="sh2"><h2>ราคาบริการ</h2><button class="btn btn-s btn-g" onclick="openNewSvc()">+ เพิ่ม</button></div>
     <div class="chips" id="pl-chips">
       <div class="chip active" onclick="setPLCat('all',this)">ทั้งหมด</div>
@@ -548,7 +577,8 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
         <button class="btn btn-s" onclick="setRange('week')">7 วัน</button>
         <button class="btn btn-s" onclick="setRange('month')">เดือนนี้</button>
         <button class="btn btn-s" onclick="setRange('all')">ทั้งหมด</button>
-        <button class="btn btn-s btn-g" onclick="exportRange()" style="margin-left:auto;">📊 Export</button>
+        <button class="btn btn-s btn-g" onclick="exportRange()">📊 CSV</button>
+        <button class="btn btn-s" onclick="exportExcel()" style="background:#1d6f42;color:#fff;border-color:#1d6f42;">📗 Excel</button>
       </div>
     </div>
     <div class="row2">
@@ -631,6 +661,33 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div class="sbt"><button class="btn" onclick="hs('sh-ns')">ยกเลิก</button><button class="btn btn-g" onclick="addSt()">บันทึก</button></div>
 </div></div>
 
+<!-- Paper Coupon Sheet -->
+<div id="sh-pcpn" class="sbg" style="display:none;" onclick="csbg(event,'sh-pcpn')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div><h3>🎫 เพิ่มคูปองกระดาษ</h3>
+  <div style="font-size:12px;color:var(--tx2);margin-bottom:14px;" id="pcpn-cust-name"></div>
+  <div class="fr"><label class="lbl">คำอธิบายคูปอง</label>
+    <input id="pcpn-desc" type="text" placeholder="เช่น ล้างรถฟรี 3 ครั้ง, ส่วนลด ฿200"/>
+  </div>
+  <div class="fr2">
+    <div><label class="lbl">ประเภท</label>
+      <select id="pcpn-type">
+        <option value="free_wash">ล้างรถฟรี (ครั้ง)</option>
+        <option value="discount">ส่วนลด (บาท)</option>
+        <option value="free_service">บริการฟรี</option>
+        <option value="other">อื่นๆ</option>
+      </select>
+    </div>
+    <div><label class="lbl">จำนวน/มูลค่า</label>
+      <input id="pcpn-val" type="number" placeholder="3"/>
+    </div>
+  </div>
+  <div class="fr"><label class="lbl">หมดอายุ (ไม่จำเป็น)</label>
+    <input id="pcpn-exp" type="date"/>
+  </div>
+  <div class="sbt"><button class="btn" onclick="hs('sh-pcpn')">ยกเลิก</button><button class="btn btn-g" onclick="addPaperCoupon()">เพิ่มคูปอง</button></div>
+</div></div>
+
 <!-- Restock -->
 <div id="sh-rs" class="sbg" style="display:none;" onclick="csbg(event,'sh-rs')">
 <div class="sht" onclick="event.stopPropagation()">
@@ -654,6 +711,36 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     <button class="btn" onclick="skipUsage()">ข้าม</button>
     <button class="btn btn-g" onclick="confirmUsage()">ยืนยัน</button>
   </div>
+</div></div>
+
+<!-- New Promotion -->
+<div id="sh-promo" class="sbg" style="display:none;" onclick="csbg(event,'sh-promo')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div><h3 id="promo-title">🔥 เพิ่มโปรโมชั่น</h3>
+  <div class="fr"><label class="lbl">ชื่อโปรโมชั่น</label>
+    <input id="pr-name" type="text" placeholder="เช่น ล้างแอร์ ลดราคาเดือนนี้"/>
+  </div>
+  <div class="fr"><label class="lbl">รายละเอียด</label>
+    <input id="pr-desc" type="text" placeholder="เช่น P01 + ล้างล้อฟรี"/>
+  </div>
+  <div class="fr2">
+    <div><label class="lbl">ราคาโปร (฿)</label><input id="pr-price" type="number" placeholder="500"/></div>
+    <div><label class="lbl">ราคาปกติ (฿)</label><input id="pr-orig" type="number" placeholder="700"/></div>
+  </div>
+  <div class="fr2">
+    <div><label class="lbl">วันหมดอายุ</label><input id="pr-exp" type="date"/></div>
+    <div><label class="lbl">สี</label>
+      <select id="pr-color">
+        <option value="#e74c3c">🔴 แดง</option>
+        <option value="#e67e22">🟠 ส้ม</option>
+        <option value="#27ae60">🟢 เขียว</option>
+        <option value="#8e44ad">🟣 ม่วง</option>
+        <option value="#C9A84C">🟡 ทอง</option>
+      </select>
+    </div>
+  </div>
+  <input type="hidden" id="pr-edit-id"/>
+  <div class="sbt"><button class="btn" onclick="hs('sh-promo')">ยกเลิก</button><button class="btn btn-g" onclick="savePromo()">บันทึก</button></div>
 </div></div>
 
 <!-- New/Edit Service -->
@@ -743,8 +830,36 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div id="cust-detail-body"></div>
   <div class="sbt">
     <button class="btn" onclick="hs('sh-cust')">ปิด</button>
+    <button class="btn btn-pur" onclick="openPaperCoupon(viewCustId)">🎫 +คูปอง</button>
     <button class="btn btn-ok" onclick="addBonusPts()">+ Pts</button>
     <button class="btn btn-d" onclick="delCustDetail()">ลบ</button>
+  </div>
+</div></div>
+
+<!-- Edit Transaction Sheet -->
+<div id="sh-edit-txn" class="sbg" style="display:none;" onclick="csbg(event,'sh-edit-txn')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div><h3>✏️ แก้ไขรายการ</h3>
+  <div style="font-size:12px;color:var(--tx2);margin-bottom:14px;" id="edit-txn-id"></div>
+  <div class="fr"><label class="lbl">วิธีชำระ</label>
+    <select id="edit-pay">
+      <option>เงินสด</option><option>QR</option><option>โอน</option><option>บัตร</option><option>บุญถอด</option>
+    </select>
+  </div>
+  <div class="fr"><label class="lbl">ยอดรวม (฿)</label>
+    <input id="edit-total" type="number" placeholder="220"/>
+  </div>
+  <div class="fr"><label class="lbl">ทะเบียน</label>
+    <input id="edit-plate" type="text" placeholder="กข 1234"/>
+  </div>
+  <div class="fr"><label class="lbl">หมายเหตุ</label>
+    <input id="edit-note" type="text" placeholder="หมายเหตุเพิ่มเติม"/>
+  </div>
+  <input type="hidden" id="edit-txn-ref"/>
+  <div class="sbt">
+    <button class="btn" onclick="hs('sh-edit-txn')">ยกเลิก</button>
+    <button class="btn btn-d" onclick="deleteTxn()">ลบรายการ</button>
+    <button class="btn btn-g" onclick="saveTxnEdit()">บันทึก</button>
   </div>
 </div></div>
 
@@ -822,7 +937,7 @@ const CAT_CL={ล้างรถ:'bb',เคลือบสี:'bt',ภายใ
 let db=null,LM=false;
 let custs=[],stock=[],txns=[],svcs=[],expenses=[],staffList=[];
 let cart=[],selC=null,rsId=null,txnN=1000;
-let CZ='S',CC='all',PLCat='all';
+let CZ='S',CC='ล้างรถ',PLCat='all';
 let selPayMethod='เงินสด',usedCoupon=null;
 let viewCustId=null,lastTxnData=null;
 
@@ -1458,10 +1573,16 @@ function rToday(){
   G('td-top').innerHTML=top.map(([n,c])=>`<div style="display:flex;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--bdr);font-size:12px;"><span>${n}</span><span class="badge bb">${c} ครั้ง</span></div>`).join('')||'<div class="empty">ยังไม่มีรายการ</div>';
   // Recent
   G('td-list').innerHTML=today.slice(0,8).map(t=>`<div class="card" style="margin-bottom:8px;">
-    <div style="display:flex;justify-content:space-between;">
-      <div><div style="font-weight:700;">${t.id}·${t.customer}</div>
-      <div style="font-size:11px;color:var(--tx3);">${t.plate||''}·${t.payment||''}·${t.staff||''}</div></div>
-      <div style="text-align:right;font-size:16px;font-weight:700;">฿${(t.total||0).toLocaleString()}</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div style="flex:1;">
+        <div style="font-weight:700;">${t.id}·${t.customer}</div>
+        <div style="font-size:11px;color:var(--tx3);">${t.plate||''}·${t.payment||''}·${t.staff||''}</div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:2px;">${t.items||''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div style="font-size:16px;font-weight:700;">฿${(t.total||0).toLocaleString()}</div>
+        <button class="btn btn-s" onclick="openEditTxn('${t._id||t.id}')" style="flex-shrink:0;">✏️</button>
+      </div>
     </div>
   </div>`).join('')||'<div class="empty">ยังไม่มีรายการวันนี้</div>';
   rExpenses();
@@ -1624,9 +1745,12 @@ function rHist(){
   G('hs-tot').textContent='฿'+tot.toLocaleString();G('hs-n').textContent=f.length;
   G('hl').innerHTML=f.slice(0,100).map(t=>`<div class="card" style="margin-bottom:8px;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
-      <div><div style="font-weight:700;font-size:13px;">${t.id}·${t.customer}</div>
+      <div style="flex:1;"><div style="font-weight:700;font-size:13px;">${t.id}·${t.customer}</div>
       <div style="font-size:11px;color:var(--tx3);">${t.plate||''}·${t.size||''}·${t.payment||''}·${t.staff||''}</div></div>
-      <div style="text-align:right;"><div style="font-size:16px;font-weight:700;">฿${(t.total||0).toLocaleString()}</div>${t.pts?`<span class="pc">+${t.pts}pts</span>`:''}</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div style="text-align:right;"><div style="font-size:16px;font-weight:700;">฿${(t.total||0).toLocaleString()}</div>${t.pts?`<span class="pc">+${t.pts}pts</span>`:''}</div>
+        <button class="btn btn-s" onclick="openEditTxn('${t._id||t.id}')">✏️</button>
+      </div>
     </div>
     <div style="font-size:10px;color:var(--tx3);">${t.items||''}</div>
     <div style="font-size:10px;color:var(--tx3);margin-top:3px;">${t.date||''} ${t.time||''}</div>
@@ -2009,6 +2133,281 @@ window.sw=function(id,el){
 
 // Subscribe usage logs
 if(db&&!LM)subscribeUsage();else{usageLogs=LS('ul')||[];rUsage();}
+
+
+// ══ PROMOTIONS ══
+let promos=[];
+
+function subscribePromos(){
+  if(db&&!LM){
+    onSnapshot(collection(db,'promotions'),s=>{
+      promos=s.docs.map(d=>({...d.data(),_id:d.id}));
+      rPromos();rPromoBanner();
+    });
+  } else {
+    promos=LS('pr')||[];rPromos();rPromoBanner();
+  }
+}
+
+window.openNewPromo=function(){
+  G('promo-title').textContent='🔥 เพิ่มโปรโมชั่น';
+  G('pr-edit-id').value='';
+  ['pr-name','pr-desc','pr-price','pr-orig','pr-exp'].forEach(i=>G(i).value='');
+  sh('sh-promo');
+};
+
+window.savePromo=async function(){
+  const name=G('pr-name').value.trim();if(!name){alert('ระบุชื่อโปร');return;}
+  const data={name,desc:G('pr-desc').value,price:parseInt(G('pr-price').value)||0,originalPrice:parseInt(G('pr-orig').value)||0,expires:G('pr-exp').value,color:G('pr-color').value,active:true,createdAt:serverTimestamp()};
+  const eid=G('pr-edit-id').value;
+  if(db&&!LM){if(eid)await updateDoc(doc(db,'promotions',eid),data);else await addDoc(collection(db,'promotions'),data);}
+  else{if(eid){const i=promos.findIndex(p=>p._id===eid);if(i>=0)promos[i]={...promos[i],...data};}else promos.push({...data,_id:'l'+Date.now()});LS('pr',promos);rPromos();rPromoBanner();}
+  hs('sh-promo');['pr-name','pr-desc','pr-price','pr-orig','pr-exp'].forEach(i=>G(i).value='');
+};
+
+window.editPromo=function(id){
+  const p=promos.find(x=>x._id===id);if(!p)return;
+  G('promo-title').textContent='แก้ไขโปรโมชั่น';
+  G('pr-name').value=p.name||'';G('pr-desc').value=p.desc||'';
+  G('pr-price').value=p.price||'';G('pr-orig').value=p.originalPrice||'';
+  G('pr-exp').value=p.expires||'';G('pr-color').value=p.color||'#e74c3c';
+  G('pr-edit-id').value=id;sh('sh-promo');
+};
+
+window.delPromo=async function(id){
+  if(!confirm('ลบโปรนี้?'))return;
+  if(db&&!LM)await deleteDoc(doc(db,'promotions',id));
+  else{promos=promos.filter(p=>p._id!==id);LS('pr',promos);rPromos();rPromoBanner();}
+};
+
+function isPromoActive(p){
+  if(!p.active)return false;
+  if(p.expires){const exp=new Date(p.expires+' 23:59:59');if(exp<new Date())return false;}
+  return true;
+}
+
+function rPromos(){
+  const el=G('promo-list');if(!el)return;
+  el.innerHTML=promos.length?promos.map(p=>{
+    const active=isPromoActive(p);
+    const disc=p.originalPrice>0?Math.round((1-p.price/p.originalPrice)*100):0;
+    return`<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:8px;${active?'':'opacity:.5'}">
+      <div style="width:12px;height:40px;border-radius:99px;background:${p.color||'#e74c3c'};flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:13px;">${p.name}${active?'':' <span style="font-size:10px;color:var(--tx3);">(หมดอายุ)</span>'}</div>
+        <div style="font-size:11px;color:var(--tx2);">${p.desc||''}</div>
+        <div style="font-size:12px;margin-top:3px;"><b style="color:${p.color||'#e74c3c'};">฿${(p.price||0).toLocaleString()}</b>${p.originalPrice?` <span style="text-decoration:line-through;color:var(--tx3);font-size:10px;">฿${p.originalPrice.toLocaleString()}</span>`:''}${disc>0?` <span class="badge br">${disc}% ลด</span>`:''}</div>
+        ${p.expires?`<div style="font-size:10px;color:var(--tx3);">หมดอายุ: ${new Date(p.expires).toLocaleDateString('th-TH')}</div>`:''}
+      </div>
+      <div style="display:flex;gap:5px;flex-shrink:0;">
+        <button class="btn btn-s" onclick="editPromo('${p._id}')">แก้ไข</button>
+        <button class="btn btn-s btn-d" onclick="delPromo('${p._id}')">ลบ</button>
+      </div>
+    </div>`;
+  }).join(''):'<div style="font-size:12px;color:var(--tx3);padding:10px 0;">ยังไม่มีโปรโมชั่น — เพิ่มได้เลย!</div>';
+}
+
+function rPromoBanner(){
+  const active=promos.filter(isPromoActive);
+  const banner=G('promo-banner');const cards=G('promo-cards');
+  if(!banner||!cards)return;
+  if(!active.length){banner.style.display='none';return;}
+  banner.style.display='block';
+  cards.innerHTML=active.map(p=>{
+    const disc=p.originalPrice>0?Math.round((1-p.price/p.originalPrice)*100):0;
+    const d=JSON.stringify({id:'promo_'+p._id,name:p.name,cat:'โปรโมชั่น',price:p.price,size:CZ,code:'PROMO',SC:0,SCo:0,cpnWash:0,cpnMonth:0});
+    return`<div class="promo-card" style="background:${p.color||'#e74c3c'};" onclick='addCart(${d.replace(/'/g,"&apos;")})'>
+      ${disc>0?`<div class="promo-badge">-${disc}%</div>`:'<div class="promo-badge">🔥</div>'}
+      <div class="promo-name">${p.name}</div>
+      ${p.desc?`<div class="promo-desc">${p.desc}</div>`:''}
+      <div class="promo-price">฿${(p.price||0).toLocaleString()}</div>
+      ${p.originalPrice?`<div class="promo-orig">฿${p.originalPrice.toLocaleString()}</div>`:''}
+      ${p.expires?`<div class="promo-exp">ถึง ${new Date(p.expires).toLocaleDateString('th-TH')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ══ PAPER COUPONS ══
+window.openPaperCoupon=function(id){
+  viewCustId=id;
+  const c=custs.find(x=>(x._id||x.id)==id);if(!c)return;
+  G('pcpn-cust-name').textContent='ลูกค้า: '+c.name;
+  G('pcpn-desc').value='';G('pcpn-val').value='';G('pcpn-exp').value='';
+  hs('sh-cust');sh('sh-pcpn');
+};
+
+window.addPaperCoupon=async function(){
+  const desc=G('pcpn-desc').value.trim();if(!desc){alert('ระบุคำอธิบายคูปอง');return;}
+  const type=G('pcpn-type').value;
+  const val=parseInt(G('pcpn-val').value)||1;
+  const exp=G('pcpn-exp').value;
+  const c=custs.find(x=>(x._id||x.id)==viewCustId);if(!c)return;
+  const newCpn={type:'paper',paperType:type,desc,value:val,remaining:val,expires:exp||null,from:new Date().toISOString(),source:'paper'};
+  const updCpns=[...(c.coupons||[]),newCpn];
+  if(db&&!LM)await updateDoc(doc(db,'customers',c._id||c.id),{coupons:updCpns});
+  else{c.coupons=updCpns;LS('cu',custs);}
+  hs('sh-pcpn');rLoy();
+  alert('✅ เพิ่มคูปองกระดาษสำเร็จ!');
+};
+
+// Show paper coupons at POS when customer selected
+function rPaperCpnAlert(){
+  const el=G('paper-cpn-alert');const list=G('paper-cpn-list');
+  if(!selC||!el||!list){if(el)el.style.display='none';return;}
+  const now=new Date();
+  const paperCpns=(selC.coupons||[]).filter(c=>c.source==='paper'&&c.remaining>0&&(!c.expires||new Date(c.expires)>now));
+  if(!paperCpns.length){el.style.display='none';return;}
+  el.style.display='block';
+  list.innerHTML=paperCpns.map((c,i)=>`<div class="paper-cpn-item">
+    <div>
+      <div style="font-weight:700;">${c.desc}</div>
+      <div style="font-size:10px;color:var(--tx3);">${c.paperType==='free_wash'?'ล้างรถฟรี':c.paperType==='discount'?'ส่วนลด ฿'+c.value:c.paperType==='free_service'?'บริการฟรี':'คูปอง'} · เหลือ ${c.remaining} ${c.paperType==='discount'?'บาท':'ครั้ง'}${c.expires?' · ถึง '+new Date(c.expires).toLocaleDateString('th-TH'):''}</div>
+    </div>
+    <button class="btn btn-s btn-pur" onclick="usePaperCpn(${i})">ใช้</button>
+  </div>`).join('');
+}
+
+window.usePaperCpn=async function(idx){
+  if(!selC)return;
+  const now=new Date();
+  const paperCpns=(selC.coupons||[]).filter(c=>c.source==='paper'&&c.remaining>0&&(!c.expires||new Date(c.expires)>now));
+  const cpn=paperCpns[idx];if(!cpn)return;
+  // Find in actual coupons array and decrement
+  const allCpns=selC.coupons||[];
+  const realIdx=allCpns.findIndex(c=>c.source==='paper'&&c.desc===cpn.desc&&c.remaining>0);
+  if(realIdx<0)return;
+  allCpns[realIdx].remaining=Math.max(0,allCpns[realIdx].remaining-1);
+  // Add discount to cart as a negative item or show as discount
+  alert(`✅ ใช้คูปอง "${cpn.desc}" แล้ว\nเหลือ ${allCpns[realIdx].remaining} ครั้ง`);
+  if(db&&!LM)await updateDoc(doc(db,'customers',selC._id),{coupons:allCpns});
+  else{selC.coupons=allCpns;LS('cu',custs);}
+  rPaperCpnAlert();
+};
+
+// Patch selCust to also show paper coupons
+const _origSelCust=window.selCust;
+window.selCust=function(id){
+  _origSelCust(id);
+  setTimeout(()=>{rPaperCpnAlert();rPromoBanner();},100);
+};
+
+// Init
+subscribePromos();
+
+
+// ══ EDIT TRANSACTION ══
+window.openEditTxn=function(id){
+  const t=txns.find(x=>(x._id||x.id)===id);if(!t)return;
+  G('edit-txn-id').textContent=t.id+' · '+t.customer+' · '+t.date;
+  G('edit-pay').value=t.payment||'เงินสด';
+  G('edit-total').value=t.total||0;
+  G('edit-plate').value=t.plate||'';
+  G('edit-note').value=t.note||'';
+  G('edit-txn-ref').value=t._id||t.id;
+  sh('sh-edit-txn');
+};
+
+window.saveTxnEdit=async function(){
+  const ref=G('edit-txn-ref').value;
+  const updates={
+    payment:G('edit-pay').value,
+    total:parseInt(G('edit-total').value)||0,
+    plate:G('edit-plate').value,
+    note:G('edit-note').value
+  };
+  if(db&&!LM){
+    // Find Firebase doc ID
+    const t=txns.find(x=>(x._id||x.id)===ref);
+    if(t&&t._id){await updateDoc(doc(db,'transactions',t._id),updates);}
+  } else {
+    const t=txns.find(x=>(x._id||x.id)===ref);
+    if(t){Object.assign(t,updates);LS('tx',txns);}
+    rHist();rToday();
+  }
+  hs('sh-edit-txn');
+  alert('✅ แก้ไขรายการสำเร็จ');
+};
+
+window.deleteTxn=async function(){
+  if(!confirm('ลบรายการนี้? ไม่สามารถกู้คืนได้'))return;
+  const ref=G('edit-txn-ref').value;
+  const t=txns.find(x=>(x._id||x.id)===ref);
+  if(db&&!LM&&t&&t._id){await deleteDoc(doc(db,'transactions',t._id));}
+  else{txns=txns.filter(x=>(x._id||x.id)!==ref);LS('tx',txns);rHist();rToday();}
+  hs('sh-edit-txn');
+};
+
+// ══ EXCEL EXPORT ══
+window.exportExcel=function(){
+  const f=txns.filter(txnInRange);
+  if(!f.length){alert('ไม่มีข้อมูล');return;}
+  const from=G('d-from')?.value||'all',to=G('d-to')?.value||'all';
+  const grand=f.reduce((a,t)=>a+(t.total||0),0);
+  const cs=f.reduce((a,t)=>a+(t.csaleTotal||0),0);
+  const co=f.reduce((a,t)=>a+(t.copTotal||0),0);
+  const cash=f.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0);
+  const qr=f.filter(t=>t.payment==='QR').reduce((a,t)=>a+(t.total||0),0);
+  const transfer=f.filter(t=>t.payment==='โอน').reduce((a,t)=>a+(t.total||0),0);
+  const card=f.filter(t=>t.payment==='บัตร').reduce((a,t)=>a+(t.total||0),0);
+
+  // Build HTML table that Excel can open
+  let html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+<head><meta charset="UTF-8"/>
+<style>
+  body{font-family:Tahoma,Arial,sans-serif;font-size:11pt;}
+  table{border-collapse:collapse;width:100%;}
+  th{background:#1a1a1a;color:#C9A84C;padding:8px 10px;font-size:11pt;text-align:left;border:1px solid #333;}
+  td{padding:6px 10px;border:1px solid #ddd;font-size:10pt;}
+  tr:nth-child(even) td{background:#f9f9f9;}
+  .header{background:#1a1a1a;color:#C9A84C;padding:12px;font-size:14pt;font-weight:bold;}
+  .summary-lbl{background:#f0f0f0;font-weight:bold;padding:6px 10px;border:1px solid #ddd;}
+  .summary-val{padding:6px 10px;border:1px solid #ddd;font-weight:bold;}
+  .total-row td{background:#fef3d0;font-weight:bold;}
+</style>
+</head><body>
+<table>
+  <tr><td colspan="10" class="header">⚙ CarCare POS — รายงาน ${from} ถึง ${to}</td></tr>
+  <tr><td colspan="10" style="padding:4px 10px;font-size:10pt;color:#666;">สร้างเมื่อ: ${new Date().toLocaleString('th-TH')}</td></tr>
+  <tr><td colspan="10" style="height:8px;"></td></tr>
+  <tr>
+    <th>#</th><th>Receipt</th><th>ลูกค้า</th><th>ทะเบียน</th>
+    <th>ขนาด</th><th>วิธีชำระ</th><th>พนักงาน</th>
+    <th>รายการ</th><th>รวม (฿)</th><th>Points</th>
+  </tr>`;
+
+  f.forEach((t,i)=>{
+    html+=`<tr>
+      <td>${i+1}</td>
+      <td>${t.id||''}</td>
+      <td>${t.customer||''}</td>
+      <td>${t.plate||''}</td>
+      <td>${t.size||''}</td>
+      <td>${t.payment||''}</td>
+      <td>${t.staff||''}</td>
+      <td>${t.items||''}</td>
+      <td style="text-align:right;font-weight:bold;">${(t.total||0).toLocaleString()}</td>
+      <td style="text-align:center;">${t.pts||0}</td>
+    </tr>`;
+  });
+
+  html+=`<tr class="total-row">
+    <td colspan="8" style="text-align:right;font-weight:bold;">รวมทั้งหมด</td>
+    <td style="text-align:right;font-weight:bold;">${grand.toLocaleString()}</td>
+    <td></td>
+  </tr>
+  <tr><td colspan="10" style="height:12px;"></td></tr>
+  <tr><td colspan="10" style="font-weight:bold;background:#f0f0f0;padding:6px 10px;font-size:12pt;">สรุปยอด</td></tr>
+  <tr><td class="summary-lbl">เงินสด</td><td class="summary-val">฿${cash.toLocaleString()}</td><td class="summary-lbl">QR</td><td class="summary-val">฿${qr.toLocaleString()}</td><td class="summary-lbl">โอน</td><td class="summary-val">฿${transfer.toLocaleString()}</td><td class="summary-lbl">บัตร</td><td class="summary-val">฿${card.toLocaleString()}</td><td colspan="2"></td></tr>
+  <tr><td class="summary-lbl">C-Sale รวม</td><td class="summary-val" style="color:green;">฿${cs.toLocaleString()}</td><td class="summary-lbl">C-Op. รวม</td><td class="summary-val" style="color:blue;">฿${co.toLocaleString()}</td><td class="summary-lbl" style="background:#fef3d0;">ยอดรวมสุทธิ</td><td class="summary-val" style="background:#fef3d0;font-size:13pt;">฿${grand.toLocaleString()}</td><td colspan="4"></td></tr>
+</table>
+</body></html>`;
+
+  const blob=new Blob(['﻿'+html],{type:'application/vnd.ms-excel;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`CarCare-${from}-${to}.xls`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+};
 
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
