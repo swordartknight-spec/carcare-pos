@@ -277,7 +277,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v7c</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v7d</span></div>
   <div class="sync">
     <span class="dot" id="dot"></span>
     <span id="sl">offline</span>
@@ -2533,14 +2533,14 @@ window.delCpnTmpl=async function(id){
   else{cpnTmpls=cpnTmpls.filter(x=>x._id!==id);LS('ct',cpnTmpls);rCpnTmpls();}
 };
 
-// Patch openPaperCoupon to show templates
-const _origOpenPaperCoupon=window.openPaperCoupon;
+// openPaperCoupon - show coupon templates for this customer
 window.openPaperCoupon=function(id){
   viewCustId=id;
   const c=custs.find(x=>(x._id||x.id)==id);if(!c)return;
   G('pcpn-cust-name').textContent='👤 '+c.name;
-  setTimeout(rPcpnTmplQuick,50);
-  hs('sh-cust');sh('sh-pcpn');
+  rPcpnTmplQuick();
+  hs('sh-cust');
+  sh('sh-pcpn');
 };
 
 subscribeCpnTmpls();
