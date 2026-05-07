@@ -277,7 +277,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v7h</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v7j</span></div>
   <div class="sync">
     <span class="dot" id="dot"></span>
     <span id="sl">offline</span>
@@ -860,7 +860,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div id="cust-detail-body"></div>
   <div class="sbt">
     <button class="btn" onclick="hs('sh-cust')">ปิด</button>
-    <button class="btn btn-pur" onclick="openPaperCoupon(viewCustId)">🎫 +คูปอง</button>
+    <button class="btn btn-pur" id="btn-add-cpn" onclick="openPaperCoupon(this.dataset.custid)">🎫 +คูปอง</button>
     <button class="btn btn-ok" onclick="addBonusPts()">+ Pts</button>
     <button class="btn btn-d" onclick="delCustDetail()">ลบ</button>
   </div>
@@ -902,8 +902,8 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div class="ss" id="oks"></div>
   <div class="rb" id="okr"></div>
   <div id="ok-cpn" style="display:none;margin-top:10px;background:var(--pur-bg);border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--pur);font-weight:700;"></div>
-  <button class="btn btn-g btn-bl" style="margin-top:14px;" onclick="hs('sh-ok')">รายการใหม่</button>
-  <button class="btn btn-inf btn-bl" style="margin-top:8px;" onclick="shareLastInvoice()">📤 ส่งใบเสร็จ (Line)</button>
+  <button class="btn btn-g btn-bl" style="margin-top:14px;" onclick="hs('sh-ok');G('content').scrollTop=0;">รายการใหม่</button>
+  <button class="btn btn-inf btn-bl" style="margin-top:8px;" onclick="shareLastInvoice().then&&shareLastInvoice();G('content').scrollTop=0;">📤 ส่งใบเสร็จ (Line)</button>
 </div></div>
 
 <script>
@@ -1643,6 +1643,7 @@ function rLoy(){
 window.showCustDetail=function(id){
   viewCustId=id;const c=custs.find(x=>(x._id||x.id)==id);if(!c)return;
   G('cust-detail-name').textContent=c.name;
+  const btnCpn=G('btn-add-cpn');if(btnCpn)btnCpn.dataset.custid=id;
   const now=new Date();
   const active=(c.coupons||[]).filter(x=>(x.type==='wash'&&x.remaining>0)||(x.type==='month'&&new Date(x.expires)>now));
   const svcHist=(c.serviceHistory||[]).slice(-10).reverse();
@@ -2488,7 +2489,7 @@ function rPcpnTmplQuick(){
 }
 
 window.giveCpnToCustomer=async function(tmplId){
-  const custId=viewCustId||G('sh-pcpn')?.dataset?.custId;
+  const custId=viewCustId||G('sh-pcpn')?.dataset?.custid||G('sh-pcpn')?.dataset?.custId;
   if(!custId)return;
   const t=cpnTmpls.find(x=>x._id===tmplId);if(!t)return;
   const c=custs.find(x=>(x._id||x.id)==custId);if(!c)return;
@@ -2541,6 +2542,7 @@ window.delCpnTmpl=async function(id){
 // openPaperCoupon - show coupon templates for this customer
 window.openPaperCoupon=function(id){
   viewCustId=id;
+  G('sh-pcpn').dataset.custid=id;
   G('sh-pcpn').dataset.custId=id;
   const c=custs.find(x=>(x._id||x.id)==id);if(!c)return;
   G('pcpn-cust-name').textContent='👤 '+c.name;
