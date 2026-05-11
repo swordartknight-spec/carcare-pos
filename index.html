@@ -284,7 +284,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- APP -->
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8b</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -397,6 +397,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
       <div class="ctf">
         <div class="cl" id="disc-row" style="display:none;"><span>ส่วนลด Loyalty</span><span id="disc-val" style="color:var(--ok);font-weight:700;"></span></div>
         <div class="cl" id="cpn-disc-row" style="display:none;"><span>🎫 ใช้คูปอง</span><span id="cpn-disc-val" style="color:var(--pur);font-weight:700;"></span></div>
+        <div class="cl" id="paper-disc-row" style="display:none;"><span>🎟 คูปองกระดาษ</span><span id="paper-disc-val" style="color:var(--pur);font-weight:700;"></span></div>
         <div class="ctot"><span>รวม (รวม VAT)</span><span id="ctot">฿0</span></div>
 
         <div style="margin:12px 0 8px;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;">วิธีชำระ</div>
@@ -1043,7 +1044,7 @@ let currentBranch=localStorage.getItem('branch')||'';
 let custs=[],stock=[],txns=[],svcs=[],expenses=[],staffList=[];
 let cart=[],selC=null,rsId=null,txnN=1000;
 let CZ='S',CC='ล้างรถ',PLCat='all';
-let selPayMethod='เงินสด',usedCoupon=null;
+let selPayMethod='เงินสด',usedCoupon=null,appliedPaperCpn=null;
 let viewCustId=null,lastTxnData=null;
 
 function G(id){return document.getElementById(id);}
@@ -1300,7 +1301,7 @@ window.addCart=function(item){
 };
 window.rC=function(i){cart.splice(i,1);rCart();updateFloat();};
 window.clrCart=function(){
-  cart=[];selC=null;usedCoupon=null;
+  cart=[];selC=null;usedCoupon=null;appliedPaperCpn=null;
   G('cq').value='';G('cch').style.display='none';G('cdd').style.display='none';
   rCart();updateFloat();
 };
@@ -1352,20 +1353,37 @@ function uTot(){
   const sub=cart.reduce((a,c)=>a+c.price*c.qty,0);
   let disc=0;
   if(selC&&(selC.points||0)>=500)disc=Math.min(Math.floor((selC.points||0)/500)*50,Math.floor(sub*.15));
-  // Coupon discount — free car wash = deduct cheapest wash price
+  // Loyalty wash coupon discount
   let cpnDisc=0;
   if(usedCoupon){
     const washSvc=svcs.find(s=>s.code==='-'||s.name.includes('ล้างสี & ดูดฝุ่น'));
     cpnDisc=washSvc?(washSvc[CZ]||200):200;
     cpnDisc=Math.min(cpnDisc,sub);
   }
-  const tot=Math.max(0,sub-disc-cpnDisc);
+  // Paper/template coupon discount
+  let paperDisc=0;
+  if(appliedPaperCpn){
+    const c=appliedPaperCpn.cpn;
+    if(c.paperType==='discount'||c.type==='template'){
+      // Template coupon: use discount field
+      paperDisc=appliedPaperCpn.cpn.discount||appliedPaperCpn.cpn.value||0;
+    } else if(c.paperType==='free_wash'||c.type==='wash'){
+      const washSvc=svcs.find(s=>s.code==='-');
+      paperDisc=washSvc?(washSvc[CZ]||200):200;
+    } else {
+      paperDisc=c.value||0;
+    }
+    paperDisc=Math.min(paperDisc,sub);
+  }
+  const tot=Math.max(0,sub-disc-cpnDisc-paperDisc);
   G('ctot').textContent='฿'+tot.toLocaleString();
   const dr=G('disc-row');
   if(disc>0){dr.style.display='flex';G('disc-val').textContent='-฿'+disc.toLocaleString();}else dr.style.display='none';
   const cr=G('cpn-disc-row');
   if(cpnDisc>0){cr.style.display='flex';G('cpn-disc-val').textContent='-฿'+cpnDisc.toLocaleString();}else cr.style.display='none';
-  return{sub,disc,cpnDisc,tot};
+  const pr=G('paper-disc-row');
+  if(pr){if(paperDisc>0){pr.style.display='flex';G('paper-disc-val').textContent='-฿'+paperDisc.toLocaleString();}else pr.style.display='none';}
+  return{sub,disc,cpnDisc,paperDisc,tot};
 }
 
 function updateFloat(){
@@ -1432,7 +1450,7 @@ window.checkout=async function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
   const plate=G('plate').value||(selC?selC.plate:'—');
   const staffName=G('staff-sel').value||'ไม่ระบุ';
-  const{sub,disc,cpnDisc,tot}=uTot();
+  const{sub,disc,cpnDisc,paperDisc,tot}=uTot();
   const pts=Math.floor(tot/10);
   const now=new Date();
   const recId='#'+String(++txnN);
@@ -1472,13 +1490,14 @@ window.checkout=async function(){
     payment:selPayMethod,staff:staffName,branch:currentBranch||'',
     items:cart.map(c=>c.name).join(', '),
     itemDetails:svcEntries,total:tot,pts:selC?pts:0,
-    csaleTotal,copTotal,discount:disc,cpnDiscount:cpnDisc,
+    csaleTotal,copTotal,discount:disc,cpnDiscount:cpnDisc,paperDiscount:paperDisc||0,
     couponUsed:usedCoupon?usedCoupon.type:'none',
     date:now.toLocaleDateString('th-TH'),
     time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
     createdAt:serverTimestamp()
   };
 
+  await deductPaperCpn();
   setDot('sy','Saving...');
   try{
     if(db&&!LM){
@@ -1526,7 +1545,7 @@ window.checkout=async function(){
   else cpnEl.style.display='none';
 
   sh('sh-ok');
-  cart=[];selC=null;usedCoupon=null;
+  cart=[];selC=null;usedCoupon=null;appliedPaperCpn=null;
   G('cq').value='';G('cch').style.display='none';G('plate').value='';G('cust-cpns').innerHTML='';
   document.querySelector('.pay-btn').classList.add('active');
   document.querySelectorAll('.pay-btn').forEach((b,i)=>{if(i>0)b.classList.remove('active');});
@@ -1551,7 +1570,7 @@ function buildReceiptHTML(cartItems,sub,disc,cpnDisc,tot,cust,pts,pay,staff,recI
 // ══ INVOICE PREVIEW (Feature 6 - Line sharing) ══
 window.previewInvoice=function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
-  const{sub,disc,cpnDisc,tot}=uTot();
+  const{sub,disc,cpnDisc,paperDisc,tot}=uTot();
   const now=new Date();
   G('inv-content').innerHTML=`<div class="inv-box">
     <div class="inv-logo">⚙ CarCare POS</div>
@@ -2352,13 +2371,18 @@ function rPaperCpnAlert(){
   const paperCpns=(selC.coupons||[]).filter(c=>c.source==='paper'&&c.remaining>0&&(!c.expires||new Date(c.expires)>now));
   if(!paperCpns.length){el.style.display='none';return;}
   el.style.display='block';
-  list.innerHTML=paperCpns.map((c,i)=>`<div class="paper-cpn-item">
-    <div>
-      <div style="font-weight:700;">${c.desc}</div>
-      <div style="font-size:10px;color:var(--tx3);">${c.paperType==='free_wash'?'ล้างรถฟรี':c.paperType==='discount'?'ส่วนลด ฿'+c.value:c.paperType==='free_service'?'บริการฟรี':'คูปอง'} · เหลือ ${c.remaining} ${c.paperType==='discount'?'บาท':'ครั้ง'}${c.expires?' · ถึง '+new Date(c.expires).toLocaleDateString('th-TH'):''}</div>
-    </div>
-    <button class="btn btn-s btn-pur" onclick="usePaperCpn(${i})">ใช้</button>
-  </div>`).join('');
+  const allCpnsRef=selC.coupons||[];
+  list.innerHTML=paperCpns.map((c,i)=>{
+    const realIdx=allCpnsRef.findIndex(x=>x.source==='paper'&&x.desc===c.desc&&x.remaining>0);
+    const isApplied=appliedPaperCpn&&appliedPaperCpn.realIdx===realIdx;
+    return`<div class="paper-cpn-item" style="${isApplied?'background:var(--ok-bg);border-radius:var(--rs);padding:4px 6px;':''}">
+      <div>
+        <div style="font-weight:700;">${c.desc}</div>
+        <div style="font-size:10px;color:var(--tx3);">เหลือ ${c.remaining} ครั้ง${c.expires?' · ถึง '+new Date(c.expires).toLocaleDateString('th-TH'):''}</div>
+      </div>
+      <button class="btn btn-s ${isApplied?'btn-ok':'btn-pur'}" onclick="usePaperCpn(${i})">${isApplied?'✓ ใช้แล้ว':'ใช้'}</button>
+    </div>`;
+  }).join('');
 }
 
 window.usePaperCpn=async function(idx){
