@@ -1469,7 +1469,7 @@ window.checkout=async function(){
 
   const tdata={
     id:recId,customer:selC?selC.name:'Walk-in',plate,size:CZ,
-    payment:selPayMethod,staff:staffName,
+    payment:selPayMethod,staff:staffName,branch:currentBranch||'',
     items:cart.map(c=>c.name).join(', '),
     itemDetails:svcEntries,total:tot,pts:selC?pts:0,
     csaleTotal,copTotal,discount:disc,cpnDiscount:cpnDisc,
@@ -1700,6 +1700,7 @@ function rLoy(){
   const list=custs.filter(c=>!q||c.name.toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.plate||'').toLowerCase().includes(q));
   G('lm').textContent=custs.length;G('lp').textContent=custs.reduce((a,c)=>a+(c.points||0),0).toLocaleString();G('lg').textContent=custs.filter(c=>(c.points||0)>=1000).length;
   const now=new Date();
+  rCeramicAlerts();
   G('ll').innerHTML=list.map(c=>{
     const active=(c.coupons||[]).filter(x=>(x.type==='wash'&&x.remaining>0)||(x.type==='month'&&new Date(x.expires)>now));
     let ceramicBadge='';
@@ -2208,22 +2209,8 @@ window.exportUsage=function(){
   a.href=u;a.download=`usage-${from}-${to}.csv`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
 };
 
-// ── PATCH CHECKOUT TO SHOW USAGE CONFIRM ──
-// After checkout succeeds, show usage confirmation sheet
-const _origCheckout=window.checkout;
-window.checkout=async function(){
-  // Save cart copy before checkout clears it
-  const cartCopy=cart.map(c=>({...c}));
-  await _origCheckout();
-  // After checkout, if last txn had products with recipes, show usage confirm
-  if(lastTxnData){
-    const expected=buildExpectedUsage(cartCopy);
-    if(expected.length>0){
-      // Small delay to let success sheet appear first
-      setTimeout(()=>showUsageConfirm(lastTxnData,cartCopy),800);
-    }
-  }
-};
+// ── USAGE CONFIRM after checkout ──
+// Called from within the main checkout function
 
 // ── PATCH sw() to init usage screen ──
 const _origSw=window.sw;
@@ -2899,20 +2886,9 @@ window.callCeramicCustomer=function(id){
   else alert('ไม่มีเบอร์โทรของลูกค้านี้');
 };
 
-// ══ BRANCH FILTER for today/history ══
-const _origRToday=rToday;
-rToday=function(){
-  _origRToday();
-  rCeramicAlerts();
-};
+// rToday ceramic alerts called separately
 
-// ══ PATCH CHECKOUT TO SAVE BRANCH ══
-const _origCheckout=window.checkout;
-window.checkout=async function(){
-  // Tag with branch before checkout
-  const origAddDoc=window._origAddDoc||null;
-  await _origCheckout();
-};
+// Branch tagging handled inline in checkout
 
 // Auto-select branch if already saved
 if(currentBranch)setTimeout(()=>selectBranch(currentBranch),500);
