@@ -2,6 +2,12 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"/>
+<script>
+// Auto-redirect to desktop dashboard if on wide screen and not forced mobile
+if(window.innerWidth>=1024&&!localStorage.getItem('force_mobile')){
+  window.location.replace('./desktop.html');
+}
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#C9A84C"/>
@@ -216,6 +222,8 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .promo-exp{font-size:9px;color:rgba(255,255,255,.6);margin-top:3px;}
 .paper-cpn-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(83,74,183,.15);font-size:12px;color:var(--pur);}
 .paper-cpn-item:last-child{border-bottom:none;}
+.pin-btn{padding:16px;font-size:20px;font-weight:700;border-radius:var(--r);border:1px solid #333;background:#2a2a2a;color:#fff;cursor:pointer;-webkit-appearance:none;transition:background .1s;}
+.pin-btn:active{background:#444;}
 .ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
 /* CATEGORY TOP NAV */
 .cat-nav{flex:1;min-width:fit-content;padding:9px 10px;font-size:11px;font-weight:700;cursor:pointer;border:none;border-right:1px solid var(--bdr);background:var(--sur);color:var(--tx2);white-space:nowrap;transition:all .15s;-webkit-appearance:none;}
@@ -282,9 +290,34 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 </div>
 
 <!-- APP -->
+<!-- PIN LOGIN SCREEN -->
+<div id="pin-login" style="position:fixed;inset:0;background:var(--blk);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+  <div style="font-size:36px;margin-bottom:8px;">⚙</div>
+  <div style="font-size:20px;font-weight:700;color:var(--gold);margin-bottom:4px;">CarCare POS</div>
+  <div style="font-size:12px;color:#aaa;margin-bottom:32px;" id="pin-branch-lbl"></div>
+  <div style="font-size:13px;color:#aaa;margin-bottom:12px;">ใส่ PIN เพื่อเข้าใช้งาน</div>
+  <div id="pin-login-display" style="font-size:40px;font-weight:700;letter-spacing:16px;color:var(--gold);margin-bottom:24px;min-width:120px;text-align:center;">____</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:240px;margin-bottom:20px;">
+    <button onclick="loginPinPress('1')" class="pin-btn">1</button>
+    <button onclick="loginPinPress('2')" class="pin-btn">2</button>
+    <button onclick="loginPinPress('3')" class="pin-btn">3</button>
+    <button onclick="loginPinPress('4')" class="pin-btn">4</button>
+    <button onclick="loginPinPress('5')" class="pin-btn">5</button>
+    <button onclick="loginPinPress('6')" class="pin-btn">6</button>
+    <button onclick="loginPinPress('7')" class="pin-btn">7</button>
+    <button onclick="loginPinPress('8')" class="pin-btn">8</button>
+    <button onclick="loginPinPress('9')" class="pin-btn">9</button>
+    <button onclick="loginPinPress('clear')" class="pin-btn" style="color:#888;">ล้าง</button>
+    <button onclick="loginPinPress('0')" class="pin-btn">0</button>
+    <button onclick="loginPinPress('del')" class="pin-btn" style="color:#888;">⌫</button>
+  </div>
+  <div id="pin-error" style="color:#f87171;font-size:12px;min-height:20px;margin-bottom:12px;"></div>
+  <button onclick="skipPinLogin()" style="background:none;border:none;color:#444;font-size:12px;cursor:pointer;padding:8px;">เข้าแบบ Guest →</button>
+</div>
+
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8b</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8d</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -727,28 +760,12 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- Paper Coupon Sheet -->
 <div id="sh-pcpn" class="sbg" style="display:none;" onclick="csbg(event,'sh-pcpn')">
 <div class="sht" onclick="event.stopPropagation()">
-  <div class="sh"></div><h3>🎫 เพิ่มคูปองกระดาษ</h3>
-  <div style="font-size:12px;color:var(--tx2);margin-bottom:14px;" id="pcpn-cust-name"></div>
-  <div class="fr"><label class="lbl">คำอธิบายคูปอง</label>
-    <input id="pcpn-desc" type="text" placeholder="เช่น ล้างรถฟรี 3 ครั้ง, ส่วนลด ฿200"/>
+  <div class="sh"></div><h3>🎫 เพิ่มคูปองให้ลูกค้า</h3>
+  <div style="font-size:13px;font-weight:700;color:var(--pur);margin-bottom:14px;" id="pcpn-cust-name"></div>
+  <div id="pcpn-tmpl-quick">
+    <div style="font-size:12px;color:var(--tx3);text-align:center;padding:20px 0;">กำลังโหลด...</div>
   </div>
-  <div class="fr2">
-    <div><label class="lbl">ประเภท</label>
-      <select id="pcpn-type">
-        <option value="free_wash">ล้างรถฟรี (ครั้ง)</option>
-        <option value="discount">ส่วนลด (บาท)</option>
-        <option value="free_service">บริการฟรี</option>
-        <option value="other">อื่นๆ</option>
-      </select>
-    </div>
-    <div><label class="lbl">จำนวน/มูลค่า</label>
-      <input id="pcpn-val" type="number" placeholder="3"/>
-    </div>
-  </div>
-  <div class="fr"><label class="lbl">หมดอายุ (ไม่จำเป็น)</label>
-    <input id="pcpn-exp" type="date"/>
-  </div>
-  <div class="sbt"><button class="btn" onclick="hs('sh-pcpn')">ยกเลิก</button><button class="btn btn-g" onclick="addPaperCoupon()">เพิ่มคูปอง</button></div>
+  <div class="sbt"><button class="btn btn-g" style="flex:1;" onclick="hs('sh-pcpn')">เสร็จสิ้น</button></div>
 </div></div>
 
 <!-- Restock -->
@@ -2341,27 +2358,7 @@ function rPromoBanner(){
 }
 
 // ══ PAPER COUPONS ══
-window.openPaperCoupon=function(id){
-  viewCustId=id;
-  const c=custs.find(x=>(x._id||x.id)==id);if(!c)return;
-  G('pcpn-cust-name').textContent='ลูกค้า: '+c.name;
-  G('pcpn-desc').value='';G('pcpn-val').value='';G('pcpn-exp').value='';
-  hs('sh-cust');sh('sh-pcpn');
-};
-
-window.addPaperCoupon=async function(){
-  const desc=G('pcpn-desc').value.trim();if(!desc){alert('ระบุคำอธิบายคูปอง');return;}
-  const type=G('pcpn-type').value;
-  const val=parseInt(G('pcpn-val').value)||1;
-  const exp=G('pcpn-exp').value;
-  const c=custs.find(x=>(x._id||x.id)==viewCustId);if(!c)return;
-  const newCpn={type:'paper',paperType:type,desc,value:val,remaining:val,expires:exp||null,from:new Date().toISOString(),source:'paper'};
-  const updCpns=[...(c.coupons||[]),newCpn];
-  if(db&&!LM)await updateDoc(doc(db,'customers',c._id||c.id),{coupons:updCpns});
-  else{c.coupons=updCpns;LS('cu',custs);}
-  hs('sh-pcpn');rLoy();
-  alert('✅ เพิ่มคูปองกระดาษสำเร็จ!');
-};
+// openPaperCoupon and addPaperCoupon defined later in coupon templates section
 
 // Show paper coupons at POS when customer selected
 function rPaperCpnAlert(){
@@ -2936,6 +2933,108 @@ setTimeout(function(){
     <button class="btn" style="width:100%;margin-top:12px;" onclick="hs('sh-pin')">ยกเลิก</button>
   `;
 },500);
+
+
+// ══ PIN LOGIN SYSTEM ══
+let loggedInStaff = null;
+let loginPinBuffer = '';
+
+function showPinLogin(){
+  loginPinBuffer='';
+  updateLoginDisplay();
+  G('pin-error').textContent='';
+  const lbl=G('pin-branch-lbl');
+  if(lbl)lbl.textContent=currentBranch?'สาขา '+currentBranch:'';
+  G('pin-login').style.display='flex';
+}
+
+function hidePinLogin(){
+  G('pin-login').style.display='none';
+}
+
+function updateLoginDisplay(){
+  const el=G('pin-login-display');
+  if(!el)return;
+  el.textContent='●'.repeat(loginPinBuffer.length)+'_'.repeat(4-loginPinBuffer.length);
+  el.style.color=loginPinBuffer.length>0?'var(--gold)':'#444';
+}
+
+window.loginPinPress=function(k){
+  const errEl=G('pin-error');
+  if(k==='del'){loginPinBuffer=loginPinBuffer.slice(0,-1);}
+  else if(k==='clear'){loginPinBuffer='';}
+  else if(loginPinBuffer.length<4){loginPinBuffer+=k;}
+  updateLoginDisplay();
+  if(errEl)errEl.textContent='';
+
+  if(loginPinBuffer.length===4){
+    // Check against staff list
+    const matched=staffList.find(s=>s.pin===loginPinBuffer);
+    if(matched){
+      loggedInStaff=matched.name;
+      localStorage.setItem('loggedStaff',matched.name);
+      // Auto-set staff selector
+      const sel=G('staff-sel');
+      if(sel){sel.value=matched.name;updateStaffDisplay();}
+      // Update badge
+      const badge=G('logged-staff-badge');
+      if(badge){badge.style.display='inline-block';badge.textContent='👤 '+matched.name;}
+      hidePinLogin();
+      loginPinBuffer='';
+    } else {
+      if(errEl){errEl.textContent='PIN ไม่ถูกต้อง กรุณาลองใหม่';}
+      const disp=G('pin-login-display');
+      if(disp){disp.style.color='#f87171';}
+      setTimeout(()=>{
+        loginPinBuffer='';
+        updateLoginDisplay();
+        if(disp)disp.style.color='#444';
+      },800);
+    }
+  }
+};
+
+window.skipPinLogin=function(){
+  loggedInStaff=null;
+  localStorage.removeItem('loggedStaff');
+  const badge=G('logged-staff-badge');
+  if(badge){badge.style.display='inline-block';badge.textContent='👤 Guest';}
+  hidePinLogin();
+};
+
+// Show PIN login when app starts (after Firebase connects)
+const _origStartApp=startApp;
+function startApp(){
+  _origStartApp();
+  // Show PIN login after a short delay
+  setTimeout(()=>{
+    // Restore last logged in staff
+    const saved=localStorage.getItem('loggedStaff');
+    const badge=G('logged-staff-badge');
+    if(saved&&staffList.find(s=>s.name===saved)){
+      loggedInStaff=saved;
+      if(badge){badge.style.display='inline-block';badge.textContent='👤 '+saved;}
+      const sel=G('staff-sel');
+      if(sel){sel.value=saved;updateStaffDisplay();}
+    } else {
+      // Show PIN login
+      if(badge){badge.style.display='inline-block';}
+      showPinLogin();
+    }
+  },600);
+}
+
+// Lock screen after inactivity (optional - 4 hours)
+let lastActivity=Date.now();
+document.addEventListener('touchstart',()=>lastActivity=Date.now());
+document.addEventListener('click',()=>lastActivity=Date.now());
+setInterval(()=>{
+  if(loggedInStaff&&Date.now()-lastActivity>4*60*60*1000){
+    loggedInStaff=null;
+    localStorage.removeItem('loggedStaff');
+    showPinLogin();
+  }
+},60000);
 
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
