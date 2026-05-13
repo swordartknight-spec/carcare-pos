@@ -317,7 +317,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8g</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8h</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1118,12 +1118,27 @@ try{
 }
 
 function startApp(){
-  G('setup').style.display='none';G('app').style.display='flex';
+  const setupEl=G('setup');if(setupEl)setupEl.style.display='none';
+  G('app').style.display='flex';
   setDot('sy','Connecting...');
   // Auto-set Vercel URL if not already set
   if(!localStorage.getItem('line_server_url')){
     localStorage.setItem('line_server_url','https://carcare-pos.vercel.app');
   }
+  // PIN login after short delay
+  setTimeout(()=>{
+    const saved=localStorage.getItem('loggedStaff');
+    const badge=G('logged-staff-badge');
+    if(saved&&staffList.find(s=>s.name===saved)){
+      loggedInStaff=saved;
+      if(badge){badge.style.display='inline-block';badge.textContent='👤 '+saved;}
+      const sel=G('staff-sel');
+      if(sel){sel.value=saved;updateStaffDisplay();}
+    } else {
+      if(badge)badge.style.display='inline-block';
+      showPinLogin();
+    }
+  },800);
   // setRange called after module loads via window.setRange
   setTimeout(function(){if(window.setRange)window.setRange('today');else{var n=new Date(),f=n.toISOString().slice(0,10);document.getElementById('d-from').value=f;document.getElementById('d-to').value=f;}},200);
   initStaffDropdown();
@@ -2997,26 +3012,7 @@ window.skipPinLogin=function(){
 };
 
 // Show PIN login when app starts (after Firebase connects)
-const _origStartApp=startApp;
-function startApp(){
-  _origStartApp();
-  // Show PIN login after a short delay
-  setTimeout(()=>{
-    // Restore last logged in staff
-    const saved=localStorage.getItem('loggedStaff');
-    const badge=G('logged-staff-badge');
-    if(saved&&staffList.find(s=>s.name===saved)){
-      loggedInStaff=saved;
-      if(badge){badge.style.display='inline-block';badge.textContent='👤 '+saved;}
-      const sel=G('staff-sel');
-      if(sel){sel.value=saved;updateStaffDisplay();}
-    } else {
-      // Show PIN login
-      if(badge){badge.style.display='inline-block';}
-      showPinLogin();
-    }
-  },600);
-}
+// PIN login init - called after startApp
 
 // Lock screen after inactivity (optional - 4 hours)
 let lastActivity=Date.now();
