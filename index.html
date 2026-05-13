@@ -33,7 +33,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Segoe UI
 .app{display:flex;flex-direction:column;height:100%;height:100dvh;}
 
 /* SETUP */
-.setup{position:fixed;inset:0;background:var(--blk);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;color:#fff;overflow-y:auto;}
+.setup{position:fixed;inset:0;background:var(--blk);z-index:500;display:none!important;flex-direction:column;align-items:center;justify-content:center;padding:24px;color:#fff;overflow-y:auto;}
 .setup h1{font-size:22px;font-weight:700;color:var(--gold);margin:10px 0 4px;}
 .setup p{font-size:12px;color:#aaa;text-align:center;margin-bottom:18px;line-height:1.6;}
 .setup-form{width:100%;max-width:380px;}
@@ -317,7 +317,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8d</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8g</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1095,7 +1095,7 @@ window.goOffline=function(){
 const savedVercel=LS('line_server_url');
 if(savedVercel){const vi=G('vercel-url');if(vi)vi.value=savedVercel;}
 
-// ── AUTO-CONNECT: hardcoded Firebase config ──
+// ── AUTO-CONNECT: hardcoded Firebase config — setup screen never shown ──
 const AUTO_CFG={
   apiKey:'AIzaSyDSuBAXVbzaMwNJEVQYxYDF8Q0zPWYxUhQ',
   authDomain:'carcare-pos-559ef.firebaseapp.com',
@@ -1103,24 +1103,18 @@ const AUTO_CFG={
   storageBucket:'carcare-pos-559ef.appspot.com',
   appId:'1:562909364593:web:549e45b521adb45247f6d0'
 };
+// Hide setup screen immediately
+const setupEl=G('setup');
+if(setupEl)setupEl.style.display='none';
+// Connect Firebase
 try{
-  LS('fb',AUTO_CFG);
-  G('fb-key').value=AUTO_CFG.apiKey;
-  G('fb-pid').value=AUTO_CFG.projectId;
-  G('fb-aid').value=AUTO_CFG.appId;
   const _autoApp=initializeApp(AUTO_CFG);
   db=getFirestore(_autoApp);
   startApp();
 }catch(e){
-  console.log('Auto-connect failed:',e);
-  // Fall back to manual entry
-  const saved=LS('fb');
-  if(saved){
-    try{
-      const cfg=saved;
-      const app=initializeApp(cfg);db=getFirestore(app);startApp();
-    }catch(e2){console.log(e2);}
-  }
+  console.error('Firebase connect failed:',e);
+  // Still start app offline
+  goOffline();
 }
 
 function startApp(){
