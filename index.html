@@ -13,6 +13,7 @@ if(window.innerWidth>=1024&&!localStorage.getItem('force_mobile')){
 <meta name="theme-color" content="#C9A84C"/>
 <link rel="manifest" href="manifest.json"/>
 <title>CarCare POS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙</text></svg>"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -294,8 +295,15 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <div id="pin-login" style="position:fixed;inset:0;background:var(--blk);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
   <div style="font-size:36px;margin-bottom:8px;">⚙</div>
   <div style="font-size:20px;font-weight:700;color:var(--gold);margin-bottom:4px;">CarCare POS</div>
-  <div style="font-size:12px;color:#aaa;margin-bottom:32px;" id="pin-branch-lbl"></div>
-  <div style="font-size:13px;color:#aaa;margin-bottom:12px;">ใส่ PIN เพื่อเข้าใช้งาน</div>
+  <div style="font-size:12px;color:#aaa;margin-bottom:24px;">เลือกสาขา แล้วใส่ PIN</div>
+
+  <!-- Branch selector -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:240px;margin-bottom:24px;">
+    <button id="pin-br-HO" onclick="pinSelectBranch('HO')" style="padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;border:2px solid #333;background:#2a2a2a;color:#666;transition:all .15s;">🏢 HO</button>
+    <button id="pin-br-MK" onclick="pinSelectBranch('MK')" style="padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;border:2px solid #333;background:#2a2a2a;color:#666;transition:all .15s;">🚗 MK</button>
+  </div>
+
+  <div style="font-size:13px;color:#aaa;margin-bottom:12px;">ใส่ PIN 4 หลัก</div>
   <div id="pin-login-display" style="font-size:40px;font-weight:700;letter-spacing:16px;color:var(--gold);margin-bottom:24px;min-width:120px;text-align:center;">____</div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:240px;margin-bottom:20px;">
     <button onclick="loginPinPress('1')" class="pin-btn">1</button>
@@ -317,7 +325,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8h</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8k</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -669,22 +677,25 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 </div><!-- content -->
 
-<!-- BOTTOM NAV -->
+<!-- BOTTOM NAV — Mobile shows only POS + Today + More -->
 <div class="nav">
   <button class="nt active" id="nt-pos" onclick="sw('pos',this)"><span class="ni">🛒</span>POS</button>
   <button class="nt" id="nt-today" onclick="sw('today',this)"><span class="ni">📊</span>Today</button>
-  <button class="nt" id="nt-loyalty" onclick="sw('loyalty',this)"><span class="ni">⭐</span>Loyalty</button>
-  <button class="nt" id="nt-history" onclick="sw('history',this)"><span class="ni">🕐</span>History</button>
   <button class="nt" onclick="toggleMoreMenu()"><span class="ni">••••</span>More</button>
 </div>
 
 <!-- MORE MENU -->
 <div id="more-menu" style="display:none;position:fixed;bottom:calc(56px + var(--sb));left:0;right:0;background:var(--sur);border-top:1px solid var(--bdr);z-index:150;padding:8px 0;box-shadow:0 -4px 20px rgba(0,0,0,.12);">
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;">
+    <button class="nt" id="nt-loyalty" onclick="sw('loyalty',this);toggleMoreMenu()"><span class="ni">⭐</span>Loyalty</button>
+    <button class="nt" id="nt-history" onclick="sw('history',this);toggleMoreMenu()"><span class="ni">🕐</span>History</button>
     <button class="nt" id="nt-staff" onclick="sw('staff',this);toggleMoreMenu()"><span class="ni">👤</span>Incentive</button>
     <button class="nt" id="nt-stock" onclick="sw('stock',this);toggleMoreMenu()"><span class="ni">📦</span>Stock</button>
     <button class="nt" id="nt-prices" onclick="sw('prices',this);toggleMoreMenu()"><span class="ni">📋</span>Prices</button>
     <button class="nt" id="nt-usage" onclick="sw('usage',this);toggleMoreMenu()"><span class="ni">🧪</span>Usage</button>
+  </div>
+  <div style="text-align:center;padding:8px;border-top:1px solid var(--bdr);margin-top:4px;">
+    <a href="./desktop.html" style="font-size:11px;color:var(--inf);text-decoration:none;font-weight:700;">🖥 เปิดหน้า Dashboard →</a>
   </div>
 </div>
 <div id="more-backdrop" onclick="toggleMoreMenu()" style="display:none;position:fixed;inset:0;z-index:149;"></div>
@@ -2687,7 +2698,7 @@ window.selectBranch=function(b){
   rToday();rHist();rSt();
 };
 
-window.showBranchPicker=function(){sh('sh-branch');};
+window.showBranchPicker=function(){sh('sh-branch');};window._showBranchPicker=window.showBranchPicker;
 
 // Init branch on load
 if(currentBranch){setTimeout(()=>{selectBranch(currentBranch);},300);}
@@ -2951,15 +2962,44 @@ let loginPinBuffer = '';
 function showPinLogin(){
   loginPinBuffer='';
   updateLoginDisplay();
-  G('pin-error').textContent='';
-  const lbl=G('pin-branch-lbl');
-  if(lbl)lbl.textContent=currentBranch?'สาขา '+currentBranch:'';
-  G('pin-login').style.display='flex';
+  const errEl=G('pin-error');if(errEl)errEl.textContent='';
+  const pl=G('pin-login');if(pl)pl.style.display='flex';
+  // Pre-select last used branch
+  const saved=localStorage.getItem('branch');
+  if(saved)pinSelectBranch(saved);
 }
+window.showPinLogin=showPinLogin;
+window._showPinLogin=showPinLogin;
+
+window.pinSelectBranch=function(b){
+  currentBranch=b;
+  localStorage.setItem('branch',b);
+  ['HO','MK'].forEach(br=>{
+    const el=G('pin-br-'+br);if(!el)return;
+    if(br===b){
+      el.style.border='2px solid var(--gold)';
+      el.style.background=b==='HO'?'#185FA5':'#3B6D11';
+      el.style.color='#fff';
+    } else {
+      el.style.border='2px solid #333';
+      el.style.background='#2a2a2a';
+      el.style.color='#666';
+    }
+  });
+  // Update branch badge in topbar
+  const badge=G('branch-badge');
+  if(badge){
+    badge.style.display='inline-block';
+    badge.textContent=b==='HO'?'🏢 HO':'🚗 MK';
+    badge.style.background=b==='HO'?'var(--inf)':'var(--ok)';
+    badge.style.color='#fff';
+  }
+};window._showPinLogin=showPinLogin;
 
 function hidePinLogin(){
-  G('pin-login').style.display='none';
+  const pl=G('pin-login');if(pl)pl.style.display='none';
 }
+window.hidePinLogin=hidePinLogin;
 
 function updateLoginDisplay(){
   const el=G('pin-login-display');
@@ -2970,6 +3010,13 @@ function updateLoginDisplay(){
 
 window.loginPinPress=function(k){
   const errEl=G('pin-error');
+  if(!currentBranch){
+    if(errEl)errEl.textContent='กรุณาเลือกสาขาก่อน';
+    // Shake branch buttons
+    ['HO','MK'].forEach(br=>{const el=G('pin-br-'+br);if(el){el.style.border='2px solid #f87171';}});
+    setTimeout(()=>['HO','MK'].forEach(br=>{const el=G('pin-br-'+br);if(el)el.style.border='2px solid #333';}),800);
+    return;
+  }
   if(k==='del'){loginPinBuffer=loginPinBuffer.slice(0,-1);}
   else if(k==='clear'){loginPinBuffer='';}
   else if(loginPinBuffer.length<4){loginPinBuffer+=k;}
@@ -3004,11 +3051,16 @@ window.loginPinPress=function(k){
 };
 
 window.skipPinLogin=function(){
+  if(!currentBranch){
+    // Default to HO if no branch selected
+    pinSelectBranch('HO');
+  }
   loggedInStaff=null;
   localStorage.removeItem('loggedStaff');
   const badge=G('logged-staff-badge');
   if(badge){badge.style.display='inline-block';badge.textContent='👤 Guest';}
   hidePinLogin();
+  rToday();rHist();rSt();
 };
 
 // Show PIN login when app starts (after Firebase connects)
