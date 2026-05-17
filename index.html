@@ -225,6 +225,10 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .paper-cpn-item:last-child{border-bottom:none;}
 .pin-btn{padding:16px;font-size:20px;font-weight:700;border-radius:var(--r);border:1px solid #333;background:#2a2a2a;color:#fff;cursor:pointer;-webkit-appearance:none;transition:background .1s;}
 .pin-btn:active{background:#444;}
+.quick-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:10px 12px;background:var(--sur);border:1.5px solid var(--bdr);border-radius:var(--r);cursor:pointer;min-width:90px;text-align:center;transition:all .12s;}
+.quick-chip:active{background:var(--gold-lt);border-color:var(--gold);transform:scale(.96);}
+.qc-name{font-size:11px;font-weight:700;line-height:1.3;color:var(--tx);}
+.qc-price{font-size:13px;font-weight:700;color:var(--gold);margin-top:4px;}
 .ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
 /* CATEGORY TOP NAV */
 .cat-nav{flex:1;min-width:fit-content;padding:9px 10px;font-size:11px;font-weight:700;cursor:pointer;border:none;border-right:1px solid var(--bdr);background:var(--sur);color:var(--tx2);white-space:nowrap;transition:all .15s;-webkit-appearance:none;}
@@ -325,7 +329,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8n</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8p</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -421,6 +425,12 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     <div id="promo-banner" style="margin-bottom:10px;display:none;">
       <div style="font-size:10px;font-weight:700;color:var(--err);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">🔥 โปรโมชั่นพิเศษ</div>
       <div id="promo-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+    </div>
+
+    <!-- Quick sell shortcuts -->
+    <div id="quick-sell" style="margin-bottom:12px;">
+      <div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">⚡ รายการขายดี</div>
+      <div id="quick-sell-cards" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;"></div>
     </div>
 
     <!-- Paper coupon alert moved into cart section -->
@@ -1382,13 +1392,20 @@ function rCouponSection(){
   });
   if(!active.length){sec.style.display='none';return;}
   sec.style.display='block';
+  const hasWash=cart.some(c=>c.cat==='ล้างรถ');
+  if(!hasWash){
+    G('cpn-opts').innerHTML='<div style="font-size:11px;color:var(--amb);padding:6px 0;">⚠️ คูปองใช้ได้กับบริการล้างรถเท่านั้น กรุณาเพิ่มล้างรถก่อน</div>';
+    return;
+  }
   G('cpn-opts').innerHTML=active.map((c,i)=>{
     let label='';
     if(c.type==='wash')label=`🎫 ล้างรถฟรี — เหลือ ${c.remaining} ครั้ง`;
     else if(c.type==='month')label=`🎫 ล้างรถฟรีถึง ${fmtDate(c.expires)}`;
     else if(c.source==='paper'||c.type==='template'){
       label=`🎟 ${c.desc||c.name||'คูปอง'} — เหลือ ${c.remaining} ครั้ง`;
-      if(c.discount>0)label+=` (ลด ฿${c.discount})`;
+      const discAmt=c.discount||0;
+      if(discAmt>0)label+=` (ลด ฿${discAmt})`;
+      else label+=` (ล้างรถฟรี ฿${svcs.find(s=>s.code==='-')?.[CZ]||200})`;
     }
     const isUsed=(usedCoupon&&usedCoupon.idx===i)||(appliedPaperCpn&&appliedPaperCpn.origIdx===i);
     return`<div class="cpn-opt" style="${isUsed?'background:rgba(59,109,17,.1);border-radius:6px;':''}">
@@ -1442,20 +1459,30 @@ function uTot(){
   const sub=cart.reduce((a,c)=>a+c.price*c.qty,0);
   let disc=0;
   if(selC&&(selC.points||0)>=500)disc=Math.min(Math.floor((selC.points||0)/500)*50,Math.floor(sub*.15));
-  // Loyalty wash coupon discount
+  // Check if cart has any ล้างรถ service
+  const hasWashInCart=cart.some(c=>c.cat==='ล้างรถ');
+
+  // Loyalty wash coupon discount — only if ล้างรถ in cart
   let cpnDisc=0;
-  if(usedCoupon){
+  if(usedCoupon&&hasWashInCart){
     const washSvc=svcs.find(s=>s.code==='-'||s.name.includes('ล้างสี & ดูดฝุ่น'));
     cpnDisc=washSvc?(washSvc[CZ]||200):200;
     cpnDisc=Math.min(cpnDisc,sub);
   }
-  // Paper/template coupon discount
+  // Paper/template coupon discount — only if ล้างรถ in cart
   let paperDisc=0;
-  if(appliedPaperCpn){
+  if(appliedPaperCpn&&hasWashInCart){
     const c=appliedPaperCpn.cpn;
-    if(c.paperType==='discount'||c.type==='template'){
-      // Template coupon: use discount field
-      paperDisc=appliedPaperCpn.cpn.discount||appliedPaperCpn.cpn.value||0;
+    // Template coupon: discount field = amount to deduct per use
+    if(c.type==='template'){
+      paperDisc=c.discount||0;
+      // If discount=0 it means free wash — deduct wash price
+      if(paperDisc===0){
+        const washSvc=svcs.find(s=>s.code==='-');
+        paperDisc=washSvc?(washSvc[CZ]||200):200;
+      }
+    } else if(c.paperType==='discount'){
+      paperDisc=c.value||0;
     } else if(c.paperType==='free_wash'||c.type==='wash'){
       const washSvc=svcs.find(s=>s.code==='-');
       paperDisc=washSvc?(washSvc[CZ]||200):200;
@@ -3135,6 +3162,68 @@ setInterval(()=>{
     showPinLogin();
   }
 },60000);
+
+
+// ══ QUICK SELL SHORTCUTS ══
+// Top selling services based on transaction history
+function rQuickSell(){
+  const el=G('quick-sell-cards');if(!el)return;
+
+  // Count service frequency from transactions
+  const svcCount={};
+  txns.slice(0,200).forEach(t=>{
+    (t.items||'').split(',').forEach(s=>{
+      const k=s.trim();
+      if(k)svcCount[k]=(svcCount[k]||0)+1;
+    });
+  });
+
+  // Get top 6 most sold services
+  const topNames=Object.entries(svcCount)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,8)
+    .map(([name])=>name);
+
+  // Match to service list to get price
+  const topSvcs=[];
+  for(const name of topNames){
+    const svc=svcs.find(s=>s.name===name);
+    if(svc&&(svc[CZ]||0)>0)topSvcs.push(svc);
+    if(topSvcs.length>=6)break;
+  }
+
+  // If no history yet, show default popular services
+  if(!topSvcs.length){
+    const defaults=['ล้างสี & ดูดฝุ่น','P01','P02','I01'];
+    defaults.forEach(code=>{
+      const svc=svcs.find(s=>s.code===code||s.name===code);
+      if(svc&&(svc[CZ]||0)>0)topSvcs.push(svc);
+    });
+  }
+
+  el.innerHTML=topSvcs.map(s=>{
+    const p=s[CZ]||0;
+    const d=JSON.stringify({id:(s._id||s.code)+'_'+CZ,name:s.name,cat:s.cat,price:p,size:CZ,code:s.code,SC:s.SC||0,SCo:s.SCo||0,cpnWash:s.cpnWash||0,cpnMonth:s.cpnMonth||0});
+    return`<div class="quick-chip" onclick='addCart(${d.replace(/'/g,"&apos;")})'>
+      <div class="qc-name">${s.name.length>12?s.name.slice(0,11)+'…':s.name}</div>
+      <div class="qc-price">฿${p.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+}
+
+// Refresh quick sell when size changes or svcs load
+const _origSetSz=window.setSz;
+window.setSz=function(s,el){
+  _origSetSz(s,el);
+  rQuickSell();
+};
+
+// Init quick sell after svcs loaded
+const _origRSvcs=rSvcs;
+rSvcs=function(){
+  _origRSvcs();
+  rQuickSell();
+};
 
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
