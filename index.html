@@ -325,7 +325,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8m</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8n</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -423,11 +423,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
       <div id="promo-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
     </div>
 
-    <!-- Paper coupon alert when customer selected -->
-    <div id="paper-cpn-alert" style="display:none;margin-bottom:10px;background:var(--pur-bg);border:1px solid var(--pur);border-radius:var(--rs);padding:10px 12px;">
-      <div style="font-size:11px;font-weight:700;color:var(--pur);margin-bottom:6px;">🎫 คูปองกระดาษของลูกค้า</div>
-      <div id="paper-cpn-list"></div>
-    </div>
+    <!-- Paper coupon alert moved into cart section -->
 
     <div class="sq-grid" id="sg"></div>
 
@@ -436,10 +432,10 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
       <div class="ch"><span>🛒 Cart</span><button class="btn btn-s btn-d" onclick="clrCart()">ล้าง</button></div>
       <div id="ci-list"></div>
 
-      <!-- COUPON USE (Feature 1) -->
+      <!-- UNIFIED COUPON SECTION -->
       <div id="cpn-use-section" style="display:none;padding:10px 14px;border-top:1px solid var(--bdr);">
         <div class="cpn-use">
-          <div class="cpn-use-title">🎫 คูปองที่สามารถใช้ได้</div>
+          <div class="cpn-use-title">🎫 คูปองที่สามารถใช้ได้ (เลือกได้ 1 ใบ)</div>
           <div id="cpn-opts"></div>
         </div>
       </div>
@@ -1373,18 +1369,63 @@ function rCart(){
 // Feature 1: Show available coupons for selected customer
 function rCouponSection(){
   const sec=G('cpn-use-section');
-  if(!selC||(selC.coupons||[]).length===0){sec.style.display='none';return;}
+  if(!selC){sec.style.display='none';return;}
   const now=new Date();
-  const active=(selC.coupons||[]).filter(c=>
-    (c.type==='wash'&&c.remaining>0)||(c.type==='month'&&new Date(c.expires)>now)
-  );
+  // ALL active coupons - loyalty + paper + template
+  const allCpns=selC.coupons||[];
+  const active=allCpns.filter(c=>{
+    if(c.type==='wash'&&c.remaining>0)return true;
+    if(c.type==='month'&&new Date(c.expires)>now)return true;
+    if(c.source==='paper'&&c.remaining>0&&(!c.expires||new Date(c.expires)>now))return true;
+    if(c.type==='template'&&c.remaining>0)return true;
+    return false;
+  });
   if(!active.length){sec.style.display='none';return;}
   sec.style.display='block';
-  G('cpn-opts').innerHTML=active.map((c,i)=>`<div class="cpn-opt">
-    <span>${c.type==='wash'?`🎫 ล้างรถฟรี — เหลือ ${c.remaining} ครั้ง`:`🎫 ล้างรถฟรีถึง ${fmtDate(c.expires)}`}</span>
-    <button class="btn btn-s btn-pur" onclick="useCoupon(${i})">${usedCoupon&&usedCoupon.idx===i?'✓ ใช้แล้ว':'ใช้'}</button>
-  </div>`).join('');
+  G('cpn-opts').innerHTML=active.map((c,i)=>{
+    let label='';
+    if(c.type==='wash')label=`🎫 ล้างรถฟรี — เหลือ ${c.remaining} ครั้ง`;
+    else if(c.type==='month')label=`🎫 ล้างรถฟรีถึง ${fmtDate(c.expires)}`;
+    else if(c.source==='paper'||c.type==='template'){
+      label=`🎟 ${c.desc||c.name||'คูปอง'} — เหลือ ${c.remaining} ครั้ง`;
+      if(c.discount>0)label+=` (ลด ฿${c.discount})`;
+    }
+    const isUsed=(usedCoupon&&usedCoupon.idx===i)||(appliedPaperCpn&&appliedPaperCpn.origIdx===i);
+    return`<div class="cpn-opt" style="${isUsed?'background:rgba(59,109,17,.1);border-radius:6px;':''}">
+      <span style="font-size:12px;">${label}</span>
+      <button class="btn btn-s ${isUsed?'btn-ok':'btn-pur'}" onclick="useAnyCoupon(${i})">${isUsed?'✓ ใช้แล้ว':'ใช้'}</button>
+    </div>`;
+  }).join('');
 }
+
+window.useAnyCoupon=function(idx){
+  // Unified handler - determine coupon type and apply
+  if(!selC)return;
+  const now=new Date();
+  const allCpns=selC.coupons||[];
+  const active=allCpns.filter(c=>{
+    if(c.type==='wash'&&c.remaining>0)return true;
+    if(c.type==='month'&&new Date(c.expires)>now)return true;
+    if(c.source==='paper'&&c.remaining>0&&(!c.expires||new Date(c.expires)>now))return true;
+    if(c.type==='template'&&c.remaining>0)return true;
+    return false;
+  });
+  const cpn=active[idx];if(!cpn)return;
+
+  // Toggle off if already selected
+  const isLoyalty=(cpn.type==='wash'||cpn.type==='month');
+  const isPaper=(cpn.source==='paper'||cpn.type==='template');
+
+  if(isLoyalty){
+    if(usedCoupon&&usedCoupon.idx===idx){usedCoupon=null;appliedPaperCpn=null;}
+    else{usedCoupon={...cpn,idx};appliedPaperCpn=null;}
+  } else if(isPaper){
+    const realIdx=allCpns.findIndex(c=>c.desc===cpn.desc&&c.remaining>0&&(c.source==='paper'||c.type==='template'));
+    if(appliedPaperCpn&&appliedPaperCpn.origIdx===idx){appliedPaperCpn=null;usedCoupon=null;}
+    else{appliedPaperCpn={cpn,realIdx,origIdx:idx,allCpns};usedCoupon=null;}
+  }
+  rCouponSection();uTot();updateFloat();
+};
 
 window.useCoupon=function(idx){
   const now=new Date();
