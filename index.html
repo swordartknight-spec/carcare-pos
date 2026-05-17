@@ -325,7 +325,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8k</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8m</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -367,6 +367,15 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
         <div style="font-size:11px;color:var(--tx2);" id="cci"></div>
         <div class="lb"><div class="lf" id="ccb" style="width:0%"></div></div>
         <div style="font-size:10px;color:var(--tx3);" id="ccnxt"></div>
+        <!-- Wash milestone progress -->
+        <div id="wash-milestone" style="display:none;margin-top:8px;background:var(--bg);border-radius:var(--rs);padding:8px 10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-size:10px;font-weight:700;color:var(--tx2);">🚿 สะสมล้างรถ (ครบ 5 = ฟรี 1 ครั้ง)</span>
+            <span style="font-size:10px;font-weight:700;color:var(--gold);" id="wash-count-txt"></span>
+          </div>
+          <div style="display:flex;gap:5px;margin-bottom:5px;" id="wash-dots"></div>
+          <div style="font-size:9px;color:var(--tx3);" id="wash-next-txt"></div>
+        </div>
         <div id="cust-cpns" style="margin-top:6px;"></div>
       </div>
     </div>
@@ -743,9 +752,13 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <!-- Staff Management -->
 <div id="sh-staff" class="sbg" style="display:none;" onclick="csbg(event,'sh-staff')">
 <div class="sht" onclick="event.stopPropagation()">
-  <div class="sh"></div><h3>จัดการพนักงาน</h3>
+  <div class="sh"></div><h3>👤 จัดการพนักงาน</h3>
+  <div style="background:var(--inf-bg);border-radius:var(--rs);padding:8px 12px;font-size:11px;color:var(--inf);margin-bottom:12px;">
+    💡 ตั้ง PIN ให้พนักงานแต่ละคน เพื่อล็อกอินและติดตาม C-Sale อัตโนมัติ
+  </div>
   <div style="display:flex;gap:8px;margin-bottom:12px;">
     <input id="new-staff-name" type="text" placeholder="ชื่อพนักงาน..." style="flex:1;"/>
+    <input id="new-staff-pin" type="number" placeholder="PIN 4 หลัก" style="width:100px;" maxlength="4"/>
     <button class="btn btn-g btn-s" onclick="addStaff()">เพิ่ม</button>
   </div>
   <div id="staff-list-manage"></div>
@@ -1189,18 +1202,16 @@ window.updateStaffDisplay=function(){
 };
 
 window.addStaff=async function(){
-  const n=G('new-staff-name').value.trim();if(!n)return;
-  if(db&&!LM)await addDoc(collection(db,'staff'),{name:n,createdAt:serverTimestamp()});
-  else{staffList.push({name:n,_id:'l'+Date.now()});LS('stf',staffList);initStaffDropdown();}
-  G('new-staff-name').value='';rStaffManage();
+  const n=G('new-staff-name').value.trim();if(!n){alert('ระบุชื่อพนักงาน');return;}
+  const pin=(G('new-staff-pin').value||'').trim();
+  if(pin&&(pin.length!==4||!/^\d{4}$/.test(pin))){alert('PIN ต้องเป็นตัวเลข 4 หลัก');return;}
+  const data={name:n,pin:pin||'',createdAt:serverTimestamp()};
+  if(db&&!LM)await addDoc(collection(db,'staff'),data);
+  else{staffList.push({...data,_id:'l'+Date.now()});LS('stf',staffList);initStaffDropdown();}
+  G('new-staff-name').value='';G('new-staff-pin').value='';rStaffManage();
 };
 
-function rStaffManage(){
-  G('staff-list-manage').innerHTML=staffList.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);">
-    <span style="font-weight:700;">👤 ${s.name}</span>
-    <button class="btn btn-s btn-d" onclick="delStaff('${s._id}')">ลบ</button>
-  </div>`).join('')||'<div class="empty" style="padding:20px;">ยังไม่มีพนักงาน</div>';
-}
+// rStaffManage defined later
 
 window.delStaff=async function(id){
   if(!confirm('ลบพนักงานนี้?'))return;
@@ -1486,7 +1497,7 @@ function tier(p){return p>=1000?'Gold ★':p>=400?'Silver ✦':'Bronze ◆';}
 window.checkout=async function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
   const plate=G('plate').value||(selC?selC.plate:'—');
-  const staffName=G('staff-sel').value||'ไม่ระบุ';
+  const staffName=loggedInStaff||G('staff-sel').value||'ไม่ระบุ';
   const{sub,disc,cpnDisc,paperDisc,tot}=uTot();
   const pts=Math.floor(tot/10);
   const now=new Date();
@@ -1524,7 +1535,7 @@ window.checkout=async function(){
 
   const tdata={
     id:recId,customer:selC?selC.name:'Walk-in',plate,size:CZ,
-    payment:selPayMethod,staff:staffName,branch:currentBranch||'',
+    payment:selPayMethod,staff:loggedInStaff||staffName,branch:currentBranch||'',
     items:cart.map(c=>c.name).join(', '),
     itemDetails:svcEntries,total:tot,pts:selC?pts:0,
     csaleTotal,copTotal,discount:disc,cpnDiscount:cpnDisc,paperDiscount:paperDisc||0,
@@ -2755,19 +2766,25 @@ window.pinPress=function(k){
 };
 
 // Add PIN field to staff management sheet
-const _origRStaffManage=window.rStaffManage||function(){};
+// Single clean rStaffManage
 window.rStaffManage=function(){
   const el=G('staff-list-manage');if(!el)return;
-  el.innerHTML=staffList.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);">
-    <div>
-      <span style="font-weight:700;">👤 ${s.name}</span>
-      <span style="font-size:11px;color:var(--tx3);margin-left:8px;">PIN: ${s.pin?'●●●●':'ไม่มี'}</span>
-    </div>
-    <div style="display:flex;gap:6px;">
-      <button class="btn btn-s" onclick="setStaffPin('${s._id||s.name}')">PIN</button>
-      <button class="btn btn-s btn-d" onclick="delStaff('${s._id}')">ลบ</button>
-    </div>
-  </div>`).join('')||'<div class="empty" style="padding:20px;">ยังไม่มีพนักงาน</div>';
+  el.innerHTML=staffList.length?staffList.map(s=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--bdr);">
+      <div>
+        <div style="font-weight:700;font-size:14px;">👤 ${s.name}</div>
+        <div style="font-size:11px;margin-top:3px;">
+          ${s.pin
+            ?'<span style="color:var(--ok);font-weight:700;">PIN ●●●● ✅</span>'
+            :'<span style="color:var(--err);">ยังไม่มี PIN</span>'}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-s btn-ok" onclick="setStaffPin('${s._id||s.name}')">✏️ PIN</button>
+        <button class="btn btn-s btn-d" onclick="delStaff('${s._id}')">ลบ</button>
+      </div>
+    </div>`).join('')
+  :'<div class="empty" style="padding:20px;">ยังไม่มีพนักงาน<br><span style="font-size:11px;">เพิ่มชื่อและ PIN ด้านบน</span></div>';
 };
 
 window.setStaffPin=async function(id){
