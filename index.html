@@ -347,7 +347,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9a</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9b</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1181,20 +1181,18 @@ function startApp(){
   if(!localStorage.getItem('line_server_url')){
     localStorage.setItem('line_server_url','https://carcare-pos.vercel.app');
   }
-  // PIN login after short delay
+  // PIN login — show immediately, staff list loads in background
   setTimeout(()=>{
     const saved=localStorage.getItem('loggedStaff');
     const badge=G('logged-staff-badge');
-    if(saved&&staffList.find(s=>s.name===saved)){
-      loggedInStaff=saved;
-      if(badge){badge.style.display='inline-block';badge.textContent='👤 '+saved;}
-      const sel=G('staff-sel');
-      if(sel){sel.value=saved;updateStaffDisplay();}
-    } else {
-      if(badge)badge.style.display='inline-block';
-      showPinLogin();
+    if(badge)badge.style.display='inline-block';
+    // Always show PIN screen — staff must log in each session
+    showPinLogin();
+    // If staff was saved, pre-fill after Firebase loads
+    if(saved){
+      window._savedStaffName=saved;
     }
-  },800);
+  },600);
   // setRange called after module loads via window.setRange
   setTimeout(function(){if(window.setRange)window.setRange('today');else{var n=new Date(),f=n.toISOString().slice(0,10);document.getElementById('d-from').value=f;document.getElementById('d-to').value=f;}},200);
   initStaffDropdown();
@@ -1214,7 +1212,13 @@ function subscribe(){
     if(s.empty)seedSvcs();else{svcs=s.docs.map(d=>({...d.data(),_id:d.id}));rSvcs();rPL();}
   });
   onSnapshot(query(collection(db,'expenses'),orderBy('createdAt','desc'),limit(100)),s=>{expenses=s.docs.map(d=>({...d.data(),_id:d.id}));rExpenses();});
-  onSnapshot(collection(db,'staff'),s=>{staffList=s.docs.map(d=>({...d.data(),_id:d.id}));initStaffDropdown();});
+  onSnapshot(collection(db,'staff'),s=>{
+  staffList=s.docs.map(d=>({...d.data(),_id:d.id}));
+  initStaffDropdown();
+  rStaffManage();
+  // If PIN screen is showing and staff was previously logged in, keep showing PIN
+  // They must re-enter PIN each session for security
+});
 }
 
 async function seedSvcs(){for(const s of DEFAULT_SVCS)await addDoc(collection(db,'services'),s);}
