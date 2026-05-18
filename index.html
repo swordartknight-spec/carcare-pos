@@ -347,7 +347,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9b</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9c</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1409,7 +1409,10 @@ function rCart(){
 // Feature 1: Show available coupons for selected customer
 function rCouponSection(){
   const sec=G('cpn-use-section');
-  if(!selC){sec.style.display='none';return;}
+  // Only show coupons when doing direct checkout, not when browsing to open a bill
+  const billDetail=G('bill-detail-view');
+  const isInBillMode=billDetail&&billDetail.style.display!=='none';
+  if(!selC||isInBillMode){sec.style.display='none';return;}
   const now=new Date();
   // ALL active coupons - loyalty + paper + template
   const allCpns=selC.coupons||[];
@@ -3297,23 +3300,25 @@ function rBillTabs(){
     const isActive=i===activeBillIdx;
     const color=b.status==='done'?'tab-green':b.status==='open'?'tab-yellow':'tab-gray';
     const dot=b.status==='done'?'dot-green':b.status==='open'?'dot-yellow':'';
-    const shortName=b.items?b.items.split(',')[0].trim().slice(0,6):'บิล';
-    html+=`<div class="bill-tab ${color}${isActive?' tab-active':''}" onclick="switchBill(${i})">
+    const custShort=(b.custName||'Walk-in').split(' ')[0].slice(0,7);
+    const plateShort=(b.plate||'').replace(/\s+/g,'').slice(0,6);
+    html+=`<div class="bill-tab ${color}${isActive?' tab-active':''}" onclick="switchBill(${i})" style="width:64px;height:64px;">
       ${dot?`<div class="tab-dot ${dot}"></div>`:''}
       <span class="tab-num">${i+1}</span>
-      <span class="tab-lbl">${shortName}</span>
+      <span class="tab-lbl" style="font-size:8px;line-height:1.2;">${custShort}</span>
+      ${plateShort?`<span style="font-size:7px;color:inherit;opacity:.8;">${plateShort}</span>`:''}
     </div>`;
   });
   // Empty slots up to 5
   for(let i=0;i<emptySlots;i++){
-    html+=`<div class="bill-tab tab-empty" onclick="newBill()">
+    html+=`<div class="bill-tab tab-empty" onclick="newBill()" style="width:64px;height:64px;">
       <span class="tab-num" style="font-size:20px;">+</span>
       <span class="tab-lbl">เปิดบิล</span>
     </div>`;
   }
   // If all 5 used, show a + button to add more
   if(bills.length>=MAX_VISIBLE_TABS){
-    html+=`<div class="bill-tab tab-empty" onclick="newBill()" style="border-style:dashed;">
+    html+=`<div class="bill-tab tab-empty" onclick="newBill()" style="width:64px;height:64px;border-style:dashed;">
       <span class="tab-num" style="font-size:20px;">+</span>
       <span class="tab-lbl">เพิ่ม</span>
     </div>`;
