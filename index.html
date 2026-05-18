@@ -347,7 +347,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9a</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -492,12 +492,8 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
           <div class="pay-btn" onclick="setPay('บัตร',this)">💳 บัตร</div>
         </div>
 
-        <div class="fr"><input id="plate" type="text" placeholder="ทะเบียนรถ (เช่น กข 1234)"/></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-          <button class="btn btn-g" style="padding:13px;font-size:14px;" onclick="openBill()">📋 เปิดบิล</button>
-          <button class="btn btn-g" style="padding:13px;font-size:14px;background:var(--blk);border-color:var(--blk);" onclick="checkout()">💰 ชำระเงิน</button>
-        </div>
-        <button class="btn btn-inf btn-bl" style="margin-top:8px;" onclick="previewInvoice()">📄 ดูใบเสร็จก่อนชำระ</button>
+        <button class="btn btn-g btn-bl" onclick="openBill()">📋 เปิดบิล →</button>
+
       </div>
     </div>
   </div>
@@ -1594,7 +1590,7 @@ function tier(p){return p>=1000?'Gold ★':p>=400?'Silver ✦':'Bronze ◆';}
 // ══ CHECKOUT ══
 window.checkout=async function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
-  const plate=G('plate').value||(selC?selC.plate:'—');
+  const plateEl=G('plate');const plate=(plateEl?plateEl.value:'')||(selC?selC.plate:'—');
   const staffName=loggedInStaff||G('staff-sel').value||'ไม่ระบุ';
   const{sub,disc,cpnDisc,paperDisc,tot}=uTot();
   const pts=Math.floor(tot/10);
@@ -3324,17 +3320,116 @@ function rBillTabs(){
 }
 
 window.switchBill=function(idx){
+  const bill=bills[idx];
+  if(!bill){newBill();return;}
   activeBillIdx=idx;
+  // Show bill detail view instead of service menu
+  showBillDetail(idx);
+  rBillTabs();
+};
+
+function showBillDetail(idx){
+  const bill=bills[idx];if(!bill)return;
+  const mins=Math.round((Date.now()-new Date(bill.time).getTime())/60000);
+  const hrs=Math.floor(mins/60);
+  const timeStr=hrs>0?hrs+'ชม. '+(mins%60)+'นาที':mins+'นาที';
+
+  // Hide normal cart section, show bill detail
+  const cartSec=G('cart-sec');if(cartSec)cartSec.style.display='none';
+
+  let detail=G('bill-detail-view');
+  if(!detail){
+    detail=document.createElement('div');
+    detail.id='bill-detail-view';
+    detail.style.cssText='background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:10px;overflow:hidden;';
+    const sgEl=G('sg');
+    if(sgEl)sgEl.parentNode.insertBefore(detail,sgEl);
+  }
+
+  const statusColor=bill.status==='done'?'var(--ok)':'var(--amb)';
+  const statusText=bill.status==='done'?'✅ เสร็จแล้ว รอชำระ':'🟡 กำลังทำ · '+timeStr;
+
+  detail.style.display='block';
+  detail.innerHTML=`
+    <div style="padding:12px 14px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-weight:700;font-size:14px;">บิล ${idx+1} — ${bill.custName}</div>
+        <div style="font-size:11px;color:var(--tx2);margin-top:2px;">ทะเบียน ${bill.plate||'—'} · เริ่ม ${new Date(bill.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:${statusColor};">${statusText}</div>
+    </div>
+    <div style="padding:12px 14px;border-bottom:1px solid var(--bdr);">
+      ${(bill.cartSnapshot||[]).map(c=>`
+        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:0.5px solid var(--bdr);">
+          <span>${c.name} (${c.size||'M'}) ×${c.qty||1}</span>
+          <span style="font-weight:700;">฿${((c.price||0)*(c.qty||1)).toLocaleString()}</span>
+        </div>`).join('')}
+      <div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:16px;font-weight:700;">
+        <span>รวม (รวม VAT)</span>
+        <span style="color:var(--gold);">฿${(bill.total||0).toLocaleString()}</span>
+      </div>
+    </div>
+    <div style="padding:12px 14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;margin-bottom:8px;">วิธีชำระ</div>
+      <div class="pay-btns" style="margin-bottom:10px;" id="bill-pay-btns">
+        <div class="pay-btn active" onclick="setBillPay('เงินสด',this)">💵 เงินสด</div>
+        <div class="pay-btn" onclick="setBillPay('QR',this)">📱 QR PromptPay</div>
+        <div class="pay-btn" onclick="setBillPay('โอน',this)">🏦 โอน</div>
+        <div class="pay-btn" onclick="setBillPay('บัตร',this)">💳 บัตร</div>
+      </div>
+      ${bill.status==='open'?
+        `<button class="btn btn-ok btn-bl" onclick="markBillDone(${idx})">✅ เสร็จงาน → ส่ง LINE ลูกค้า</button>`:
+        `<button class="btn btn-g btn-bl" onclick="checkoutBill(${idx})">💰 ชำระเงิน →</button>`
+      }
+      <button class="btn btn-bl" style="margin-top:8px;background:var(--bg);" onclick="closeBillDetail()">← กลับไปเปิดบิลใหม่</button>
+    </div>`;
+
+  // Hide service grid when viewing bill
+  const sgEl=G('sg');if(sgEl)sgEl.style.display='none';
+  const qsEl=G('quick-sell');if(qsEl)qsEl.style.display='none';
+  const catNav=G('cat-topnav');if(catNav)catNav.style.display='none';
+}
+
+let billPayMethod='เงินสด';
+window.setBillPay=function(m,el){
+  billPayMethod=m;
+  document.querySelectorAll('#bill-pay-btns .pay-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+};
+
+window.closeBillDetail=function(){
+  const detail=G('bill-detail-view');if(detail)detail.style.display='none';
+  const sgEl=G('sg');if(sgEl)sgEl.style.display='';
+  const qsEl=G('quick-sell');if(qsEl)qsEl.style.display='';
+  const catNav=G('cat-topnav');if(catNav)catNav.style.display='';
+  activeBillIdx=bills.length;
+  rBillTabs();
+};
+
+window.checkoutBill=async function(idx){
+  const bill=bills[idx];if(!bill)return;
+  // Restore cart from snapshot and do checkout
+  cart=bill.cartSnapshot||[];
+  selC=bill.selCSnapshot||null;
+  selPayMethod=billPayMethod;
+  // Set plate
+  const plateEl=G('plate');if(plateEl)plateEl.value=bill.plate||'';
+  // Do checkout
+  await checkout();
+  // Remove bill tab
+  bills.splice(idx,1);
+  activeBillIdx=Math.max(0,idx-1);
+  saveBills();
+  closeBillDetail();
   rBillTabs();
 };
 
 window.newBill=function(){
-  // Clear current POS state
   cart=[];selC=null;usedCoupon=null;appliedPaperCpn=null;
-  G('cq').value='';G('cch').style.display='none';G('plate').value='';
+  G('cq').value='';G('cch').style.display='none';
   rCart();updateFloat();
-  // Add new empty slot conceptually — just switch to empty state
-  activeBillIdx=bills.length; // point to new slot
+  activeBillIdx=bills.length;
+  closeBillDetail();
   rBillTabs();
   G('content').scrollTop=0;
 };
@@ -3359,7 +3454,7 @@ function rBillStatus(){
 
 window.openBill=async function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
-  const plate=G('plate').value||(selC?selC.plate:'—');
+  const plateEl=G('plate');const plate=(plateEl?plateEl.value:'')||(selC?selC.plate:'—');
   const{tot}=uTot();
   const bill={
     id:'BILL'+Date.now(),
@@ -3417,6 +3512,14 @@ window.checkout=async function(){
 
 // Init on load
 setTimeout(initBills, 1000);
+// Update bill timers every minute
+setInterval(()=>{
+  const detail=G('bill-detail-view');
+  if(detail&&detail.style.display!=='none'&&bills[activeBillIdx]){
+    showBillDetail(activeBillIdx);
+  }
+  rBillTabs();
+},60000);
 
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
