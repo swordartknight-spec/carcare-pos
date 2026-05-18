@@ -229,6 +229,24 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .quick-chip:active{background:var(--gold-lt);border-color:var(--gold);transform:scale(.96);}
 .qc-name{font-size:11px;font-weight:700;line-height:1.3;color:var(--tx);}
 .qc-price{font-size:13px;font-weight:700;color:var(--gold);margin-top:4px;}
+.bill-tab{flex-shrink:0;width:54px;height:54px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:2px solid transparent;position:relative;transition:all .15s;}
+.bill-tab:active{transform:scale(.95);}
+.tab-empty{background:var(--bg);border:1.5px dashed var(--bdr2);}
+.tab-empty .tab-num{color:var(--tx3);font-size:18px;}
+.tab-empty .tab-lbl{color:var(--tx3);}
+.tab-yellow{background:#FAEEDA;border-color:#854F0B;}
+.tab-yellow .tab-num{color:#854F0B;}
+.tab-yellow .tab-lbl{color:#854F0B;}
+.tab-green{background:#E2EFDA;border-color:#3B6D11;}
+.tab-green .tab-num{color:#3B6D11;}
+.tab-green .tab-lbl{color:#3B6D11;}
+.tab-gray{background:var(--bg);border-color:var(--bdr2);}
+.tab-active{box-shadow:0 0 0 2.5px var(--gold)!important;}
+.tab-num{font-size:16px;font-weight:700;}
+.tab-lbl{font-size:8px;margin-top:2px;font-weight:700;white-space:nowrap;overflow:hidden;max-width:50px;text-align:center;}
+.tab-dot{position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;}
+.dot-yellow{background:#854F0B;}
+.dot-green{background:#3B6D11;}
 .ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
 /* CATEGORY TOP NAV */
 .cat-nav{flex:1;min-width:fit-content;padding:9px 10px;font-size:11px;font-weight:700;cursor:pointer;border:none;border-right:1px solid var(--bdr);background:var(--sur);color:var(--tx2);white-space:nowrap;transition:all .15s;-webkit-appearance:none;}
@@ -329,7 +347,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v8p</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -356,6 +374,15 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
   <!-- ═══ POS ═══ -->
   <div id="sc-pos" class="sc active">
+
+    <!-- BILL TABS -->
+    <div style="background:var(--sur);border-bottom:1px solid var(--bdr);padding:8px 10px;margin:-12px -12px 12px -12px;">
+      <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;" id="bill-tabs-row"></div>
+    </div>
+
+    <!-- Bill status bar -->
+    <div id="bill-status-bar" style="display:none;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rs);margin-bottom:10px;font-size:11px;font-weight:700;flex-wrap:wrap;"></div>
+
     <!-- Customer -->
     <div class="cb">
       <div style="display:flex;gap:8px;">
@@ -466,7 +493,10 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
         </div>
 
         <div class="fr"><input id="plate" type="text" placeholder="ทะเบียนรถ (เช่น กข 1234)"/></div>
-        <button class="btn btn-g btn-bl" onclick="checkout()">ชำระเงิน →</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <button class="btn btn-g" style="padding:13px;font-size:14px;" onclick="openBill()">📋 เปิดบิล</button>
+          <button class="btn btn-g" style="padding:13px;font-size:14px;background:var(--blk);border-color:var(--blk);" onclick="checkout()">💰 ชำระเงิน</button>
+        </div>
         <button class="btn btn-inf btn-bl" style="margin-top:8px;" onclick="previewInvoice()">📄 ดูใบเสร็จก่อนชำระ</button>
       </div>
     </div>
@@ -3224,6 +3254,169 @@ rSvcs=function(){
   _origRSvcs();
   rQuickSell();
 };
+
+
+// ══ FIX: deductPaperCpn was missing ══
+async function deductPaperCpn(){
+  if(!appliedPaperCpn||!selC)return;
+  const{allCpns,realIdx}=appliedPaperCpn;
+  if(realIdx<0||realIdx>=allCpns.length)return;
+  allCpns[realIdx].remaining=Math.max(0,(allCpns[realIdx].remaining||1)-1);
+  try{
+    if(db&&!LM)await updateDoc(doc(db,'customers',selC._id),{coupons:allCpns});
+    else{selC.coupons=allCpns;LS('cu',custs);}
+  }catch(e){console.error('deductPaperCpn error:',e);}
+}
+
+// ══ BILL TABS SYSTEM ══
+let bills=[]; // [{id, custName, custId, plate, items, total, status:'open'|'done'|'paid', time, branch}]
+let activeBillIdx=0;
+const MAX_VISIBLE_TABS=5;
+
+function initBills(){
+  // Load from localStorage
+  bills=JSON.parse(localStorage.getItem('bills')||'[]');
+  // Clear paid bills older than today
+  const td=new Date().toLocaleDateString('th-TH');
+  bills=bills.filter(b=>b.status!=='paid'||b.date===td);
+  rBillTabs();
+}
+
+function saveBills(){
+  localStorage.setItem('bills',JSON.stringify(bills));
+}
+
+function rBillTabs(){
+  const container=G('bill-tabs-row');if(!container)return;
+  // Show MAX_VISIBLE_TABS tabs, scrollable if more
+  const visibleBills=bills.slice(0,Math.max(bills.length, MAX_VISIBLE_TABS));
+  const emptySlots=Math.max(0, MAX_VISIBLE_TABS - bills.length);
+  let html='';
+  // Existing bills
+  bills.forEach((b,i)=>{
+    const isActive=i===activeBillIdx;
+    const color=b.status==='done'?'tab-green':b.status==='open'?'tab-yellow':'tab-gray';
+    const dot=b.status==='done'?'dot-green':b.status==='open'?'dot-yellow':'';
+    const shortName=b.items?b.items.split(',')[0].trim().slice(0,6):'บิล';
+    html+=`<div class="bill-tab ${color}${isActive?' tab-active':''}" onclick="switchBill(${i})">
+      ${dot?`<div class="tab-dot ${dot}"></div>`:''}
+      <span class="tab-num">${i+1}</span>
+      <span class="tab-lbl">${shortName}</span>
+    </div>`;
+  });
+  // Empty slots up to 5
+  for(let i=0;i<emptySlots;i++){
+    html+=`<div class="bill-tab tab-empty" onclick="newBill()">
+      <span class="tab-num" style="font-size:20px;">+</span>
+      <span class="tab-lbl">เปิดบิล</span>
+    </div>`;
+  }
+  // If all 5 used, show a + button to add more
+  if(bills.length>=MAX_VISIBLE_TABS){
+    html+=`<div class="bill-tab tab-empty" onclick="newBill()" style="border-style:dashed;">
+      <span class="tab-num" style="font-size:20px;">+</span>
+      <span class="tab-lbl">เพิ่ม</span>
+    </div>`;
+  }
+  container.innerHTML=html;
+  // Show current bill status
+  rBillStatus();
+}
+
+window.switchBill=function(idx){
+  activeBillIdx=idx;
+  rBillTabs();
+};
+
+window.newBill=function(){
+  // Clear current POS state
+  cart=[];selC=null;usedCoupon=null;appliedPaperCpn=null;
+  G('cq').value='';G('cch').style.display='none';G('plate').value='';
+  rCart();updateFloat();
+  // Add new empty slot conceptually — just switch to empty state
+  activeBillIdx=bills.length; // point to new slot
+  rBillTabs();
+  G('content').scrollTop=0;
+};
+
+function rBillStatus(){
+  const el=G('bill-status-bar');if(!el)return;
+  const bill=bills[activeBillIdx];
+  if(!bill){el.style.display='none';return;}
+  if(bill.status==='open'){
+    el.style.display='flex';
+    el.style.background='#FAEEDA';el.style.color='#854F0B';
+    const mins=Math.round((Date.now()-new Date(bill.time).getTime())/60000);
+    el.innerHTML=`🟡 กำลังทำงาน · เริ่ม ${new Date(bill.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} · ${mins} นาที
+      <button onclick="markBillDone(${activeBillIdx})" style="margin-left:auto;padding:4px 10px;background:#3B6D11;color:#E2EFDA;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">✅ เสร็จงาน</button>`;
+  } else if(bill.status==='done'){
+    el.style.display='flex';
+    el.style.background='#E2EFDA';el.style.color='#3B6D11';
+    el.innerHTML=`✅ เสร็จแล้ว — รอชำระเงิน <span style="font-size:10px;margin-left:6px;">LINE แจ้งแล้ว ✓</span>
+      <button onclick="switchBill(${activeBillIdx});checkout()" style="margin-left:auto;padding:4px 10px;background:#C9A84C;color:#1a1a1a;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">💰 ชำระเงิน</button>`;
+  }
+}
+
+window.openBill=async function(){
+  if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
+  const plate=G('plate').value||(selC?selC.plate:'—');
+  const{tot}=uTot();
+  const bill={
+    id:'BILL'+Date.now(),
+    custName:selC?selC.name:'Walk-in',
+    custId:selC?selC._id||selC.id:null,
+    plate,items:cart.map(c=>c.name).join(', '),
+    total:tot,status:'open',
+    time:new Date().toISOString(),
+    date:new Date().toLocaleDateString('th-TH'),
+    branch:currentBranch||'',
+    cartSnapshot:JSON.parse(JSON.stringify(cart)),
+    selCSnapshot:selC?JSON.parse(JSON.stringify(selC)):null
+  };
+  bills.push(bill);
+  activeBillIdx=bills.length-1;
+  saveBills();
+  rBillTabs();
+  // Clear POS for next customer
+  cart=[];selC=null;usedCoupon=null;appliedPaperCpn=null;
+  G('cq').value='';G('cch').style.display='none';G('plate').value='';
+  rCart();updateFloat();
+  alert('✅ เปิดบิลแล้ว! Tab '+(activeBillIdx+1)+' — '+bill.custName);
+  G('content').scrollTop=0;
+};
+
+window.markBillDone=async function(idx){
+  const bill=bills[idx];if(!bill)return;
+  bill.status='done';
+  saveBills();
+  rBillTabs();
+  // Send Line notification if customer has lineUserId
+  const lineId=bill.selCSnapshot?.lineUserId;
+  const serverUrl=localStorage.getItem('line_server_url')?.replace(/^["']+|["']+$/g,'').trim();
+  if(lineId&&serverUrl){
+    const msg=`🚗 รถของคุณเสร็จแล้ว!\n\nทะเบียน: ${bill.plate}\nบริการ: ${bill.items}\n─────────────\nรอชำระ ฿${bill.total.toLocaleString()}\n📍 CarCare สาขา ${bill.branch||''}\n\nกรุณาชำระเงินที่เคาน์เตอร์`;
+    try{
+      await fetch(serverUrl+'/api/send-receipt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lineUserId:lineId,message:msg})});
+    }catch(e){console.error('Line notify error:',e);}
+  }
+  alert('✅ แจ้งลูกค้าทาง Line แล้ว! กรุณาชำระเงินที่เคาน์เตอร์');
+};
+
+// Override checkout to also clear bill tab when paid
+const _origCheckoutForBills=window.checkout;
+window.checkout=async function(){
+  await _origCheckoutForBills();
+  // Mark active bill as paid and remove
+  if(bills[activeBillIdx]){
+    bills.splice(activeBillIdx,1);
+    activeBillIdx=Math.max(0,activeBillIdx-1);
+    saveBills();
+    rBillTabs();
+  }
+};
+
+// Init on load
+setTimeout(initBills, 1000);
 
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
