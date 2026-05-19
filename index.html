@@ -347,7 +347,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9e</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9f</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -483,13 +483,14 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
         <div class="cl" id="paper-disc-row" style="display:none;"><span>🎟 คูปองกระดาษ</span><span id="paper-disc-val" style="color:var(--pur);font-weight:700;"></span></div>
         <div class="ctot"><span>รวม (รวม VAT)</span><span id="ctot">฿0</span></div>
 
-        <div style="margin:12px 0 8px;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;">วิธีชำระ</div>
-        <!-- Payment buttons (Feature 4) -->
-        <div class="pay-btns">
-          <div class="pay-btn active" onclick="setPay('เงินสด',this)">💵 เงินสด</div>
-          <div class="pay-btn" onclick="setPay('QR',this)">📱 QR PromptPay</div>
-          <div class="pay-btn" onclick="setPay('โอน',this)">🏦 โอน</div>
-          <div class="pay-btn" onclick="setPay('บัตร',this)">💳 บัตร</div>
+        <div id="pay-method-section" style="display:none;">
+          <div style="margin:12px 0 8px;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;">วิธีชำระ</div>
+          <div class="pay-btns">
+            <div class="pay-btn active" onclick="setPay('เงินสด',this)">💵 เงินสด</div>
+            <div class="pay-btn" onclick="setPay('QR',this)">📱 QR PromptPay</div>
+            <div class="pay-btn" onclick="setPay('โอน',this)">🏦 โอน</div>
+            <div class="pay-btn" onclick="setPay('บัตร',this)">💳 บัตร</div>
+          </div>
         </div>
 
         <button class="btn btn-g btn-bl" onclick="openBill()">📋 เปิดบิล →</button>
