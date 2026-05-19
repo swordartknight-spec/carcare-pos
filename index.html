@@ -391,7 +391,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v10</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v10a</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -3314,206 +3314,22 @@ rSvcs=function(){
 };
 
 
-// ══ FIX: deductPaperCpn was missing ══
-async function deductPaperCpn(){
-  if(!appliedPaperCpn||!selC)return;
-  const{allCpns,realIdx}=appliedPaperCpn;
-  if(realIdx<0||realIdx>=allCpns.length)return;
-  allCpns[realIdx].remaining=Math.max(0,(allCpns[realIdx].remaining||1)-1);
-  try{
-    if(db&&!LM)await updateDoc(doc(db,'customers',selC._id),{coupons:allCpns});
-    else{selC.coupons=allCpns;LS('cu',custs);}
-  }catch(e){console.error('deductPaperCpn error:',e);}
-}
+// deductPaperCpn defined in bill system below
 
 // ══ BILL TABS SYSTEM ══
-let bills=[]; // [{id, custName, custId, plate, items, total, status:'open'|'done'|'paid', time, branch}]
+// bills replaced by billSlots // [{id, custName, custId, plate, items, total, status:'open'|'done'|'paid', time, branch}]
 let activeBillIdx=0;
 const MAX_VISIBLE_TABS=5;
 
-function initBills(){
-  // Load from localStorage
-  bills=JSON.parse(localStorage.getItem('bills')||'[]');
-  // Clear paid bills older than today
-  const td=new Date().toLocaleDateString('th-TH');
-  bills=bills.filter(b=>b.status!=='paid'||b.date===td);
-  rBillTabs();
-}
+// initBills replaced by initBillSlots
 
-function saveBills(){
-  localStorage.setItem('bills',JSON.stringify(bills));
-}
 
-function rBillTabs(){
-  const container=G('bill-tabs-row');if(!container)return;
-  // Show MAX_VISIBLE_TABS tabs, scrollable if more
-  const visibleBills=bills.slice(0,Math.max(bills.length, MAX_VISIBLE_TABS));
-  const emptySlots=Math.max(0, MAX_VISIBLE_TABS - bills.length);
-  let html='';
-  // Existing bills
-  bills.forEach((b,i)=>{
-    const isActive=i===activeBillIdx;
-    const color=b.status==='done'?'tab-green':b.status==='open'?'tab-yellow':'tab-gray';
-    const dot=b.status==='done'?'dot-green':b.status==='open'?'dot-yellow':'';
-    const custShort=(b.custName||'Walk-in').split(' ')[0].slice(0,7);
-    const plateShort=(b.plate||'').replace(/\s+/g,'').slice(0,6);
-    html+=`<div class="bill-tab ${color}${isActive?' tab-active':''}" onclick="switchBill(${i})" style="width:64px;height:64px;">
-      ${dot?`<div class="tab-dot ${dot}"></div>`:''}
-      <span class="tab-num">${i+1}</span>
-      <span class="tab-lbl" style="font-size:8px;line-height:1.2;">${custShort}</span>
-      ${plateShort?`<span style="font-size:7px;color:inherit;opacity:.8;">${plateShort}</span>`:''}
-    </div>`;
-  });
-  // Empty slots up to 5
-  for(let i=0;i<emptySlots;i++){
-    html+=`<div class="bill-tab tab-empty" onclick="newBill()" style="width:64px;height:64px;">
-      <span class="tab-num" style="font-size:20px;">+</span>
-      <span class="tab-lbl">เปิดบิล</span>
-    </div>`;
-  }
-  // If all 5 used, show a + button to add more
-  if(bills.length>=MAX_VISIBLE_TABS){
-    html+=`<div class="bill-tab tab-empty" onclick="newBill()" style="width:64px;height:64px;border-style:dashed;">
-      <span class="tab-num" style="font-size:20px;">+</span>
-      <span class="tab-lbl">เพิ่ม</span>
-    </div>`;
-  }
-  container.innerHTML=html;
-  // Show current bill status
-  rBillStatus();
-}
 
-window.switchBill=function(idx){
-  const bill=bills[idx];
-  if(!bill){newBill();return;}
-  activeBillIdx=idx;
-  // Show bill detail view instead of service menu
-  showBillDetail(idx);
-  rBillTabs();
-};
+// rBillTabs replaced by rSlotGrid
 
-function showBillDetail(idx){
-  const bill=bills[idx];if(!bill)return;
-  const mins=Math.round((Date.now()-new Date(bill.time).getTime())/60000);
-  const hrs=Math.floor(mins/60);
-  const timeStr=hrs>0?hrs+'ชม. '+(mins%60)+'นาที':mins+'นาที';
+// switchBill replaced by viewBillSlot
 
-  // Hide normal cart section, show bill detail
-  const cartSec=G('cart-sec');if(cartSec)cartSec.style.display='none';
-
-  let detail=G('bill-detail-view');
-  if(!detail){
-    detail=document.createElement('div');
-    detail.id='bill-detail-view';
-    detail.style.cssText='background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);margin-bottom:10px;overflow:hidden;';
-    const sgEl=G('sg');
-    if(sgEl)sgEl.parentNode.insertBefore(detail,sgEl);
-  }
-
-  const statusColor=bill.status==='done'?'var(--ok)':'var(--amb)';
-  const statusText=bill.status==='done'?'✅ เสร็จแล้ว รอชำระ':'🟡 กำลังทำ · '+timeStr;
-
-  detail.style.display='block';
-  detail.innerHTML=`
-    <div style="padding:12px 14px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <div style="font-weight:700;font-size:14px;">บิล ${idx+1} — ${bill.custName}</div>
-        <div style="font-size:11px;color:var(--tx2);margin-top:2px;">ทะเบียน ${bill.plate||'—'} · เริ่ม ${new Date(bill.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div style="font-size:12px;font-weight:700;color:${statusColor};">${statusText}</div>
-        <button onclick="cancelBill(${idx})" style="padding:4px 8px;background:var(--err-bg);color:var(--err);border:1px solid var(--err);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">ยกเลิก</button>
-      </div>
-    </div>
-    <div style="padding:12px 14px;border-bottom:1px solid var(--bdr);">
-      ${(bill.cartSnapshot||[]).map(c=>`
-        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:0.5px solid var(--bdr);">
-          <span>${c.name} (${c.size||'M'}) ×${c.qty||1}</span>
-          <span style="font-weight:700;">฿${((c.price||0)*(c.qty||1)).toLocaleString()}</span>
-        </div>`).join('')}
-      <div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:16px;font-weight:700;">
-        <span>รวม (รวม VAT)</span>
-        <span style="color:var(--gold);">฿${(bill.total||0).toLocaleString()}</span>
-      </div>
-    </div>
-    <div style="padding:12px 14px;">
-      <div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;margin-bottom:8px;">วิธีชำระ</div>
-      <div class="pay-btns" style="margin-bottom:10px;" id="bill-pay-btns">
-        <div class="pay-btn active" onclick="setBillPay('เงินสด',this)">💵 เงินสด</div>
-        <div class="pay-btn" onclick="setBillPay('QR',this)">📱 QR PromptPay</div>
-        <div class="pay-btn" onclick="setBillPay('โอน',this)">🏦 โอน</div>
-        <div class="pay-btn" onclick="setBillPay('บัตร',this)">💳 บัตร</div>
-      </div>
-      ${bill.status==='open'?
-        `<button class="btn btn-ok btn-bl" onclick="markBillDone(${idx})">✅ เสร็จงาน → ส่ง LINE ลูกค้า</button>`:
-        `<button class="btn btn-g btn-bl" onclick="checkoutBill(${idx})">💰 ชำระเงิน →</button>`
-      }
-      <button class="btn btn-bl" style="margin-top:8px;background:var(--bg);" onclick="closeBillDetail()">← กลับไปเปิดบิลใหม่</button>
-    </div>`;
-
-  // Hide service grid when viewing bill
-  const sgEl=G('sg');if(sgEl)sgEl.style.display='none';
-  const qsEl=G('quick-sell');if(qsEl)qsEl.style.display='none';
-  const catNav=G('cat-topnav');if(catNav)catNav.style.display='none';
-}
-
-let billPayMethod='เงินสด';
-window.setBillPay=function(m,el){
-  billPayMethod=m;
-  document.querySelectorAll('#bill-pay-btns .pay-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-};
-
-window.closeBillDetail=function(){
-  const detail=G('bill-detail-view');if(detail)detail.style.display='none';
-  // Restore all hidden elements
-  const sgEl=G('sg');if(sgEl)sgEl.style.display='';
-  const qsEl=G('quick-sell');if(qsEl)qsEl.style.display='';
-  const catNav=G('cat-topnav');if(catNav)catNav.style.display='';
-  const cqWrap=G('cq')?.closest('.card');if(cqWrap)cqWrap.style.display='';
-  const staffCard=G('staff-sel')?.closest('.card');if(staffCard)staffCard.style.display='';
-  const sizeCard=document.querySelector('.stabs')?.closest('.card');if(sizeCard)sizeCard.style.display='';
-  const promoBanner=G('promo-banner');if(promoBanner)rPromoBanner();
-  activeBillIdx=bills.length;
-  rBillTabs();
-};
-
-window.checkoutBill=async function(idx){
-  const bill=bills[idx];if(!bill)return;
-  // Restore state
-  cart=JSON.parse(JSON.stringify(bill.cartSnapshot||[]));
-  selC=bill.selCSnapshot?JSON.parse(JSON.stringify(bill.selCSnapshot)):null;
-  selPayMethod=billPayMethod||'เงินสด';
-  CZ=bill.size||CZ||'M';
-  // plate field may not exist - skip safely
-  try{const p=G('plate');if(p)p.value=bill.plate||'';}catch(e){}
-  // Run checkout
-  try{
-    await checkout();
-  }catch(e){
-    console.error('checkoutBill:',e);
-    alert('เกิดข้อผิดพลาด: '+e.message);
-    return;
-  }
-  // Remove bill from list
-  bills.splice(idx,1);
-  activeBillIdx=0;
-  saveBills();
-  // Close detail view and restore POS
-  closeBillDetail();
-  rBillTabs();
-  showToast('💰 ชำระเงินสำเร็จ!');
-};
-
-window.newBill=function(){
-  cart=[];selC=null;usedCoupon=null;appliedPaperCpn=null;
-  G('cq').value='';G('cch').style.display='none';
-  rCart();updateFloat();
-  activeBillIdx=bills.length;
-  closeBillDetail();
-  rBillTabs();
-  G('content').scrollTop=0;
-};
+// newBill replaced by openBill/slot system
 
 function rBillStatus(){
   const el=G('bill-status-bar');if(!el)return;
@@ -3531,38 +3347,7 @@ function rBillStatus(){
   }
 }
 
-window.openBill=async function(){
-  if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
-  const plate=(()=>{try{const el=G('plate');return el?el.value:'';}catch{return '';}})()||(selC?selC.plate:'');
-  const{tot}=uTot();
-  const bill={
-    id:'BILL'+Date.now(),
-    custName:selC?selC.name:'Walk-in',
-    custId:selC?selC._id||selC.id:null,
-    plate,items:cart.map(c=>c.name).join(', '),
-    total:tot,status:'open',
-    time:new Date().toISOString(),
-    date:new Date().toLocaleDateString('th-TH'),
-    branch:currentBranch||'',
-    cartSnapshot:JSON.parse(JSON.stringify(cart)),
-    selCSnapshot:selC?JSON.parse(JSON.stringify(selC)):null
-  };
-  bills.push(bill);
-  activeBillIdx=bills.length-1;
-  saveBills();
-  rBillTabs();
-  // Clear POS for next customer
-  cart=[];selC=null;usedCoupon=null;appliedPaperCpn=null;
-  G('cq').value='';G('cch').style.display='none';try{const p=G('plate');if(p)p.value='';}catch(e){}
-  rCart();updateFloat();
-  // Show toast notification
-  showToast('✅ เปิดบิล #'+(bills.length)+' — '+bill.custName);
-  G('content').scrollTop=0;
-  // Auto-switch to the new bill after toast
-  setTimeout(()=>{
-    switchBill(activeBillIdx);
-  },600);
-};
+// openBill replaced by Firebase slot version below
 
 window.markBillDone=async function(idx){
   const bill=bills[idx];if(!bill)return;
@@ -3606,10 +3391,7 @@ window.cancelBill=function(idx){
   rBillTabs();
   showToast('🗑 ยกเลิกบิลแล้ว');
 };
-if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-</script>
-</body>
-</html>// ══ BILL SLOT SYSTEM (Firebase-backed) ══
+// ══ BILL SLOT SYSTEM (Firebase-backed) ══
 // 10 fixed slots per branch, stored in Firebase
 
 let billSlots = []; // live from Firebase
@@ -3850,15 +3632,7 @@ window.markSlotDone=async function(id){
   const lineId=bill.selCSnapshot?.lineUserId;
   const serverUrl=(localStorage.getItem('line_server_url')||'').replace(/^["']+|["']+$/g,'').trim();
   if(lineId&&serverUrl){
-    const msg='🚗 รถของคุณเสร็จแล้ว!
-
-ทะเบียน: '+(bill.plate||'—')+'
-บริการ: '+bill.items+'
-─────────────
-รอชำระ ฿'+bill.total.toLocaleString()+'
-📍 CarCare สาขา '+(bill.branch||'')+'
-
-กรุณาชำระเงินที่เคาน์เตอร์';
+    const msg='🚗 รถของคุณเสร็จแล้ว!\n\nทะเบียน: '+(bill.plate||'—')+'\nบริการ: '+bill.items+'\n─────────────\nรอชำระ ฿'+bill.total.toLocaleString()+'\n📍 CarCare สาขา '+(bill.branch||'')+'\n\nกรุณาชำระเงินที่เคาน์เตอร์';
     try{await fetch(serverUrl+'/api/send-receipt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lineUserId:lineId,message:msg})});}
     catch(e){}
   }
@@ -3921,10 +3695,7 @@ window.addNewSlot=async function(){
 window.cancelBill=function(idx){cancelBillSlot(idx);};
 
 // ── UPDATE rToday to show open bills count ──
-const _origRTodayForBills=rToday;
-rToday=function(){
-  _origRTodayForBills();
-};
+
 
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
