@@ -347,7 +347,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9f</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9g</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -384,7 +384,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     <div id="bill-status-bar" style="display:none;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rs);margin-bottom:10px;font-size:11px;font-weight:700;flex-wrap:wrap;"></div>
 
     <!-- Customer -->
-    <div class="cb">
+    <div class="cb" id="pos-cust-card">
       <div style="display:flex;gap:8px;">
         <input id="cq" type="text" placeholder="ค้นหาลูกค้า / ทะเบียน..." oninput="cSearch()" style="flex:1;"/>
         <button class="btn btn-s btn-g" onclick="sh('sh-nc')">+</button>
@@ -411,8 +411,8 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
       </div>
     </div>
 
-    <!-- Staff selector (Feature 2) -->
-    <div class="card" style="padding:10px 12px;margin-bottom:10px;">
+    <!-- Staff selector -->
+    <div class="card" id="pos-staff-card" style="padding:10px 12px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;white-space:nowrap;">คนทำ:</div>
         <select id="staff-sel" style="flex:1;padding:6px 10px;font-size:13px;" onchange="updateStaffDisplay()">
@@ -427,7 +427,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     </div>
 
     <!-- Size -->
-    <div class="card" style="padding:10px 12px;">
+    <div class="card" id="pos-size-card" style="padding:10px 12px;">
       <div style="font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:6px;text-transform:uppercase;">ขนาดรถ</div>
       <div class="stabs" id="size-tabs">
         <div class="stab active" onclick="setSz('S',this)">S</div>
@@ -3487,7 +3487,8 @@ window.openBill=async function(){
   cart=[];selC=null;usedCoupon=null;appliedPaperCpn=null;
   G('cq').value='';G('cch').style.display='none';G('plate').value='';
   rCart();updateFloat();
-  alert('✅ เปิดบิลแล้ว! Tab '+(activeBillIdx+1)+' — '+bill.custName);
+  // Show toast notification
+  showToast('✅ เปิดบิล #'+(bills.length)+' — '+bill.custName);
   G('content').scrollTop=0;
 };
 
@@ -3520,6 +3521,22 @@ setInterval(()=>{
   }
   rBillTabs();
 },60000);
+
+
+// ══ TOAST NOTIFICATION ══
+function showToast(msg,duration=2000){
+  let t=G('pos-toast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='pos-toast';
+    t.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#C9A84C;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:700;z-index:500;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.3);';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;
+  t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.style.opacity='0',duration);
+}
 
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
