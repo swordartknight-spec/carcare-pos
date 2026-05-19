@@ -347,7 +347,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9j</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9k</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1703,7 +1703,7 @@ window.checkout=async function(){
 
   sh('sh-ok');
   cart=[];selC=null;usedCoupon=null;appliedPaperCpn=null;
-  G('cq').value='';G('cch').style.display='none';G('plate').value='';G('cust-cpns').innerHTML='';
+  G('cq').value='';G('cch').style.display='none';try{const p=G('plate');if(p)p.value='';}catch(e){}G('cust-cpns').innerHTML='';
   document.querySelector('.pay-btn').classList.add('active');
   document.querySelectorAll('.pay-btn').forEach((b,i)=>{if(i>0)b.classList.remove('active');});
   selPayMethod='เงินสด';
@@ -3506,7 +3506,7 @@ window.openBill=async function(){
   rBillTabs();
   // Clear POS for next customer
   cart=[];selC=null;usedCoupon=null;appliedPaperCpn=null;
-  G('cq').value='';G('cch').style.display='none';G('plate').value='';
+  G('cq').value='';G('cch').style.display='none';try{const p=G('plate');if(p)p.value='';}catch(e){}
   rCart();updateFloat();
   // Show toast notification
   showToast('✅ เปิดบิล #'+(bills.length)+' — '+bill.custName);
