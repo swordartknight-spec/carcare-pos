@@ -347,7 +347,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9h</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9j</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1123,6 +1123,12 @@ let selPayMethod='เงินสด',usedCoupon=null,appliedPaperCpn=null;
 let viewCustId=null,lastTxnData=null;
 
 function G(id){return document.getElementById(id);}
+function showToast(msg,duration=2000){
+  let t=document.getElementById('pos-toast');
+  if(!t){t=document.createElement('div');t.id='pos-toast';t.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-10px);background:#1a1a1a;color:#C9A84C;padding:10px 24px;border-radius:99px;font-size:13px;font-weight:700;z-index:9999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4);';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-10px)';},duration);
+}
 function setDot(s,l){G('dot').className='dot '+s;G('sl').textContent=l;}
 function fmtDate(d){return d?new Date(d).toLocaleDateString('th-TH'):'—';}
 function todayTH(){return new Date().toLocaleDateString('th-TH');}
@@ -1599,7 +1605,7 @@ function tier(p){return p>=1000?'Gold ★':p>=400?'Silver ✦':'Bronze ◆';}
 // ══ CHECKOUT ══
 window.checkout=async function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
-  const plateEl=G('plate');const plate=(plateEl?plateEl.value:'')||(selC?selC.plate:'—');
+  const plate=(()=>{try{const el=G('plate');return el?el.value:'';}catch{return '';}})()||(selC?selC.plate:'');
   const staffName=loggedInStaff||G('staff-sel').value||'ไม่ระบุ';
   const{sub,disc,cpnDisc,paperDisc,tot}=uTot();
   const pts=Math.floor(tot/10);
@@ -3431,7 +3437,9 @@ window.checkoutBill=async function(idx){
   cart=JSON.parse(JSON.stringify(bill.cartSnapshot||[]));
   selC=bill.selCSnapshot?JSON.parse(JSON.stringify(bill.selCSnapshot)):null;
   selPayMethod=billPayMethod||'เงินสด';
-  CZ=bill.size||'M';
+  CZ=bill.size||CZ||'M';
+  // plate field may not exist - skip safely
+  try{const p=G('plate');if(p)p.value=bill.plate||'';}catch(e){}
   // Run checkout
   try{
     await checkout();
@@ -3468,19 +3476,17 @@ function rBillStatus(){
     el.style.display='flex';
     el.style.background='#FAEEDA';el.style.color='#854F0B';
     const mins=Math.round((Date.now()-new Date(bill.time).getTime())/60000);
-    el.innerHTML=`🟡 กำลังทำงาน · เริ่ม ${new Date(bill.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} · ${mins} นาที
-      <button onclick="markBillDone(${activeBillIdx})" style="margin-left:auto;padding:4px 10px;background:#3B6D11;color:#E2EFDA;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">✅ เสร็จงาน</button>`;
+    el.innerHTML=`🟡 กำลังทำงาน · เริ่ม ${new Date(bill.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} · ${mins} นาที`;
   } else if(bill.status==='done'){
     el.style.display='flex';
     el.style.background='#E2EFDA';el.style.color='#3B6D11';
-    el.innerHTML=`✅ เสร็จแล้ว — รอชำระเงิน <span style="font-size:10px;margin-left:6px;">LINE แจ้งแล้ว ✓</span>
-      <button onclick="switchBill(${activeBillIdx});checkout()" style="margin-left:auto;padding:4px 10px;background:#C9A84C;color:#1a1a1a;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">💰 ชำระเงิน</button>`;
+    el.innerHTML=`✅ เสร็จแล้ว — รอชำระเงิน <span style="font-size:10px;color:#3B6D11;margin-left:6px;">LINE แจ้งแล้ว ✓</span>`;
   }
 }
 
 window.openBill=async function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
-  const plateEl=G('plate');const plate=(plateEl?plateEl.value:'')||(selC?selC.plate:'—');
+  const plate=(()=>{try{const el=G('plate');return el?el.value:'';}catch{return '';}})()||(selC?selC.plate:'');
   const{tot}=uTot();
   const bill={
     id:'BILL'+Date.now(),
@@ -3538,21 +3544,6 @@ setInterval(()=>{
   rBillTabs();
 },60000);
 
-
-// ══ TOAST NOTIFICATION ══
-function showToast(msg,duration=2000){
-  let t=G('pos-toast');
-  if(!t){
-    t=document.createElement('div');
-    t.id='pos-toast';
-    t.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#C9A84C;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:700;z-index:500;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.3);';
-    document.body.appendChild(t);
-  }
-  t.textContent=msg;
-  t.style.opacity='1';
-  clearTimeout(t._timer);
-  t._timer=setTimeout(()=>t.style.opacity='0',duration);
-}
 
 
 window.cancelBill=function(idx){
