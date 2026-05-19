@@ -347,7 +347,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9g</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9h</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -376,8 +376,9 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div id="sc-pos" class="sc active">
 
     <!-- BILL TABS -->
-    <div id="bill-tabs-row-wrap" style="background:var(--sur);border-bottom:1px solid var(--bdr);padding:8px 10px;margin:-12px -12px 12px -12px;">
-      <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;" id="bill-tabs-row"></div>
+    <div id="bill-tabs-row-wrap" style="background:var(--sur);border-bottom:1px solid var(--bdr);padding:8px 10px 6px;margin:-12px -12px 12px -12px;">
+      <div style="font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">บิลที่เปิดไว้</div>
+      <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;" id="bill-tabs-row"></div>
     </div>
 
     <!-- Bill status bar -->
@@ -3366,7 +3367,10 @@ function showBillDetail(idx){
         <div style="font-weight:700;font-size:14px;">บิล ${idx+1} — ${bill.custName}</div>
         <div style="font-size:11px;color:var(--tx2);margin-top:2px;">ทะเบียน ${bill.plate||'—'} · เริ่ม ${new Date(bill.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</div>
       </div>
-      <div style="font-size:12px;font-weight:700;color:${statusColor};">${statusText}</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:12px;font-weight:700;color:${statusColor};">${statusText}</div>
+        <button onclick="cancelBill(${idx})" style="padding:4px 8px;background:var(--err-bg);color:var(--err);border:1px solid var(--err);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">ยกเลิก</button>
+      </div>
     </div>
     <div style="padding:12px 14px;border-bottom:1px solid var(--bdr);">
       ${(bill.cartSnapshot||[]).map(c=>`
@@ -3423,16 +3427,27 @@ window.closeBillDetail=function(){
 
 window.checkoutBill=async function(idx){
   const bill=bills[idx];if(!bill)return;
+  // Restore state
   cart=JSON.parse(JSON.stringify(bill.cartSnapshot||[]));
   selC=bill.selCSnapshot?JSON.parse(JSON.stringify(bill.selCSnapshot)):null;
   selPayMethod=billPayMethod||'เงินสด';
-  CZ=bill.size||CZ;
-  try{await checkout();}catch(e){alert('เกิดข้อผิดพลาด: '+e.message);return;}
+  CZ=bill.size||'M';
+  // Run checkout
+  try{
+    await checkout();
+  }catch(e){
+    console.error('checkoutBill:',e);
+    alert('เกิดข้อผิดพลาด: '+e.message);
+    return;
+  }
+  // Remove bill from list
   bills.splice(idx,1);
   activeBillIdx=0;
   saveBills();
+  // Close detail view and restore POS
   closeBillDetail();
   rBillTabs();
+  showToast('💰 ชำระเงินสำเร็จ!');
 };
 
 window.newBill=function(){
@@ -3497,16 +3512,17 @@ window.markBillDone=async function(idx){
   bill.status='done';
   saveBills();
   rBillTabs();
-  // Send Line notification if customer has lineUserId
+  // Send Line notification
   const lineId=bill.selCSnapshot?.lineUserId;
-  const serverUrl=localStorage.getItem('line_server_url')?.replace(/^["']+|["']+$/g,'').trim();
+  const serverUrl=(localStorage.getItem('line_server_url')||'').replace(/^["']+|["']+$/g,'').trim();
   if(lineId&&serverUrl){
-    const msg=`🚗 รถของคุณเสร็จแล้ว!\n\nทะเบียน: ${bill.plate}\nบริการ: ${bill.items}\n─────────────\nรอชำระ ฿${bill.total.toLocaleString()}\n📍 CarCare สาขา ${bill.branch||''}\n\nกรุณาชำระเงินที่เคาน์เตอร์`;
-    try{
-      await fetch(serverUrl+'/api/send-receipt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lineUserId:lineId,message:msg})});
-    }catch(e){console.error('Line notify error:',e);}
+    const msg='🚗 รถของคุณเสร็จแล้ว!\n\nทะเบียน: '+(bill.plate||'—')+'\nบริการ: '+bill.items+'\n─────────────\nรอชำระ ฿'+bill.total.toLocaleString()+'\n📍 CarCare สาขา '+(bill.branch||'')+'\n\nกรุณาชำระเงินที่เคาน์เตอร์';
+    try{await fetch(serverUrl+'/api/send-receipt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lineUserId:lineId,message:msg})});}
+    catch(e){console.error('Line notify error:',e);}
   }
-  alert('✅ แจ้งลูกค้าทาง Line แล้ว! กรุณาชำระเงินที่เคาน์เตอร์');
+  // Refresh detail view to show ชำระเงิน button
+  showBillDetail(idx);
+  showToast('✅ แจ้งลูกค้าทาง Line แล้ว');
 };
 
 // Bill cleared in checkoutBill(), no override needed
@@ -3538,6 +3554,16 @@ function showToast(msg,duration=2000){
   t._timer=setTimeout(()=>t.style.opacity='0',duration);
 }
 
+
+window.cancelBill=function(idx){
+  if(!confirm('ยกเลิกบิลนี้? ข้อมูลจะหายไป'))return;
+  bills.splice(idx,1);
+  activeBillIdx=0;
+  saveBills();
+  closeBillDetail();
+  rBillTabs();
+  showToast('🗑 ยกเลิกบิลแล้ว');
+};
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
