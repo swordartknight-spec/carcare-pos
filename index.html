@@ -391,7 +391,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v10a</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v10b</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -3370,14 +3370,14 @@ window.markBillDone=async function(idx){
 // Bill cleared in checkoutBill(), no override needed
 
 // Init on load
-setTimeout(initBills, 1000);
+// initBills removed - using initBillSlots via startApp
 // Update bill timers every minute
 setInterval(()=>{
-  const detail=G('bill-detail-view');
-  if(detail&&detail.style.display!=='none'&&bills[activeBillIdx]){
-    showBillDetail(activeBillIdx);
+  rSlotGrid();
+  if(activeBillId){
+    const bill=billSlots.find(b=>b._id===activeBillId);
+    if(bill&&G('bill-detail-view')?.style.display!=='none') renderBillDetail(bill);
   }
-  rBillTabs();
 },60000);
 
 
