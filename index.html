@@ -347,7 +347,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9d</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9e</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -376,7 +376,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div id="sc-pos" class="sc active">
 
     <!-- BILL TABS -->
-    <div style="background:var(--sur);border-bottom:1px solid var(--bdr);padding:8px 10px;margin:-12px -12px 12px -12px;">
+    <div id="bill-tabs-row-wrap" style="background:var(--sur);border-bottom:1px solid var(--bdr);padding:8px 10px;margin:-12px -12px 12px -12px;">
       <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;" id="bill-tabs-row"></div>
     </div>
 
@@ -3422,17 +3422,13 @@ window.closeBillDetail=function(){
 
 window.checkoutBill=async function(idx){
   const bill=bills[idx];if(!bill)return;
-  // Restore cart from snapshot and do checkout
-  cart=bill.cartSnapshot||[];
-  selC=bill.selCSnapshot||null;
-  selPayMethod=billPayMethod;
-  // Set plate
-  const plateEl=G('plate');if(plateEl)plateEl.value=bill.plate||'';
-  // Do checkout
-  await checkout();
-  // Remove bill tab
+  cart=JSON.parse(JSON.stringify(bill.cartSnapshot||[]));
+  selC=bill.selCSnapshot?JSON.parse(JSON.stringify(bill.selCSnapshot)):null;
+  selPayMethod=billPayMethod||'เงินสด';
+  CZ=bill.size||CZ;
+  try{await checkout();}catch(e){alert('เกิดข้อผิดพลาด: '+e.message);return;}
   bills.splice(idx,1);
-  activeBillIdx=Math.max(0,idx-1);
+  activeBillIdx=0;
   saveBills();
   closeBillDetail();
   rBillTabs();
@@ -3511,18 +3507,7 @@ window.markBillDone=async function(idx){
   alert('✅ แจ้งลูกค้าทาง Line แล้ว! กรุณาชำระเงินที่เคาน์เตอร์');
 };
 
-// Override checkout to also clear bill tab when paid
-const _origCheckoutForBills=window.checkout;
-window.checkout=async function(){
-  await _origCheckoutForBills();
-  // Mark active bill as paid and remove
-  if(bills[activeBillIdx]){
-    bills.splice(activeBillIdx,1);
-    activeBillIdx=Math.max(0,activeBillIdx-1);
-    saveBills();
-    rBillTabs();
-  }
-};
+// Bill cleared in checkoutBill(), no override needed
 
 // Init on load
 setTimeout(initBills, 1000);
