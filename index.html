@@ -247,6 +247,18 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .tab-dot{position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;}
 .dot-yellow{background:#854F0B;}
 .dot-green{background:#3B6D11;}
+/* BILL VIEW MODE — hide POS input elements */
+#sc-pos.bill-view #pos-cust-card,
+#sc-pos.bill-view #pos-staff-card,
+#sc-pos.bill-view #pos-size-card,
+#sc-pos.bill-view #cat-topnav,
+#sc-pos.bill-view #quick-sell,
+#sc-pos.bill-view #sg,
+#sc-pos.bill-view #cart-sec,
+#sc-pos.bill-view #promo-banner,
+#sc-pos.bill-view #pay-method-section,
+#sc-pos.bill-view #bill-status-bar{display:none!important;}
+#sc-pos.bill-view #bill-detail-view{display:block!important;}
 .ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
 /* CATEGORY TOP NAV */
 .cat-nav{flex:1;min-width:fit-content;padding:9px 10px;font-size:11px;font-weight:700;cursor:pointer;border:none;border-right:1px solid var(--bdr);background:var(--sur);color:var(--tx2);white-space:nowrap;transition:all .15s;-webkit-appearance:none;}
@@ -347,7 +359,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9k</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9m</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -3511,6 +3523,10 @@ window.openBill=async function(){
   // Show toast notification
   showToast('✅ เปิดบิล #'+(bills.length)+' — '+bill.custName);
   G('content').scrollTop=0;
+  // Auto-switch to the new bill after toast
+  setTimeout(()=>{
+    switchBill(activeBillIdx);
+  },600);
 };
 
 window.markBillDone=async function(idx){
