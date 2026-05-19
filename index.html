@@ -229,37 +229,36 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .quick-chip:active{background:var(--gold-lt);border-color:var(--gold);transform:scale(.96);}
 .qc-name{font-size:11px;font-weight:700;line-height:1.3;color:var(--tx);}
 .qc-price{font-size:13px;font-weight:700;color:var(--gold);margin-top:4px;}
-/* BILL SLOTS */
-.bill-slot{border-radius:12px;padding:12px 10px;cursor:pointer;transition:all .15s;border:2px solid transparent;position:relative;text-align:center;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;}
-.bill-slot:active{transform:scale(.96);}
-.bs-empty{background:var(--bg);border:2px dashed var(--bdr2);}
-.bs-open{background:#FAEEDA;border-color:#854F0B;}
-.bs-done{background:#E2EFDA;border-color:#3B6D11;}
-.bs-num{font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:2px;}
-.bs-name{font-size:12px;font-weight:700;line-height:1.3;}
-.bs-plate{font-size:10px;opacity:.8;margin-top:1px;}
-.bs-time{font-size:9px;opacity:.7;margin-top:2px;}
-.bs-status{font-size:9px;font-weight:700;padding:2px 6px;border-radius:99px;margin-top:3px;}
-.bs-open .bs-num,.bs-open .bs-name,.bs-open .bs-plate,.bs-open .bs-time{color:#854F0B;}
-.bs-done .bs-num,.bs-done .bs-name,.bs-done .bs-plate,.bs-done .bs-time{color:#3B6D11;}
-.bs-open .bs-status{background:rgba(133,79,11,.15);color:#854F0B;}
-.bs-done .bs-status{background:rgba(59,109,17,.15);color:#3B6D11;}
-/* ADD SLOT BUTTON */
-.bs-add{background:var(--bg);border:2px dashed var(--bdr2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border-radius:12px;min-height:80px;color:var(--tx3);font-size:22px;transition:all .15s;}
-.bs-add:active{background:var(--gold-lt);border-color:var(--gold);}
+.slot{border-radius:10px;padding:8px 6px;cursor:pointer;border:2px solid transparent;text-align:center;transition:all .15s;min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;}
+.slot:active{transform:scale(.94);}
+.slot-empty{background:var(--bg);border:2px dashed var(--bdr2);}
+.slot-open{background:#FAEEDA;border-color:#854F0B;}
+.slot-done{background:#E2EFDA;border-color:#3B6D11;}
+.slot-num{font-size:9px;font-weight:700;color:var(--tx3);}
+.slot-open .slot-num,.slot-done .slot-num{opacity:.7;}
+.slot-icon{font-size:18px;line-height:1;}
+.slot-name{font-size:9px;font-weight:700;line-height:1.2;max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.slot-open .slot-name{color:#854F0B;}
+.slot-done .slot-name{color:#3B6D11;}
+.slot-plate{font-size:8px;opacity:.75;}
+.slot-open .slot-plate{color:#854F0B;}
+.slot-done .slot-plate{color:#3B6D11;}
+.slot-time{font-size:7px;opacity:.65;margin-top:1px;}
+.slot-open .slot-time{color:#854F0B;}
+.slot-done .slot-time{color:#3B6D11;}
 /* BILL DETAIL FULL SCREEN */
-.bill-detail-screen{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;overflow:hidden;}
+.bd-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;overflow:hidden;}
 .bd-topbar{background:var(--blk);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.bd-back{color:var(--gold);font-size:22px;cursor:pointer;padding:0 4px;}
+.bd-back{color:var(--gold);font-size:22px;cursor:pointer;line-height:1;}
 .bd-title{flex:1;color:#fff;font-size:15px;font-weight:700;}
-.bd-cancel{font-size:11px;padding:5px 10px;background:var(--err-bg);color:var(--err);border:1px solid var(--err);border-radius:6px;cursor:pointer;font-weight:700;}
-.bd-status{padding:10px 16px;font-size:12px;font-weight:700;flex-shrink:0;}
-.bd-status.open{background:#FAEEDA;color:#854F0B;}
-.bd-status.done{background:#E2EFDA;color:#3B6D11;}
+.bd-cancel{font-size:11px;padding:5px 10px;background:var(--err-bg);color:var(--err);border:1px solid var(--err);border-radius:6px;cursor:pointer;font-weight:700;-webkit-appearance:none;}
+.bd-status-bar{padding:10px 16px;font-size:12px;font-weight:700;flex-shrink:0;}
+.bd-open{background:#FAEEDA;color:#854F0B;}
+.bd-done{background:#E2EFDA;color:#3B6D11;}
 .bd-body{flex:1;overflow-y:auto;padding:14px 16px;}
 .bd-footer{padding:12px 16px;background:var(--sur);border-top:1px solid var(--bdr);flex-shrink:0;}
 .bd-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--bdr);font-size:13px;}
-.bd-total{display:flex;justify-content:space-between;padding:12px 0 0;font-size:17px;font-weight:700;}
+.bd-total-row{display:flex;justify-content:space-between;padding:12px 0 0;font-size:17px;font-weight:700;}
 .bill-tab{flex-shrink:0;width:54px;height:54px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:2px solid transparent;position:relative;transition:all .15s;}
 .bill-tab:active{transform:scale(.95);}
 .tab-empty{background:var(--bg);border:1.5px dashed var(--bdr2);}
@@ -290,7 +289,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 #sc-pos.bill-view #pay-method-section,
 #sc-pos.bill-view #bill-status-bar{display:none!important;}
 #sc-pos.bill-view #bill-detail-view{display:block!important;}
-#sc-pos.bill-view #bill-slot-grid{display:none!important;}
+#sc-pos.bill-view #bill-slot-wrap{display:none!important;}
 .ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
 /* CATEGORY TOP NAV */
 .cat-nav{flex:1;min-width:fit-content;padding:9px 10px;font-size:11px;font-weight:700;cursor:pointer;border:none;border-right:1px solid var(--bdr);background:var(--sur);color:var(--tx2);white-space:nowrap;transition:all .15s;-webkit-appearance:none;}
@@ -391,7 +390,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v10b</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9n</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -420,15 +419,15 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div id="sc-pos" class="sc active">
 
     <!-- BILL SLOT GRID -->
-    <div id="bill-slot-grid" style="margin:-12px -12px 14px -12px;background:var(--sur);border-bottom:1px solid var(--bdr);padding:12px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <span style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;">📋 บิลที่เปิดไว้</span>
-        <span id="bill-open-count" style="font-size:11px;color:var(--tx3);"></span>
+    <div id="bill-slot-wrap" style="background:var(--sur);border-bottom:1px solid var(--bdr);padding:10px 12px;margin:-12px -12px 14px -12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;">📋 บิลที่เปิดไว้</span>
+        <span id="slots-open-count" style="font-size:10px;color:var(--tx3);"></span>
       </div>
-      <div id="bill-slots-container" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+      <div id="bill-slots" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div>
     </div>
 
-    <!-- BILL DETAIL VIEW (full screen overlay inside POS) -->
+    <!-- Bill detail overlay -->
     <div id="bill-detail-view" style="display:none;"></div>
 
     <!-- Customer -->
@@ -3314,90 +3313,7 @@ rSvcs=function(){
 };
 
 
-// deductPaperCpn defined in bill system below
-
-// ══ BILL TABS SYSTEM ══
-// bills replaced by billSlots // [{id, custName, custId, plate, items, total, status:'open'|'done'|'paid', time, branch}]
-let activeBillIdx=0;
-const MAX_VISIBLE_TABS=5;
-
-// initBills replaced by initBillSlots
-
-
-
-// rBillTabs replaced by rSlotGrid
-
-// switchBill replaced by viewBillSlot
-
-// newBill replaced by openBill/slot system
-
-function rBillStatus(){
-  const el=G('bill-status-bar');if(!el)return;
-  const bill=bills[activeBillIdx];
-  if(!bill){el.style.display='none';return;}
-  if(bill.status==='open'){
-    el.style.display='flex';
-    el.style.background='#FAEEDA';el.style.color='#854F0B';
-    const mins=Math.round((Date.now()-new Date(bill.time).getTime())/60000);
-    el.innerHTML=`🟡 กำลังทำงาน · เริ่ม ${new Date(bill.time).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} · ${mins} นาที`;
-  } else if(bill.status==='done'){
-    el.style.display='flex';
-    el.style.background='#E2EFDA';el.style.color='#3B6D11';
-    el.innerHTML=`✅ เสร็จแล้ว — รอชำระเงิน <span style="font-size:10px;color:#3B6D11;margin-left:6px;">LINE แจ้งแล้ว ✓</span>`;
-  }
-}
-
-// openBill replaced by Firebase slot version below
-
-window.markBillDone=async function(idx){
-  const bill=bills[idx];if(!bill)return;
-  bill.status='done';
-  saveBills();
-  rBillTabs();
-  // Send Line notification
-  const lineId=bill.selCSnapshot?.lineUserId;
-  const serverUrl=(localStorage.getItem('line_server_url')||'').replace(/^["']+|["']+$/g,'').trim();
-  if(lineId&&serverUrl){
-    const msg='🚗 รถของคุณเสร็จแล้ว!\n\nทะเบียน: '+(bill.plate||'—')+'\nบริการ: '+bill.items+'\n─────────────\nรอชำระ ฿'+bill.total.toLocaleString()+'\n📍 CarCare สาขา '+(bill.branch||'')+'\n\nกรุณาชำระเงินที่เคาน์เตอร์';
-    try{await fetch(serverUrl+'/api/send-receipt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lineUserId:lineId,message:msg})});}
-    catch(e){console.error('Line notify error:',e);}
-  }
-  // Refresh detail view to show ชำระเงิน button
-  showBillDetail(idx);
-  showToast('✅ แจ้งลูกค้าทาง Line แล้ว');
-};
-
-// Bill cleared in checkoutBill(), no override needed
-
-// Init on load
-// initBills removed - using initBillSlots via startApp
-// Update bill timers every minute
-setInterval(()=>{
-  rSlotGrid();
-  if(activeBillId){
-    const bill=billSlots.find(b=>b._id===activeBillId);
-    if(bill&&G('bill-detail-view')?.style.display!=='none') renderBillDetail(bill);
-  }
-},60000);
-
-
-
-window.cancelBill=function(idx){
-  if(!confirm('ยกเลิกบิลนี้? ข้อมูลจะหายไป'))return;
-  bills.splice(idx,1);
-  activeBillIdx=0;
-  saveBills();
-  closeBillDetail();
-  rBillTabs();
-  showToast('🗑 ยกเลิกบิลแล้ว');
-};
-// ══ BILL SLOT SYSTEM (Firebase-backed) ══
-// 10 fixed slots per branch, stored in Firebase
-
-let billSlots = []; // live from Firebase
-let activeBillId = null; // currently viewed bill _id
-
-// ── deductPaperCpn (fix) ──
+// ══ deductPaperCpn ══
 async function deductPaperCpn(){
   if(!appliedPaperCpn||!selC)return;
   const{allCpns,realIdx}=appliedPaperCpn;
@@ -3406,296 +3322,220 @@ async function deductPaperCpn(){
   try{
     if(db&&!LM)await updateDoc(doc(db,'customers',selC._id),{coupons:allCpns});
     else{selC.coupons=allCpns;LS('cu',custs);}
-  }catch(e){console.error('deductPaperCpn:',e);}
+  }catch(e){}
 }
 
-// ── SUBSCRIBE to bills from Firebase ──
-function subscribeBills(){
-  if(!db||LM)return;
-  onSnapshot(
-    query(collection(db,'bills'),orderBy('slotNum')),
-    snap=>{
-      billSlots=snap.docs.map(d=>({...d.data(),_id:d.id}))
-        .filter(b=>!currentBranch||!b.branch||b.branch===currentBranch);
-      rSlotGrid();
-      // Refresh detail if open
-      if(activeBillId){
-        const bill=billSlots.find(b=>b._id===activeBillId);
-        if(bill)renderBillDetail(bill);
-        else closeBillDetail();
-      }
-    }
-  );
-}
+// ══ 10-SLOT BILL SYSTEM ══
+const TOTAL_SLOTS=10;
+let slots=[]; // array of 10 slot objects
+let activeSlotIdx=null; // which slot is being viewed
 
-// ── RENDER SLOT GRID ──
-function rSlotGrid(){
-  const con=G('bill-slots-container');if(!con)return;
-  const open=billSlots.filter(b=>b.status==='open'||b.status==='done');
-  G('bill-open-count').textContent=open.length?open.length+' บิลเปิดอยู่':'';
-
-  let html='';
-  // Existing bills
-  billSlots.forEach(b=>{
-    const mins=b.openedAt?Math.round((Date.now()-new Date(b.openedAt).getTime())/60000):0;
-    const timeStr=mins>60?Math.floor(mins/60)+'ชม.'+( mins%60)+'น.':mins+'น.';
-    const custShort=(b.custName||'Walk-in').split(' ')[0];
-    const cls=b.status==='done'?'bs-done':b.status==='open'?'bs-open':'bs-empty';
-    if(b.status==='empty'){
-      html+=`<div class="bill-slot bs-empty" onclick="openNewBillInSlot('${b._id}')">
-        <div class="bs-num">บิล ${b.slotNum}</div>
-        <div style="font-size:20px;color:var(--bdr2);">+</div>
-        <div style="font-size:9px;color:var(--tx3);">ว่าง</div>
-      </div>`;
-    } else {
-      html+=`<div class="bill-slot ${cls}" onclick="viewBillSlot('${b._id}')">
-        <div class="bs-num">บิล ${b.slotNum}</div>
-        <div class="bs-name">${custShort}</div>
-        <div class="bs-plate">${b.plate||'—'}</div>
-        <div class="bs-time">${timeStr}</div>
-        <div class="bs-status">${b.status==='done'?'รอชำระ':'กำลังทำ'}</div>
-      </div>`;
-    }
-  });
-
-  // Add slot button if all slots are used
-  const emptyCount=billSlots.filter(b=>b.status==='empty').length;
-  if(emptyCount===0){
-    html+=`<div class="bs-add" onclick="addNewSlot()"><div>+</div><div style="font-size:9px;margin-top:2px;">เพิ่มช่อง</div></div>`;
+function initSlots(){
+  const saved=localStorage.getItem('billSlots');
+  if(saved){
+    try{slots=JSON.parse(saved);}catch{slots=[];}
   }
-  con.innerHTML=html;
+  // Ensure always 10 slots
+  while(slots.length<TOTAL_SLOTS) slots.push({status:'empty'});
+  slots=slots.slice(0,TOTAL_SLOTS);
+  saveSlots();rSlots();
 }
 
-// ── INIT SLOTS — create 5 default empty slots if none ──
-async function initBillSlots(){
-  if(!db||LM)return;
-  subscribeBills();
-  // Check if slots exist for this branch
-  setTimeout(async()=>{
-    if(billSlots.length===0){
-      // Create 5 default slots
-      for(let i=1;i<=5;i++){
-        await addDoc(collection(db,'bills'),{
-          slotNum:i,status:'empty',branch:currentBranch||'',
-          createdAt:serverTimestamp()
-        });
-      }
+function saveSlots(){
+  localStorage.setItem('billSlots',JSON.stringify(slots));
+}
+
+function rSlots(){
+  const con=G('bill-slots');if(!con)return;
+  const openCount=slots.filter(s=>s.status==='open'||s.status==='done').length;
+  const countEl=G('slots-open-count');
+  if(countEl)countEl.textContent=openCount?openCount+' บิลเปิดอยู่':'ทั้งหมดว่าง';
+
+  con.innerHTML=slots.map((s,i)=>{
+    if(s.status==='empty'){
+      return`<div class="slot slot-empty" onclick="selectSlot(${i})">
+        <span class="slot-num">ช่อง ${i+1}</span>
+        <span class="slot-icon" style="color:var(--bdr2);">+</span>
+        <span style="font-size:8px;color:var(--tx3);">ว่าง</span>
+      </div>`;
     }
-  },2000);
+    const mins=s.openedAt?Math.round((Date.now()-new Date(s.openedAt).getTime())/60000):0;
+    const timeStr=mins>=60?Math.floor(mins/60)+'ชม.':mins+'น.';
+    const name=(s.custName||'Walk-in').split(' ')[0].slice(0,8);
+    const cls=s.status==='done'?'slot-done':'slot-open';
+    const icon=s.status==='done'?'✅':'🟡';
+    return`<div class="slot ${cls}" onclick="selectSlot(${i})">
+      <span class="slot-num">ช่อง ${i+1}</span>
+      <span class="slot-icon">${icon}</span>
+      <span class="slot-name">${name}</span>
+      <span class="slot-plate">${(s.plate||'').slice(0,7)}</span>
+      <span class="slot-time">${timeStr}</span>
+    </div>`;
+  }).join('');
 }
 
-// ── OPEN NEW BILL IN SLOT ──
-window.openNewBillInSlot=function(slotId){
-  // Just set active slot and let POS open a bill into it
-  activeBillId=slotId;
-  // Show POS normally — staff selects customer + services
-  closeBillDetail();
-  showToast('เลือกบิล '+slotId.slice(-4)+' — เพิ่มบริการแล้วกด เปิดบิล');
+// ── Select slot ──
+window.selectSlot=function(idx){
+  const slot=slots[idx];
+  if(slot.status==='empty'){
+    // Use this slot for the next bill
+    activeSlotIdx=idx;
+    closeBillDetail();
+    showToast('เลือกช่อง '+(idx+1)+' — เพิ่มบริการแล้วกด เปิดบิล');
+    return;
+  }
+  // View existing bill
+  activeSlotIdx=idx;
+  showBillDetail(idx);
 };
 
-// ── OPEN BILL — save cart to Firebase slot ──
+// ── Open bill ──
 window.openBill=async function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
-  const{tot}=uTot();
-  const plate=(()=>{try{const el=G('plate');return el?el.value:'';}catch{return '';}})()||(selC?selC.plate:'');
-
   // Find target slot
-  let targetId=activeBillId;
-  // If no slot selected, use first empty slot
-  if(!targetId||!billSlots.find(b=>b._id===targetId&&b.status==='empty')){
-    const emptySlot=billSlots.find(b=>b.status==='empty');
-    if(!emptySlot){alert('ไม่มีช่องว่าง กรุณายกเลิกบิลเก่าก่อน');return;}
-    targetId=emptySlot._id;
+  let idx=activeSlotIdx;
+  if(idx===null||slots[idx]?.status!=='empty'){
+    idx=slots.findIndex(s=>s.status==='empty');
+    if(idx<0){alert('ไม่มีช่องว่าง ยกเลิกบิลเก่าก่อน');return;}
   }
-
-  const billData={
+  const{tot}=uTot();
+  const plate=selC?.plate||'';
+  slots[idx]={
     status:'open',
     custName:selC?selC.name:'Walk-in',
     custId:selC?selC._id||selC.id:null,
     plate,
     items:cart.map(c=>c.name).join(', '),
-    total:tot,
-    size:CZ,
+    total:tot,size:CZ,
     branch:currentBranch||'',
     staff:loggedInStaff||G('staff-sel')?.value||'',
     openedAt:new Date().toISOString(),
-    cartSnapshot:cart.map(c=>({...c})),
-    selCSnapshot:selC?JSON.parse(JSON.stringify(selC)):null,
-    updatedAt:serverTimestamp()
+    cartSnap:cart.map(c=>({...c})),
+    custSnap:selC?JSON.parse(JSON.stringify(selC)):null
   };
-
-  try{
-    await updateDoc(doc(db,'bills',targetId),billData);
-    activeBillId=targetId;
-  }catch(e){
-    // Offline fallback
-    const slot=billSlots.find(b=>b._id===targetId);
-    if(slot)Object.assign(slot,billData);
-    rSlotGrid();
-  }
-
+  activeSlotIdx=idx;
+  saveSlots();
   // Clear POS
   cart=[];selC=null;usedCoupon=null;appliedPaperCpn=null;
   G('cq').value='';G('cch').style.display='none';
-  try{const p=G('plate');if(p)p.value='';}catch(e){}
   rCart();updateFloat();
-
-  showToast('✅ เปิดบิล — '+billData.custName);
+  showToast('✅ เปิดบิล ช่อง '+(idx+1)+' — '+slots[idx].custName);
   G('content').scrollTop=0;
-
-  // Auto-show bill detail after 600ms
-  setTimeout(()=>{
-    const bill=billSlots.find(b=>b._id===targetId)||{...billData,_id:targetId};
-    viewBillSlot(targetId);
-  },600);
+  // Auto-show bill detail
+  setTimeout(()=>showBillDetail(idx),600);
 };
 
-// ── VIEW BILL SLOT ──
-window.viewBillSlot=function(id){
-  const bill=billSlots.find(b=>b._id===id);
-  if(!bill||bill.status==='empty'){openNewBillInSlot(id);return;}
-  activeBillId=id;
-  renderBillDetail(bill);
-};
-
-// ── RENDER BILL DETAIL (full screen) ──
+// ── Show bill detail (full screen) ──
 let billPayMethod='เงินสด';
 
-function renderBillDetail(bill){
+function showBillDetail(idx){
+  const slot=slots[idx];if(!slot||slot.status==='empty')return;
   G('sc-pos').classList.add('bill-view');
-  const det=G('bill-detail-view');
-  det.style.display='block';
+  const det=G('bill-detail-view');det.style.display='block';
+  const mins=slot.openedAt?Math.round((Date.now()-new Date(slot.openedAt).getTime())/60000):0;
+  const timeStr=mins>=60?Math.floor(mins/60)+'ชม. '+(mins%60)+'น.':mins+' นาที';
+  const isDone=slot.status==='done';
 
-  const mins=bill.openedAt?Math.round((Date.now()-new Date(bill.openedAt).getTime())/60000):0;
-  const hrs=Math.floor(mins/60);
-  const timeStr=hrs>0?hrs+'ชม. '+(mins%60)+'นาที':mins+' นาที';
-  const isDone=bill.status==='done';
-
-  det.innerHTML=`
-  <div class="bill-detail-screen">
+  det.innerHTML=`<div class="bd-screen">
     <div class="bd-topbar">
       <span class="bd-back" onclick="closeBillDetail()">←</span>
-      <div class="bd-title">บิล ${bill.slotNum} — ${bill.custName||'Walk-in'}</div>
-      <button class="bd-cancel" onclick="cancelBillSlot('${bill._id}')">ยกเลิก</button>
+      <div class="bd-title">ช่อง ${idx+1} — ${slot.custName||'Walk-in'}</div>
+      <button class="bd-cancel" onclick="cancelSlot(${idx})">ยกเลิกบิล</button>
     </div>
-    <div class="bd-status ${isDone?'done':'open'}">
-      ${isDone?'✅ เสร็จแล้ว — รอชำระเงิน':'🟡 กำลังทำงาน · '+timeStr}
-      ${isDone?'<span style="font-size:10px;margin-left:8px;">LINE แจ้งแล้ว ✓</span>':''}
+    <div class="bd-status-bar ${isDone?'bd-done':'bd-open'}">
+      ${isDone?'✅ เสร็จแล้ว — รอชำระเงิน <span style="font-size:10px;margin-left:6px;">LINE แจ้งแล้ว ✓</span>':'🟡 กำลังทำงาน · '+timeStr}
     </div>
     <div class="bd-body">
-      <div style="font-size:11px;color:var(--tx3);margin-bottom:10px;">ทะเบียน ${bill.plate||'—'} · ขนาด ${bill.size||'M'} · พนักงาน ${bill.staff||'—'}</div>
-      ${(bill.cartSnapshot||[]).map(c=>`
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:12px;">ทะเบียน ${slot.plate||'—'} · ขนาด ${slot.size||'M'} · พนักงาน ${slot.staff||'—'}</div>
+      ${(slot.cartSnap||[]).map(c=>`
         <div class="bd-item">
-          <span>${c.name} (${c.size||c.size||'M'}) ×${c.qty||1}</span>
+          <span>${c.name} (${c.size||slot.size||'M'}) ×${c.qty||1}</span>
           <span style="font-weight:700;">฿${((c.price||0)*(c.qty||1)).toLocaleString()}</span>
         </div>`).join('')}
-      <div class="bd-total">
+      <div class="bd-total-row">
         <span>รวม (รวม VAT)</span>
-        <span style="color:var(--gold);">฿${(bill.total||0).toLocaleString()}</span>
+        <span style="color:var(--gold);">฿${(slot.total||0).toLocaleString()}</span>
       </div>
     </div>
     <div class="bd-footer">
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;" id="bd-pay-btns">
-        ${['เงินสด','QR','โอน','บัตร'].map(m=>`
-          <div class="pay-btn${billPayMethod===m?' active':''}" onclick="setBillPayMethod('${m}',this)">
-            ${{เงินสด:'💵 เงินสด',QR:'📱 QR',โอน:'🏦 โอน',บัตร:'💳 บัตร'}[m]}
-          </div>`).join('')}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;" id="bd-pay-row">
+        ${['เงินสด','QR','โอน','บัตร'].map(m=>`<div class="pay-btn${billPayMethod===m?' active':''}" onclick="setSlotPay('${m}',this)">${{เงินสด:'💵 เงินสด',QR:'📱 QR',โอน:'🏦 โอน',บัตร:'💳 บัตร'}[m]}</div>`).join('')}
       </div>
       ${isDone
-        ?`<button class="btn btn-g btn-bl" onclick="checkoutBill('${bill._id}')">💰 ชำระเงิน →</button>`
-        :`<button class="btn btn-ok btn-bl" onclick="markSlotDone('${bill._id}')">✅ เสร็จงาน → ส่ง LINE ลูกค้า</button>`
+        ?`<button class="btn btn-g btn-bl" onclick="checkoutSlot(${idx})">💰 ชำระเงิน →</button>`
+        :`<button class="btn btn-ok btn-bl" onclick="doneSlot(${idx})">✅ เสร็จงาน → ส่ง LINE ลูกค้า</button>`
       }
     </div>
   </div>`;
 }
 
-window.setBillPayMethod=function(m,el){
+window.setSlotPay=function(m,el){
   billPayMethod=m;
-  document.querySelectorAll('#bd-pay-btns .pay-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#bd-pay-row .pay-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
 };
 
-// ── CLOSE BILL DETAIL ──
+// ── Close bill detail ──
 window.closeBillDetail=function(){
   G('sc-pos').classList.remove('bill-view');
   const det=G('bill-detail-view');if(det)det.style.display='none';
-  activeBillId=null;
-  rPromoBanner();rCart();rQuickSell();
+  activeSlotIdx=null;
+  rPromoBanner();rCart();rQuickSell();rSlots();
 };
 
-// ── MARK DONE ──
-window.markSlotDone=async function(id){
-  const bill=billSlots.find(b=>b._id===id);if(!bill)return;
-  try{await updateDoc(doc(db,'bills',id),{status:'done',doneAt:new Date().toISOString()});}
-  catch(e){bill.status='done';rSlotGrid();}
+// ── Mark done + send LINE ──
+window.doneSlot=async function(idx){
+  slots[idx].status='done';
+  slots[idx].doneAt=new Date().toISOString();
+  saveSlots();
   // Send LINE
-  const lineId=bill.selCSnapshot?.lineUserId;
+  const slot=slots[idx];
+  const lineId=slot.custSnap?.lineUserId;
   const serverUrl=(localStorage.getItem('line_server_url')||'').replace(/^["']+|["']+$/g,'').trim();
   if(lineId&&serverUrl){
-    const msg='🚗 รถของคุณเสร็จแล้ว!\n\nทะเบียน: '+(bill.plate||'—')+'\nบริการ: '+bill.items+'\n─────────────\nรอชำระ ฿'+bill.total.toLocaleString()+'\n📍 CarCare สาขา '+(bill.branch||'')+'\n\nกรุณาชำระเงินที่เคาน์เตอร์';
-    try{await fetch(serverUrl+'/api/send-receipt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lineUserId:lineId,message:msg})});}
-    catch(e){}
+    const msg='🚗 รถของคุณเสร็จแล้ว!\n\nทะเบียน: '+(slot.plate||'—')+'\nบริการ: '+slot.items+'\n─────────────\nรอชำระ ฿'+slot.total.toLocaleString()+'\n📍 CarCare สาขา '+(slot.branch||'')+'\n\nกรุณาชำระเงินที่เคาน์เตอร์';
+    try{await fetch(serverUrl+'/api/send-receipt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lineUserId:lineId,message:msg})});}catch(e){}
   }
   showToast('✅ แจ้งลูกค้าทาง LINE แล้ว');
-  // Re-render detail as done
-  const updated={...bill,status:'done',doneAt:new Date().toISOString()};
-  renderBillDetail(updated);
+  showBillDetail(idx);
 };
 
-// ── CHECKOUT BILL ──
-window.checkoutBill=async function(id){
-  const bill=billSlots.find(b=>b._id===id);if(!bill)return;
-  cart=JSON.parse(JSON.stringify(bill.cartSnapshot||[]));
-  selC=bill.selCSnapshot?JSON.parse(JSON.stringify(bill.selCSnapshot)):null;
+// ── Checkout ──
+window.checkoutSlot=async function(idx){
+  const slot=slots[idx];if(!slot)return;
+  cart=JSON.parse(JSON.stringify(slot.cartSnap||[]));
+  selC=slot.custSnap?JSON.parse(JSON.stringify(slot.custSnap)):null;
   selPayMethod=billPayMethod||'เงินสด';
-  CZ=bill.size||'M';
+  CZ=slot.size||'M';
   try{await checkout();}catch(e){alert('เกิดข้อผิดพลาด: '+e.message);return;}
-  // Reset slot to empty
-  try{
-    await updateDoc(doc(db,'bills',id),{
-      status:'empty',custName:null,custId:null,plate:null,
-      items:null,total:null,cartSnapshot:null,selCSnapshot:null,
-      openedAt:null,doneAt:null,staff:null
-    });
-  }catch(e){
-    const slot=billSlots.find(b=>b._id===id);
-    if(slot){slot.status='empty';rSlotGrid();}
-  }
+  // Reset slot
+  slots[idx]={status:'empty'};
+  activeSlotIdx=null;
+  saveSlots();
   closeBillDetail();
   showToast('💰 ชำระเงินสำเร็จ!');
 };
 
-// ── CANCEL BILL ──
-window.cancelBillSlot=async function(id){
-  if(!confirm('ยกเลิกบิลนี้?'))return;
-  try{
-    await updateDoc(doc(db,'bills',id),{
-      status:'empty',custName:null,custId:null,plate:null,
-      items:null,total:null,cartSnapshot:null,selCSnapshot:null,
-      openedAt:null,doneAt:null
-    });
-  }catch(e){
-    const slot=billSlots.find(b=>b._id===id);
-    if(slot){slot.status='empty';rSlotGrid();}
-  }
+// ── Cancel slot ──
+window.cancelSlot=function(idx){
+  if(!confirm('ยกเลิกบิลช่อง '+(idx+1)+'?'))return;
+  slots[idx]={status:'empty'};
+  activeSlotIdx=null;
+  saveSlots();
   closeBillDetail();
   showToast('🗑 ยกเลิกบิลแล้ว');
 };
 
-// ── ADD NEW SLOT ──
-window.addNewSlot=async function(){
-  const nextNum=billSlots.length+1;
-  await addDoc(collection(db,'bills'),{
-    slotNum:nextNum,status:'empty',branch:currentBranch||'',
-    createdAt:serverTimestamp()
-  });
-};
+// Update slot timers every minute
+setInterval(()=>{
+  rSlots();
+  if(activeSlotIdx!==null&&G('bill-detail-view')?.style.display!=='none'){
+    showBillDetail(activeSlotIdx);
+  }
+},60000);
 
-// ── CANCEL BILL (old name alias) ──
-window.cancelBill=function(idx){cancelBillSlot(idx);};
-
-// ── UPDATE rToday to show open bills count ──
-
+// Init on load
+setTimeout(initSlots,800);
 
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
