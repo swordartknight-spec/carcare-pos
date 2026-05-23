@@ -393,7 +393,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9s</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9t</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1625,18 +1625,18 @@ window.selCust=function(id){
   // Wash milestone dots
   const totalW=selC.totalWashes||0;
   const posInCycle=totalW%5;
-  const nextFree=posInCycle===0?5:5-posInCycle;
+  const nextFree=5-posInCycle;
   const milestoneEl=G('wash-milestone');
   if(milestoneEl){
     milestoneEl.style.display='block';
-    if(G('wash-count-txt'))G('wash-count-txt').textContent=totalW+' ครั้ง รวม';
+    if(G('wash-count-txt'))G('wash-count-txt').textContent=totalW+' ครั้งรวม';
     let dotsHtml='';
     for(let i=0;i<5;i++){
       const filled=i<posInCycle;
-      dotsHtml+=`<div style="flex:1;height:10px;border-radius:99px;background:${filled?'var(--gold)':'var(--bdr)'};border:1px solid ${filled?'var(--gold-dk)':'var(--bdr2)'};transition:all .3s;"></div>`;
+      dotsHtml+=`<div style="flex:1;height:12px;border-radius:99px;background:${filled?'var(--gold)':'var(--bdr)'};border:1.5px solid ${filled?'var(--gold-dk)':'var(--bdr2)'};transition:all .3s;"></div>`;
     }
     if(G('wash-dots'))G('wash-dots').innerHTML=dotsHtml;
-    if(G('wash-next-txt'))G('wash-next-txt').textContent=posInCycle===0?'เริ่มรอบใหม่! ล้างอีก 5 ครั้ง = ฟรี 1 ครั้ง':'อีก '+nextFree+' ครั้ง = ล้างฟรี 1 ครั้ง 🎁';
+    if(G('wash-next-txt'))G('wash-next-txt').textContent=posInCycle===0&&totalW>0?'🎉 ครบรอบ! รับคูปองล้างรถฟรีแล้ว':'อีก '+nextFree+' ครั้ง = ล้างฟรี 1 ครั้ง 🎁';
   }
   G('plate').value=selC.plate||'';
   // Show coupons in chip
@@ -1672,10 +1672,9 @@ window.checkout=async function(){
     if((ci.cpnMonth||0)>0){const exp=new Date(now);exp.setMonth(exp.getMonth()+ci.cpnMonth);newCoupons.push({type:'month',expires:exp.toISOString(),from:now.toISOString(),service:ci.name});cpnMsg.push(`ล้างรถฟรี ${ci.cpnMonth} เดือน (ถึง ${fmtDate(exp)})`);}
   }
 
-  // ── LOYALTY WASH COUPON: every 5 car washes = 1 free wash ──
-  // Count wash services in this transaction
-  const washCats=['ล้างรถ'];
-  const washCount=cart.filter(c=>washCats.includes(c.cat)).reduce((a,c)=>a+(c.qty||1),0);
+  // ── LOYALTY WASH COUPON: every 5 ล้างสี & ดูดฝุ่น = 1 free wash ──
+  // Only count code '-' (ล้างสี & ดูดฝุ่น)
+  const washCount=cart.filter(c=>c.code==='-').reduce((a,c)=>a+(c.qty||1),0);
   if(washCount>0&&selC){
     const prevWashes=selC.totalWashes||0;
     const newWashes=prevWashes+washCount;
