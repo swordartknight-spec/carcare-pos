@@ -245,10 +245,9 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .slot-done .slot-plate{color:#3B6D11;}
 .slot-time{font-size:7px;opacity:.65;margin-top:1px;}
 .slot-open .slot-time{color:#854F0B;}
-.slot-active{box-shadow:0 0 0 3px #C9A84C!important;transform:scale(1.06);}
-.slot-selected{background:#1a1a1a!important;border-color:#C9A84C!important;}
-.slot-selected .slot-icon,.slot-selected .slot-num{color:#C9A84C!important;}
-.slot-selected span{color:#C9A84C!important;}
+.slot-active{box-shadow:0 0 0 3px #C9A84C,0 0 12px rgba(201,168,76,.4)!important;transform:scale(1.06);}
+.slot-selected{background:#1a1a1a!important;border-color:#C9A84C!important;box-shadow:0 0 0 3px #C9A84C,0 0 12px rgba(201,168,76,.4)!important;transform:scale(1.06);}
+.slot-selected .slot-icon,.slot-selected .slot-num,.slot-selected span{color:#C9A84C!important;}
 .slot-done .slot-time{color:#3B6D11;}
 /* BILL DETAIL FULL SCREEN */
 .bd-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;overflow:hidden;}
@@ -394,7 +393,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9p</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9q</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
