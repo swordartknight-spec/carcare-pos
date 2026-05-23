@@ -393,7 +393,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9q</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9r</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -3357,9 +3357,10 @@ function rSlots(){
   con.innerHTML=slots.map((s,i)=>{
     if(s.status==='empty'){
       const isSel=activeSlotIdx===i;
-      return`<div class="slot slot-empty${isSel?' slot-selected':''}" onclick="selectSlot(${i})">
-        <span class="slot-num">ช่อง ${i+1}</span>
-        <span class="slot-icon" style="color:${isSel?'#C9A84C':'var(--bdr2)'};">${isSel?'●':'+'}</span>
+      const selStyle=isSel?'background:#1a1a1a;border:2px solid #C9A84C;box-shadow:0 0 0 2px #C9A84C,0 0 12px rgba(201,168,76,.5);transform:scale(1.06);':'';
+      return`<div class="slot slot-empty" style="${selStyle}" onclick="selectSlot(${i})">
+        <span class="slot-num" style="color:${isSel?'#C9A84C':'var(--tx3)'};">ช่อง ${i+1}</span>
+        <span class="slot-icon" style="font-size:${isSel?'18px':'18px'};color:${isSel?'#C9A84C':'var(--bdr2)'};">${isSel?'●':'+'}</span>
         <span style="font-size:8px;color:${isSel?'#C9A84C':'var(--tx3)'};">${isSel?'เลือกแล้ว':'ว่าง'}</span>
       </div>`;
     }
