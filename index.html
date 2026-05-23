@@ -246,6 +246,9 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .slot-time{font-size:7px;opacity:.65;margin-top:1px;}
 .slot-open .slot-time{color:#854F0B;}
 .slot-active{box-shadow:0 0 0 3px #C9A84C!important;transform:scale(1.06);}
+.slot-selected{background:#1a1a1a!important;border-color:#C9A84C!important;}
+.slot-selected .slot-icon,.slot-selected .slot-num{color:#C9A84C!important;}
+.slot-selected span{color:#C9A84C!important;}
 .slot-done .slot-time{color:#3B6D11;}
 /* BILL DETAIL FULL SCREEN */
 .bd-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;overflow:hidden;}
@@ -290,7 +293,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 #sc-pos.bill-view #pay-method-section,
 #sc-pos.bill-view #bill-status-bar{display:none!important;}
 #sc-pos.bill-view #bill-detail-view{display:block!important;}
-#sc-pos.bill-view #bill-slot-wrap{display:none!important;}
+/* slot grid stays visible in bill-view mode */
 .ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
 /* CATEGORY TOP NAV */
 .cat-nav{flex:1;min-width:fit-content;padding:9px 10px;font-size:11px;font-weight:700;cursor:pointer;border:none;border-right:1px solid var(--bdr);background:var(--sur);color:var(--tx2);white-space:nowrap;transition:all .15s;-webkit-appearance:none;}
@@ -391,7 +394,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9o</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9p</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -3354,10 +3357,11 @@ function rSlots(){
 
   con.innerHTML=slots.map((s,i)=>{
     if(s.status==='empty'){
-      return`<div class="slot slot-empty" onclick="selectSlot(${i})">
+      const isSel=activeSlotIdx===i;
+      return`<div class="slot slot-empty${isSel?' slot-selected':''}" onclick="selectSlot(${i})">
         <span class="slot-num">ช่อง ${i+1}</span>
-        <span class="slot-icon" style="color:var(--bdr2);">+</span>
-        <span style="font-size:8px;color:var(--tx3);">ว่าง</span>
+        <span class="slot-icon" style="color:${isSel?'#C9A84C':'var(--bdr2)'};">${isSel?'●':'+'}</span>
+        <span style="font-size:8px;color:${isSel?'#C9A84C':'var(--tx3)'};">${isSel?'เลือกแล้ว':'ว่าง'}</span>
       </div>`;
     }
     const mins=s.openedAt?Math.round((Date.now()-new Date(s.openedAt).getTime())/60000):0;
@@ -3381,14 +3385,22 @@ function rSlots(){
 window.selectSlot=function(idx){
   const slot=slots[idx];
   if(slot.status==='empty'){
-    // Use this slot for the next bill
-    activeSlotIdx=idx;
-    closeBillDetail();
-    showToast('เลือกช่อง '+(idx+1)+' — เพิ่มบริการแล้วกด เปิดบิล');
+    // Toggle selection
+    if(activeSlotIdx===idx){
+      activeSlotIdx=null;
+      closeBillDetail();
+    } else {
+      activeSlotIdx=idx;
+      closeBillDetail();
+      rSlots();
+      showToast('เลือกช่อง '+(idx+1)+' — เพิ่มบริการแล้วกด เปิดบิล');
+    }
+    rSlots();
     return;
   }
   // View existing bill
   activeSlotIdx=idx;
+  rSlots();
   showBillDetail(idx);
 };
 
@@ -3439,7 +3451,7 @@ function showBillDetail(idx){
   const timeStr=mins>=60?Math.floor(mins/60)+'ชม. '+(mins%60)+'น.':mins+' นาที';
   const isDone=slot.status==='done';
 
-  det.innerHTML=`<div class="bd-screen">
+  det.innerHTML=`<div class="bd-screen" style="position:relative;inset:auto;z-index:auto;min-height:60vh;">
     <div class="bd-topbar">
       <span class="bd-back" onclick="closeBillDetail()">←</span>
       <div class="bd-title">ช่อง ${idx+1} — ${slot.custName||'Walk-in'}</div>
@@ -3500,7 +3512,8 @@ window.closeBillDetail=function(){
   G('sc-pos').classList.remove('bill-view');
   const det=G('bill-detail-view');if(det)det.style.display='none';
   activeSlotIdx=null;
-  rPromoBanner();rCart();rQuickSell();rSlots();
+  rSlots();
+  rPromoBanner();rCart();rQuickSell();
 };
 
 // ── Mark done + send LINE ──
