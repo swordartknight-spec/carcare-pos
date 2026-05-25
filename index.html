@@ -393,7 +393,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9t</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9w</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1401,6 +1401,7 @@ function rSvcs(){
       <div class="sq-name">${s.name}</div>
       <div class="sq-code">${s.code}·${CZ}</div>
       <div class="sq-price">฿${p.toLocaleString()}</div>
+      ${currentBranch&&s[CZ+'_'+currentBranch]?'<div style="font-size:7px;font-weight:700;color:var(--inf);margin-top:1px;">'+currentBranch+'</div>':''}
       ${cpnTxt}
     </div>`;
   }
@@ -1692,7 +1693,7 @@ window.checkout=async function(){
 
   const tdata={
     id:recId,customer:selC?selC.name:'Walk-in',plate,size:CZ,
-    payment:selPayMethod,staff:loggedInStaff||staffName,branch:currentBranch||'',
+    payment:selPayMethod,staff:loggedInStaff||staffName,branch:currentBranch||'',duration:window._billDurationMins||null,
     items:cart.map(c=>c.name).join(', '),
     itemDetails:svcEntries,total:tot,pts:selC?pts:0,
     csaleTotal,copTotal,discount:disc,cpnDiscount:cpnDisc,paperDiscount:paperDisc||0,
@@ -3375,7 +3376,8 @@ function rSlots(){
       <span class="slot-icon">${icon}</span>
       <span class="slot-name">${name}</span>
       <span class="slot-plate">${(s.plate||'').slice(0,7)}</span>
-      <span class="slot-time">${timeStr}</span>
+      ${s.billSeq?`<span style="font-size:8px;font-weight:700;opacity:.85;">บิล #${s.billSeq}</span>`:''}
+      ${s.status==='done'&&s.doneAt&&s.openedAt?`<span style="font-size:7px;opacity:.75;">${Math.round((new Date(s.doneAt)-new Date(s.openedAt))/60000)}น.</span>`:''}
     </div>`;
   }).join('');
 }
@@ -3415,6 +3417,11 @@ window.openBill=async function(){
   }
   const{tot}=uTot();
   const plate=selC?.plate||'';
+  // Get today's receipt number from txns
+  const todayDate=new Date().toLocaleDateString('th-TH');
+  const todayCount=txns.filter(t=>t.date===todayDate&&(!currentBranch||!t.branch||t.branch===currentBranch)).length;
+  const billSeq=todayCount+slots.filter(s=>s.status==='open'||s.status==='done').length+1;
+
   slots[idx]={
     status:'open',
     custName:selC?selC.name:'Walk-in',
@@ -3425,6 +3432,7 @@ window.openBill=async function(){
     branch:currentBranch||'',
     staff:loggedInStaff||G('staff-sel')?.value||'',
     openedAt:new Date().toISOString(),
+    billSeq:billSeq,
     cartSnap:cart.map(c=>({...c})),
     custSnap:selC?JSON.parse(JSON.stringify(selC)):null
   };
@@ -3454,11 +3462,13 @@ function showBillDetail(idx){
   det.innerHTML=`<div class="bd-screen" style="position:relative;inset:auto;z-index:auto;min-height:60vh;">
     <div class="bd-topbar">
       <span class="bd-back" onclick="closeBillDetail()">←</span>
-      <div class="bd-title">ช่อง ${idx+1} — ${slot.custName||'Walk-in'}</div>
+      <div class="bd-title">ช่อง ${idx+1} — ${slot.custName||'Walk-in'}${slot.billSeq?' #'+slot.billSeq:''}</div>
       <button class="bd-cancel" onclick="cancelSlot(${idx})">ยกเลิกบิล</button>
     </div>
     <div class="bd-status-bar ${isDone?'bd-done':'bd-open'}">
-      ${isDone?'✅ เสร็จแล้ว — รอชำระเงิน':'🟡 กำลังทำงาน · '+timeStr}
+      ${isDone?
+        '✅ เสร็จแล้ว — รอชำระเงิน · ใช้เวลา '+(slot.doneAt&&slot.openedAt?Math.round((new Date(slot.doneAt)-new Date(slot.openedAt))/60000)+'นาที':'—')
+        :'🟡 กำลังทำงาน · '+timeStr}
     </div>
     <!-- 3-step progress indicator -->
     <div style="display:flex;align-items:center;padding:12px 20px 10px;background:var(--sur);border-bottom:1px solid var(--bdr);">
@@ -3540,7 +3550,12 @@ window.checkoutSlot=async function(idx){
   selC=slot.custSnap?JSON.parse(JSON.stringify(slot.custSnap)):null;
   selPayMethod=billPayMethod||'เงินสด';
   CZ=slot.size||'M';
+  // Calculate duration for transaction record
+  if(slot.openedAt&&slot.doneAt){
+    window._billDurationMins=Math.round((new Date(slot.doneAt)-new Date(slot.openedAt))/60000);
+  }
   try{await checkout();}catch(e){alert('เกิดข้อผิดพลาด: '+e.message);return;}
+  window._billDurationMins=null;
   // Reset slot
   slots[idx]={status:'empty'};
   activeSlotIdx=null;
