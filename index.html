@@ -245,9 +245,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .slot-done .slot-plate{color:#3B6D11;}
 .slot-time{font-size:7px;opacity:.65;margin-top:1px;}
 .slot-open .slot-time{color:#854F0B;}
-.slot-active{box-shadow:0 0 0 3px #C9A84C,0 0 12px rgba(201,168,76,.4)!important;transform:scale(1.06);}
-.slot-selected{background:#1a1a1a!important;border-color:#C9A84C!important;box-shadow:0 0 0 3px #C9A84C,0 0 12px rgba(201,168,76,.4)!important;transform:scale(1.06);}
-.slot-selected .slot-icon,.slot-selected .slot-num,.slot-selected span{color:#C9A84C!important;}
+.slot-active{box-shadow:0 0 0 3px #C9A84C!important;transform:scale(1.06);}
 .slot-done .slot-time{color:#3B6D11;}
 /* BILL DETAIL FULL SCREEN */
 .bd-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;overflow:hidden;}
@@ -292,7 +290,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 #sc-pos.bill-view #pay-method-section,
 #sc-pos.bill-view #bill-status-bar{display:none!important;}
 #sc-pos.bill-view #bill-detail-view{display:block!important;}
-/* slot grid stays visible in bill-view mode */
+#sc-pos.bill-view #bill-slot-wrap{display:none!important;}
 .ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
 /* CATEGORY TOP NAV */
 .cat-nav{flex:1;min-width:fit-content;padding:9px 10px;font-size:11px;font-weight:700;cursor:pointer;border:none;border-right:1px solid var(--bdr);background:var(--sur);color:var(--tx2);white-space:nowrap;transition:all .15s;-webkit-appearance:none;}
@@ -393,7 +391,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9w</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9o</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1238,7 +1236,7 @@ function startApp(){
   if(!localStorage.getItem('line_server_url')){
     localStorage.setItem('line_server_url','https://carcare-pos.vercel.app');
   }
-  // PIN login — show immediately, staff list loads in background
+  // PIN login — wait for staff list to load from Firebase first
   setTimeout(()=>{
     const saved=localStorage.getItem('loggedStaff');
     const badge=G('logged-staff-badge');
@@ -1249,7 +1247,7 @@ function startApp(){
     if(saved){
       window._savedStaffName=saved;
     }
-  },600);
+  },1500);
   // setRange called after module loads via window.setRange
   setTimeout(function(){if(window.setRange)window.setRange('today');else{var n=new Date(),f=n.toISOString().slice(0,10);document.getElementById('d-from').value=f;document.getElementById('d-to').value=f;}},200);
   initStaffDropdown();
@@ -1401,7 +1399,6 @@ function rSvcs(){
       <div class="sq-name">${s.name}</div>
       <div class="sq-code">${s.code}·${CZ}</div>
       <div class="sq-price">฿${p.toLocaleString()}</div>
-      ${currentBranch&&s[CZ+'_'+currentBranch]?'<div style="font-size:7px;font-weight:700;color:var(--inf);margin-top:1px;">'+currentBranch+'</div>':''}
       ${cpnTxt}
     </div>`;
   }
@@ -1626,18 +1623,18 @@ window.selCust=function(id){
   // Wash milestone dots
   const totalW=selC.totalWashes||0;
   const posInCycle=totalW%5;
-  const nextFree=5-posInCycle;
+  const nextFree=posInCycle===0?5:5-posInCycle;
   const milestoneEl=G('wash-milestone');
   if(milestoneEl){
     milestoneEl.style.display='block';
-    if(G('wash-count-txt'))G('wash-count-txt').textContent=totalW+' ครั้งรวม';
+    if(G('wash-count-txt'))G('wash-count-txt').textContent=totalW+' ครั้ง รวม';
     let dotsHtml='';
     for(let i=0;i<5;i++){
       const filled=i<posInCycle;
-      dotsHtml+=`<div style="flex:1;height:12px;border-radius:99px;background:${filled?'var(--gold)':'var(--bdr)'};border:1.5px solid ${filled?'var(--gold-dk)':'var(--bdr2)'};transition:all .3s;"></div>`;
+      dotsHtml+=`<div style="flex:1;height:10px;border-radius:99px;background:${filled?'var(--gold)':'var(--bdr)'};border:1px solid ${filled?'var(--gold-dk)':'var(--bdr2)'};transition:all .3s;"></div>`;
     }
     if(G('wash-dots'))G('wash-dots').innerHTML=dotsHtml;
-    if(G('wash-next-txt'))G('wash-next-txt').textContent=posInCycle===0&&totalW>0?'🎉 ครบรอบ! รับคูปองล้างรถฟรีแล้ว':'อีก '+nextFree+' ครั้ง = ล้างฟรี 1 ครั้ง 🎁';
+    if(G('wash-next-txt'))G('wash-next-txt').textContent=posInCycle===0?'เริ่มรอบใหม่! ล้างอีก 5 ครั้ง = ฟรี 1 ครั้ง':'อีก '+nextFree+' ครั้ง = ล้างฟรี 1 ครั้ง 🎁';
   }
   G('plate').value=selC.plate||'';
   // Show coupons in chip
@@ -1673,9 +1670,10 @@ window.checkout=async function(){
     if((ci.cpnMonth||0)>0){const exp=new Date(now);exp.setMonth(exp.getMonth()+ci.cpnMonth);newCoupons.push({type:'month',expires:exp.toISOString(),from:now.toISOString(),service:ci.name});cpnMsg.push(`ล้างรถฟรี ${ci.cpnMonth} เดือน (ถึง ${fmtDate(exp)})`);}
   }
 
-  // ── LOYALTY WASH COUPON: every 5 ล้างสี & ดูดฝุ่น = 1 free wash ──
-  // Only count code '-' (ล้างสี & ดูดฝุ่น)
-  const washCount=cart.filter(c=>c.code==='-').reduce((a,c)=>a+(c.qty||1),0);
+  // ── LOYALTY WASH COUPON: every 5 car washes = 1 free wash ──
+  // Count wash services in this transaction
+  const washCats=['ล้างรถ'];
+  const washCount=cart.filter(c=>washCats.includes(c.cat)).reduce((a,c)=>a+(c.qty||1),0);
   if(washCount>0&&selC){
     const prevWashes=selC.totalWashes||0;
     const newWashes=prevWashes+washCount;
@@ -1693,7 +1691,7 @@ window.checkout=async function(){
 
   const tdata={
     id:recId,customer:selC?selC.name:'Walk-in',plate,size:CZ,
-    payment:selPayMethod,staff:loggedInStaff||staffName,branch:currentBranch||'',duration:window._billDurationMins||null,
+    payment:selPayMethod,staff:loggedInStaff||staffName,branch:currentBranch||'',
     items:cart.map(c=>c.name).join(', '),
     itemDetails:svcEntries,total:tot,pts:selC?pts:0,
     csaleTotal,copTotal,discount:disc,cpnDiscount:cpnDisc,paperDiscount:paperDisc||0,
@@ -3356,12 +3354,10 @@ function rSlots(){
 
   con.innerHTML=slots.map((s,i)=>{
     if(s.status==='empty'){
-      const isSel=activeSlotIdx===i;
-      const selStyle=isSel?'background:#1a1a1a;border:2px solid #C9A84C;box-shadow:0 0 0 2px #C9A84C,0 0 12px rgba(201,168,76,.5);transform:scale(1.06);':'';
-      return`<div class="slot slot-empty" style="${selStyle}" onclick="selectSlot(${i})">
-        <span class="slot-num" style="color:${isSel?'#C9A84C':'var(--tx3)'};">ช่อง ${i+1}</span>
-        <span class="slot-icon" style="font-size:${isSel?'18px':'18px'};color:${isSel?'#C9A84C':'var(--bdr2)'};">${isSel?'●':'+'}</span>
-        <span style="font-size:8px;color:${isSel?'#C9A84C':'var(--tx3)'};">${isSel?'เลือกแล้ว':'ว่าง'}</span>
+      return`<div class="slot slot-empty" onclick="selectSlot(${i})">
+        <span class="slot-num">ช่อง ${i+1}</span>
+        <span class="slot-icon" style="color:var(--bdr2);">+</span>
+        <span style="font-size:8px;color:var(--tx3);">ว่าง</span>
       </div>`;
     }
     const mins=s.openedAt?Math.round((Date.now()-new Date(s.openedAt).getTime())/60000):0;
@@ -3376,8 +3372,7 @@ function rSlots(){
       <span class="slot-icon">${icon}</span>
       <span class="slot-name">${name}</span>
       <span class="slot-plate">${(s.plate||'').slice(0,7)}</span>
-      ${s.billSeq?`<span style="font-size:8px;font-weight:700;opacity:.85;">บิล #${s.billSeq}</span>`:''}
-      ${s.status==='done'&&s.doneAt&&s.openedAt?`<span style="font-size:7px;opacity:.75;">${Math.round((new Date(s.doneAt)-new Date(s.openedAt))/60000)}น.</span>`:''}
+      <span class="slot-time">${timeStr}</span>
     </div>`;
   }).join('');
 }
@@ -3386,23 +3381,14 @@ function rSlots(){
 window.selectSlot=function(idx){
   const slot=slots[idx];
   if(slot.status==='empty'){
-    if(activeSlotIdx===idx){
-      // Deselect
-      activeSlotIdx=null;
-    } else {
-      // Select — just hide bill detail, keep activeSlotIdx
-      const det=G('bill-detail-view');if(det)det.style.display='none';
-      G('sc-pos').classList.remove('bill-view');
-      activeSlotIdx=idx;
-      showToast('เลือกช่อง '+(idx+1)+' — เพิ่มบริการแล้วกด เปิดบิล');
-    }
-    rSlots();
-    rPromoBanner();rCart();rQuickSell();
+    // Use this slot for the next bill
+    activeSlotIdx=idx;
+    closeBillDetail();
+    showToast('เลือกช่อง '+(idx+1)+' — เพิ่มบริการแล้วกด เปิดบิล');
     return;
   }
   // View existing bill
   activeSlotIdx=idx;
-  rSlots();
   showBillDetail(idx);
 };
 
@@ -3417,11 +3403,6 @@ window.openBill=async function(){
   }
   const{tot}=uTot();
   const plate=selC?.plate||'';
-  // Get today's receipt number from txns
-  const todayDate=new Date().toLocaleDateString('th-TH');
-  const todayCount=txns.filter(t=>t.date===todayDate&&(!currentBranch||!t.branch||t.branch===currentBranch)).length;
-  const billSeq=todayCount+slots.filter(s=>s.status==='open'||s.status==='done').length+1;
-
   slots[idx]={
     status:'open',
     custName:selC?selC.name:'Walk-in',
@@ -3432,7 +3413,6 @@ window.openBill=async function(){
     branch:currentBranch||'',
     staff:loggedInStaff||G('staff-sel')?.value||'',
     openedAt:new Date().toISOString(),
-    billSeq:billSeq,
     cartSnap:cart.map(c=>({...c})),
     custSnap:selC?JSON.parse(JSON.stringify(selC)):null
   };
@@ -3459,16 +3439,14 @@ function showBillDetail(idx){
   const timeStr=mins>=60?Math.floor(mins/60)+'ชม. '+(mins%60)+'น.':mins+' นาที';
   const isDone=slot.status==='done';
 
-  det.innerHTML=`<div class="bd-screen" style="position:relative;inset:auto;z-index:auto;min-height:60vh;">
+  det.innerHTML=`<div class="bd-screen">
     <div class="bd-topbar">
       <span class="bd-back" onclick="closeBillDetail()">←</span>
-      <div class="bd-title">ช่อง ${idx+1} — ${slot.custName||'Walk-in'}${slot.billSeq?' #'+slot.billSeq:''}</div>
+      <div class="bd-title">ช่อง ${idx+1} — ${slot.custName||'Walk-in'}</div>
       <button class="bd-cancel" onclick="cancelSlot(${idx})">ยกเลิกบิล</button>
     </div>
     <div class="bd-status-bar ${isDone?'bd-done':'bd-open'}">
-      ${isDone?
-        '✅ เสร็จแล้ว — รอชำระเงิน · ใช้เวลา '+(slot.doneAt&&slot.openedAt?Math.round((new Date(slot.doneAt)-new Date(slot.openedAt))/60000)+'นาที':'—')
-        :'🟡 กำลังทำงาน · '+timeStr}
+      ${isDone?'✅ เสร็จแล้ว — รอชำระเงิน':'🟡 กำลังทำงาน · '+timeStr}
     </div>
     <!-- 3-step progress indicator -->
     <div style="display:flex;align-items:center;padding:12px 20px 10px;background:var(--sur);border-bottom:1px solid var(--bdr);">
@@ -3522,8 +3500,7 @@ window.closeBillDetail=function(){
   G('sc-pos').classList.remove('bill-view');
   const det=G('bill-detail-view');if(det)det.style.display='none';
   activeSlotIdx=null;
-  rSlots();
-  rPromoBanner();rCart();rQuickSell();
+  rPromoBanner();rCart();rQuickSell();rSlots();
 };
 
 // ── Mark done + send LINE ──
@@ -3550,12 +3527,7 @@ window.checkoutSlot=async function(idx){
   selC=slot.custSnap?JSON.parse(JSON.stringify(slot.custSnap)):null;
   selPayMethod=billPayMethod||'เงินสด';
   CZ=slot.size||'M';
-  // Calculate duration for transaction record
-  if(slot.openedAt&&slot.doneAt){
-    window._billDurationMins=Math.round((new Date(slot.doneAt)-new Date(slot.openedAt))/60000);
-  }
   try{await checkout();}catch(e){alert('เกิดข้อผิดพลาด: '+e.message);return;}
-  window._billDurationMins=null;
   // Reset slot
   slots[idx]={status:'empty'};
   activeSlotIdx=null;
