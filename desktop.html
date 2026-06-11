@@ -547,43 +547,35 @@ function rAnalytics(){
   G('an-upsell').textContent=upsellRate+'%';
   G('an-upsell-sub').textContent=upsellCount+' บิลจาก '+f.length;
 
-  // Avg Wash Time — from washDuration field (minutes)
+  // Avg Wash Time — from washDuration (minutes) saved at checkout
   const timed=f.filter(t=>t.washDuration&&t.washDuration>0);
   const avgTime=timed.length>0?Math.round(timed.reduce((a,t)=>a+(t.washDuration||0),0)/timed.length):0;
   G('an-avgtime').textContent=avgTime>0?avgTime+' น.':'N/A';
-  G('an-avgtime-sub').textContent=timed.length>0?'จาก '+timed.length+' รายการที่มีข้อมูล':'ยังไม่มีข้อมูล duration';
+  G('an-avgtime-sub').textContent=timed.length>0?'จาก '+timed.length+' รายการ':'ยังไม่มีข้อมูล (บิลใหม่จะมี)';
 
-  // Service code revenue breakdown
+  // Service code revenue breakdown — using itemDetails array from v9o
   const svcMap={};
   f.forEach(t=>{
-    if(!t.itemsDetail&&!t.cartSnap&&!t.items)return;
-    // Try cartSnap first (most detailed)
-    let items=[];
-    if(t.cartSnap&&Array.isArray(t.cartSnap)){
-      items=t.cartSnap.map(c=>({code:c.code||'',name:c.name||'',revenue:(c.price||0)*(c.qty||1)}));
-    } else if(t.items){
-      // Parse from items string — format: "ชื่อ (S) ×1"
-      t.items.split(',').forEach(i=>{
-        const m=i.trim().match(/^([A-Z]\d+)\s/);
-        const code=m?m[1]:'?';
-        items.push({code,name:i.trim(),revenue:0});
+    // v9o saves itemDetails: [{name, code, cat, size, price}]
+    if(t.itemDetails&&Array.isArray(t.itemDetails)&&t.itemDetails.length>0){
+      t.itemDetails.forEach(it=>{
+        const code=(it.code||'?').toUpperCase();
+        const key=code;
+        if(!svcMap[key])svcMap[key]={code,name:it.name||code,count:0,revenue:0};
+        svcMap[key].count++;
+        svcMap[key].revenue+=(it.price||0);
       });
-    }
-    items.forEach(it=>{
-      const code=it.code||'?';
-      if(!svcMap[code])svcMap[code]={code,name:it.name,count:0,revenue:0};
-      svcMap[code].count++;
-      svcMap[code].revenue+=it.revenue;
-    });
-    // Fallback: if no cart detail, attribute whole bill to first code found in items string
-    if(items.length===0&&t.items){
+    } else if(t.items){
+      // Fallback: items is a comma-separated name string
       const parts=t.items.split(',');
+      const share=parts.length>0?(t.total||0)/parts.length:0;
       parts.forEach(p=>{
-        const m=p.trim().match(/([A-Z]\d+)/);
-        const code=m?m[1]:'?';
-        if(!svcMap[code])svcMap[code]={code,name:p.trim(),count:0,revenue:0};
-        svcMap[code].count++;
-        if(parts.length===1)svcMap[code].revenue+=(t.total||0);
+        const name=p.trim();
+        const code='?';
+        const key=name.slice(0,20);
+        if(!svcMap[key])svcMap[key]={code,name,count:0,revenue:0};
+        svcMap[key].count++;
+        svcMap[key].revenue+=share;
       });
     }
   });
