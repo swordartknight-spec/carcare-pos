@@ -95,12 +95,21 @@ input:focus,select:focus{border-color:var(--gold);}
 .prog-fill{height:100%;border-radius:99px;background:var(--gold);}
 
 /* CUSTOMER */
-.cust-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bdr);font-size:13px;}
+.cust-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 30px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bdr);font-size:13px;}
 .cust-row:hover{background:#fafaf8;}
 .cust-row:last-child{border-bottom:none;}
 
 /* EMPTY */
 .empty{text-align:center;padding:48px;color:var(--tx3);font-size:13px;}
+
+/* CUSTOMER EXPAND */
+.cust-expand{display:none;background:#fafaf8;border-bottom:1px solid var(--bdr);padding:0 14px 14px;}
+.cust-expand.open{display:block;}
+.cust-expand-inner{margin-top:10px;}
+.ch-row{display:grid;grid-template-columns:80px 90px 1fr 80px 80px 90px;gap:8px;padding:7px 10px;font-size:12px;border-bottom:1px solid var(--bdr);align-items:center;}
+.ch-row:last-child{border-bottom:none;}
+.ch-head{background:var(--bg);font-weight:700;font-size:11px;color:var(--tx3);text-transform:uppercase;border-radius:6px 6px 0 0;}
+.cust-row{cursor:pointer;}
 
 /* DATEPICKER ROW */
 .filter-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
@@ -277,6 +286,7 @@ input:focus,select:focus{border-color:var(--gold);}
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">Visits</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">Tier</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">LINE</span>
+          <span></span>
         </div>
         <div id="cust-list"></div>
       </div>
@@ -469,8 +479,63 @@ function rCustomers(){
   const q=(G('c-search').value||'').toLowerCase();
   const list=custs.filter(c=>!q||c.name?.toLowerCase().includes(q)||(c.plate||'').toLowerCase().includes(q)||(c.phone||'').includes(q));
   G('c-count').textContent=list.length+' สมาชิก';
-  G('cust-list').innerHTML=list.map(c=>`<div class="cust-row"><div><div style="font-weight:700;">${c.name||''}</div><div style="font-size:11px;color:var(--tx3);">${c.car||''} · ${c.plate||''} · ${c.size||''}</div></div><div style="font-weight:700;">${(c.points||0).toLocaleString()} pts</div><div>${c.visits||0}</div><div>${tier(c.points||0)}</div><div>${c.lineUserId?'<span style="background:#00b900;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;">LINE ✓</span>':'<span style="color:var(--tx3);font-size:11px;">ไม่มี</span>'}</div></div>`).join('')||'<div class="empty">ไม่พบสมาชิก</div>';
+  G('cust-list').innerHTML=list.map((c,i)=>{
+    const cid='cexp-'+i;
+    return `<div>
+      <div class="cust-row" onclick="toggleCustExpand('${cid}','${(c.name||'').replace(/'/g,"\'")}')">
+        <div><div style="font-weight:700;">${c.name||''}</div><div style="font-size:11px;color:var(--tx3);">${c.car||''} · ${c.plate||''} · ${c.size||''}</div></div>
+        <div style="font-weight:700;">${(c.points||0).toLocaleString()} pts</div>
+        <div>${c.visits||0}</div>
+        <div>${tier(c.points||0)}</div>
+        <div>${c.lineUserId?'<span style="background:#00b900;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;">LINE ✓</span>':'<span style="color:var(--tx3);font-size:11px;">ไม่มี</span>'}</div>
+        <div id="${cid}-arrow" style="color:var(--tx3);font-size:14px;transition:transform .2s;">▼</div>
+      </div>
+      <div class="cust-expand" id="${cid}">
+        <div class="cust-expand-inner" id="${cid}-body"><div style="padding:16px;color:var(--tx3);font-size:13px;">กำลังโหลด...</div></div>
+      </div>
+    </div>`;
+  }).join('')||'<div class="empty">ไม่พบสมาชิก</div>';
 }
+
+window.toggleCustExpand=function(cid, custName){
+  const panel=G(cid);
+  const arrow=G(cid+'-arrow');
+  const body=G(cid+'-body');
+  const isOpen=panel.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.cust-expand.open').forEach(el=>{el.classList.remove('open');});
+  document.querySelectorAll('[id$="-arrow"]').forEach(el=>{el.style.transform='';});
+  if(!isOpen){
+    panel.classList.add('open');
+    arrow.style.transform='rotate(180deg)';
+    // Load history for this customer
+    const hist=txns.filter(t=>(t.customer||'')==custName&&filterBranch(t)).sort((a,b)=>{
+      try{const pa=a.date.split('/'),pb=b.date.split('/');
+        return new Date(parseInt(pb[2]),parseInt(pb[1])-1,parseInt(pb[0]))- new Date(parseInt(pa[2]),parseInt(pa[1])-1,parseInt(pa[0]));}catch{return 0;}
+    });
+    if(hist.length===0){
+      body.innerHTML='<div style="padding:12px 0;color:var(--tx3);font-size:13px;">ยังไม่มีประวัติการใช้บริการ</div>';
+    } else {
+      const total=hist.reduce((a,t)=>a+(t.total||0),0);
+      body.innerHTML=`
+        <div style="display:flex;gap:16px;padding:10px 0 6px;font-size:12px;color:var(--tx3);">
+          <span>รวมทั้งหมด <b style="color:var(--gold);">฿${total.toLocaleString()}</b></span>
+          <span>${hist.length} ครั้ง</span>
+        </div>
+        <div class="ch-row ch-head"><span>#</span><span>วันที่</span><span>บริการ</span><span>เวลา</span><span style="text-align:right;">ยอด</span><span>ชำระ</span></div>
+        ${hist.slice(0,20).map(t=>`<div class="ch-row">
+          <span style="color:var(--gold);font-weight:700;">${t.id||''}</span>
+          <span style="color:var(--tx3);">${t.date||''}</span>
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.items||''}</span>
+          <span style="color:var(--tx3);">${t.time||'—'}</span>
+          <span style="text-align:right;font-weight:700;">฿${(t.total||0).toLocaleString()}</span>
+          <span><span class="badge b-${payClass(t.payment)}">${t.payment||''}</span></span>
+        </div>`).join('')}
+        ${hist.length>20?`<div style="padding:8px 10px;font-size:11px;color:var(--tx3);">แสดง 20 รายการล่าสุด จาก ${hist.length} รายการ</div>`:''}
+      `;
+    }
+  }
+};
 
 // ── STOCK ──
 function rStock(){
