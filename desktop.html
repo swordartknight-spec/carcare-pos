@@ -95,7 +95,7 @@ input:focus,select:focus{border-color:var(--gold);}
 .prog-fill{height:100%;border-radius:99px;background:var(--gold);}
 
 /* CUSTOMER */
-.cust-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 30px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bdr);font-size:13px;}
+.cust-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 30px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bdr);font-size:13px;}
 .cust-row:hover{background:#fafaf8;}
 .cust-row:last-child{border-bottom:none;}
 
@@ -209,7 +209,7 @@ input:focus,select:focus{border-color:var(--gold);}
       <div class="table-card">
         <div class="table-head"><span style="font-weight:700;">รายการวันนี้</span><span id="today-count" style="color:var(--tx3);font-size:12px;"></span></div>
         <table>
-          <thead><tr><th>#</th><th>ลูกค้า</th><th>ทะเบียน</th><th>บริการ</th><th>พนักงาน</th><th>เวลา</th><th>ระยะเวลา</th><th>วิธีชำระ</th><th style="text-align:right;">รวม</th></tr></thead>
+          <thead><tr><th>#</th><th>ลูกค้า</th><th>ทะเบียน</th><th>บริการ</th><th>พนักงาน</th><th>ระยะเวลา</th><th>วิธีชำระ</th><th style="text-align:right;">รวม</th></tr></thead>
           <tbody id="today-table"></tbody>
         </table>
       </div>
@@ -280,12 +280,13 @@ input:focus,select:focus{border-color:var(--gold);}
         <span id="c-count" style="color:var(--tx3);font-size:12px;"></span>
       </div>
       <div class="table-card">
-        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--bdr);">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 30px;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--bdr);">
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">ชื่อ / รถ</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">Points</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">Visits</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">Tier</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">LINE</span>
+          <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">เบอร์โทร</span>
           <span></span>
         </div>
         <div id="cust-list"></div>
@@ -442,7 +443,7 @@ function rToday(){
   const payData=[today.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0),today.filter(t=>t.payment==='QR').reduce((a,t)=>a+(t.total||0),0),today.filter(t=>t.payment==='โอน').reduce((a,t)=>a+(t.total||0),0),today.filter(t=>t.payment==='บัตร').reduce((a,t)=>a+(t.total||0),0)];
   if(chartPay)chartPay.destroy();
   chartPay=new Chart(G('chart-pay'),{type:'doughnut',data:{labels:['เงินสด','QR','โอน','บัตร'],datasets:[{data:payData,backgroundColor:['#3B6D11','#185FA5','#534AB7','#854F0B'],borderWidth:0}]},options:{plugins:{legend:{position:'bottom'}},responsive:true,cutout:'65%'}});
-  G('today-table').innerHTML=today.map(t=>`<tr><td style="font-weight:700;color:var(--gold);">${t.id||''}</td><td>${t.customer||'Walk-in'}</td><td>${t.plate||'—'}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.items||''}</td><td>${t.staff||'—'}</td><td style="color:var(--tx3);font-size:12px;">${t.time||'—'}</td><td style="font-size:12px;">${t.washDuration>0?'<span style="background:var(--inf-bg);color:var(--inf);padding:2px 7px;border-radius:99px;font-weight:700;">'+t.washDuration+' น.</span>':'<span style="color:var(--tx3);">—</span>'}</td><td><span class="badge b-${payClass(t.payment)}">${t.payment||''}</span></td><td style="text-align:right;font-weight:700;">฿${(t.total||0).toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="9" class="empty">ยังไม่มีรายการ</td></tr>';
+  G('today-table').innerHTML=today.map(t=>`<tr><td style="font-weight:700;color:var(--gold);">${t.id||''}</td><td>${t.customer||'Walk-in'}</td><td>${t.plate||'—'}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.items||''}</td><td>${t.staff||'—'}</td><td style="color:var(--tx3);font-size:12px;">${t.time||'—'}</td><td style="font-size:12px;">${t.washDuration>0?'<span style="background:var(--inf-bg);color:var(--inf);padding:2px 7px;border-radius:99px;font-weight:700;">'+t.washDuration+' น.</span>':'<span style="color:var(--tx3);">—</span>'}</td><td><span class="badge b-${payClass(t.payment)}">${t.payment||''}</span></td><td style="text-align:right;font-weight:700;">฿${(t.total||0).toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">ยังไม่มีรายการ</td></tr>';
 }
 
 // ── HISTORY ──
@@ -488,6 +489,7 @@ function rCustomers(){
         <div>${c.visits||0}</div>
         <div>${tier(c.points||0)}</div>
         <div>${c.lineUserId?'<span style="background:#00b900;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;">LINE ✓</span>':'<span style="color:var(--tx3);font-size:11px;">ไม่มี</span>'}</div>
+        <div style="font-size:12px;color:var(--tx2);">${c.phone?'<a href="tel:'+c.phone.replace(/[-\s]/g,'')+'" style="color:var(--inf);text-decoration:none;font-weight:600;" onclick="event.stopPropagation()">📞 '+c.phone+'</a>':'<span style="color:var(--tx3);">—</span>'}</div>
         <div id="${cid}-arrow" style="color:var(--tx3);font-size:14px;transition:transform .2s;">▼</div>
       </div>
       <div class="cust-expand" id="${cid}">
