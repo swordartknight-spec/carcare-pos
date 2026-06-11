@@ -125,6 +125,7 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="sb-item" onclick="nav('customers',this)"><span class="sb-icon">⭐</span>Customers</div>
     <div class="sb-item" onclick="nav('stock',this)"><span class="sb-icon">📦</span>Stock</div>
     <div class="sb-item" onclick="nav('ceramic',this)"><span class="sb-icon">🛡</span>Ceramic Due</div>
+    <div class="sb-item" onclick="nav('analytics',this)"><span class="sb-icon">📈</span>Analytics</div>
   </nav>
   <div class="sb-footer">
     <div class="sb-staff"><b id="sb-date"></b>Dashboard View</div>
@@ -311,6 +312,62 @@ input:focus,select:focus{border-color:var(--gold);}
       </div>
     </div>
 
+  <!-- ANALYTICS -->
+    <div class="screen" id="sc-analytics">
+      <!-- KPI Cards Row 1 -->
+      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
+        <div class="stat-card green">
+          <div class="stat-lbl">Retention Rate</div>
+          <div class="stat-val" id="an-retention" style="font-size:28px;">—</div>
+          <div class="stat-sub" id="an-retention-sub">ลูกค้ากลับมาใช้ซ้ำ</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-lbl">Upsell Rate</div>
+          <div class="stat-val" id="an-upsell" style="font-size:28px;">—</div>
+          <div class="stat-sub" id="an-upsell-sub">บิลที่มีบริการเสริม</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-lbl">Avg Wash Time</div>
+          <div class="stat-val" id="an-avgtime" style="font-size:28px;">—</div>
+          <div class="stat-sub" id="an-avgtime-sub">นาทีต่อคัน</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-lbl">Returning Customers</div>
+          <div class="stat-val" id="an-returning" style="font-size:28px;">—</div>
+          <div class="stat-sub" id="an-returning-sub">จากทั้งหมด</div>
+        </div>
+      </div>
+
+      <!-- Service Revenue by Code -->
+      <div class="chart-grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px;">
+        <div class="chart-card">
+          <div class="card-title">ยอดขายแยกตาม Service Code <span style="font-size:11px;color:var(--tx3);font-weight:400;">(P01–P09, W01–W09...)</span></div>
+          <canvas id="chart-svc-code" height="180"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="card-title">Top Services by Revenue</div>
+          <div id="svc-code-list" style="overflow-y:auto;max-height:220px;"></div>
+        </div>
+      </div>
+
+      <!-- Filter row -->
+      <div class="filter-row">
+        <button class="btn" onclick="setAnRange('month',this)" id="an-btn-month" style="background:var(--gold);color:var(--blk);border-color:var(--gold-dk);">เดือนนี้</button>
+        <button class="btn" onclick="setAnRange('3m',this)" id="an-btn-3m">3 เดือน</button>
+        <button class="btn" onclick="setAnRange('all',this)" id="an-btn-all">ทั้งหมด</button>
+        <span style="font-size:12px;color:var(--tx3);" id="an-range-lbl"></span>
+      </div>
+
+      <!-- Service code detail table -->
+      <div class="table-card">
+        <div class="table-head"><span style="font-weight:700;">รายได้แยก Service Code — ใช้วางแผนสั่งน้ำยา</span></div>
+        <table>
+          <thead><tr><th>Code</th><th>ชื่อบริการ</th><th>จำนวนครั้ง</th><th style="text-align:right;">รายได้รวม</th><th style="text-align:right;">เฉลี่ย/ครั้ง</th><th>สัดส่วน</th></tr></thead>
+          <tbody id="an-svc-table"></tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -430,7 +487,166 @@ function rCeramic(){
 }
 
 // ── EXPOSE TO GLOBAL (for onclick handlers) ──
-window.setBr=function(b,el){currentBranch=b;document.querySelectorAll('.sb-br').forEach(x=>x.classList.remove('active'));el.classList.add('active');rToday();rHistory();rStaff();};
+// ── ANALYTICS ──
+let chartSvcCode=null;
+let anRange='month';
+
+window.setAnRange=function(r,el){
+  anRange=r;
+  document.querySelectorAll('#sc-analytics .btn').forEach(b=>b.style.cssText='');
+  if(el){el.style.background='var(--gold)';el.style.color='var(--blk)';el.style.borderColor='var(--gold-dk)';}
+  rAnalytics();
+};
+
+function getAnTxns(){
+  const n=new Date();
+  return txns.filter(t=>{
+    if(!filterBranch(t))return false;
+    if(anRange==='all')return true;
+    try{
+      const p=(t.date||'').split('/');
+      const d=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+      if(anRange==='month'){return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();}
+      if(anRange==='3m'){const s=new Date(n);s.setMonth(s.getMonth()-3);return d>=s;}
+    }catch{return false;}
+    return false;
+  });
+}
+
+function rAnalytics(){
+  const f=getAnTxns();
+
+  // Range label
+  const lbl={month:'เดือนนี้','3m':'3 เดือนล่าสุด',all:'ทั้งหมด'};
+  G('an-range-lbl').textContent=f.length+' รายการ · '+lbl[anRange];
+
+  // Retention Rate — customers with visits > 1
+  const custVisits={};
+  f.forEach(t=>{if(t.customer&&t.customer!=='Walk-in'){custVisits[t.customer]=(custVisits[t.customer]||0)+1;}});
+  const totalCusts=Object.keys(custVisits).length;
+  const returningCusts=Object.values(custVisits).filter(v=>v>1).length;
+  const retention=totalCusts>0?Math.round(returningCusts/totalCusts*100):0;
+  G('an-retention').textContent=retention+'%';
+  G('an-retention-sub').textContent=returningCusts+' จาก '+totalCusts+' สมาชิก';
+  G('an-returning').textContent=returningCusts;
+  G('an-returning-sub').textContent='จาก '+totalCusts+' สมาชิกทั้งหมด';
+
+  // Upsell Rate — bills with >1 service or non-wash service
+  const washCodes=['W0','W1','W2','WA','WB','WC'];
+  let upsellCount=0;
+  f.forEach(t=>{
+    if(!t.items)return;
+    const items=(t.items||'').split(',');
+    if(items.length>1)upsellCount++;
+    else{
+      const hasExtra=items.some(i=>!washCodes.some(w=>i.trim().toUpperCase().startsWith(w)));
+      if(hasExtra)upsellCount++;
+    }
+  });
+  const upsellRate=f.length>0?Math.round(upsellCount/f.length*100):0;
+  G('an-upsell').textContent=upsellRate+'%';
+  G('an-upsell-sub').textContent=upsellCount+' บิลจาก '+f.length;
+
+  // Avg Wash Time — from washDuration field (minutes)
+  const timed=f.filter(t=>t.washDuration&&t.washDuration>0);
+  const avgTime=timed.length>0?Math.round(timed.reduce((a,t)=>a+(t.washDuration||0),0)/timed.length):0;
+  G('an-avgtime').textContent=avgTime>0?avgTime+' น.':'N/A';
+  G('an-avgtime-sub').textContent=timed.length>0?'จาก '+timed.length+' รายการที่มีข้อมูล':'ยังไม่มีข้อมูล duration';
+
+  // Service code revenue breakdown
+  const svcMap={};
+  f.forEach(t=>{
+    if(!t.itemsDetail&&!t.cartSnap&&!t.items)return;
+    // Try cartSnap first (most detailed)
+    let items=[];
+    if(t.cartSnap&&Array.isArray(t.cartSnap)){
+      items=t.cartSnap.map(c=>({code:c.code||'',name:c.name||'',revenue:(c.price||0)*(c.qty||1)}));
+    } else if(t.items){
+      // Parse from items string — format: "ชื่อ (S) ×1"
+      t.items.split(',').forEach(i=>{
+        const m=i.trim().match(/^([A-Z]\d+)\s/);
+        const code=m?m[1]:'?';
+        items.push({code,name:i.trim(),revenue:0});
+      });
+    }
+    items.forEach(it=>{
+      const code=it.code||'?';
+      if(!svcMap[code])svcMap[code]={code,name:it.name,count:0,revenue:0};
+      svcMap[code].count++;
+      svcMap[code].revenue+=it.revenue;
+    });
+    // Fallback: if no cart detail, attribute whole bill to first code found in items string
+    if(items.length===0&&t.items){
+      const parts=t.items.split(',');
+      parts.forEach(p=>{
+        const m=p.trim().match(/([A-Z]\d+)/);
+        const code=m?m[1]:'?';
+        if(!svcMap[code])svcMap[code]={code,name:p.trim(),count:0,revenue:0};
+        svcMap[code].count++;
+        if(parts.length===1)svcMap[code].revenue+=(t.total||0);
+      });
+    }
+  });
+
+  const svcRows=Object.values(svcMap).sort((a,b)=>b.revenue-a.revenue);
+  const totalRev=svcRows.reduce((a,s)=>a+s.revenue,0)||1;
+
+  // Chart
+  const top10=svcRows.slice(0,10);
+  if(chartSvcCode)chartSvcCode.destroy();
+  if(top10.length){
+    chartSvcCode=new Chart(G('chart-svc-code'),{
+      type:'bar',
+      data:{
+        labels:top10.map(s=>s.code||s.name.slice(0,12)),
+        datasets:[{
+          label:'รายได้ (฿)',
+          data:top10.map(s=>s.revenue),
+          backgroundColor:'rgba(201,168,76,.75)',
+          borderColor:'#C9A84C',
+          borderWidth:2,
+          borderRadius:6
+        }]
+      },
+      options:{
+        plugins:{legend:{display:false}},
+        scales:{y:{ticks:{callback:v=>'฿'+v.toLocaleString()}}},
+        responsive:true
+      }
+    });
+  }
+
+  // Side list
+  G('svc-code-list').innerHTML=svcRows.slice(0,15).map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);">
+      <span style="font-size:11px;color:var(--tx3);width:18px;text-align:center;">${i+1}</span>
+      <span style="font-weight:700;min-width:40px;color:var(--gold);">${s.code||'?'}</span>
+      <span style="flex:1;font-size:12px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.name}</span>
+      <span style="font-weight:700;font-size:13px;">฿${s.revenue.toLocaleString()}</span>
+    </div>`).join('');
+
+  // Table
+  G('an-svc-table').innerHTML=svcRows.map(s=>{
+    const pct=Math.round(s.revenue/totalRev*100);
+    return`<tr>
+      <td style="font-weight:700;color:var(--gold);">${s.code||'?'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.name}</td>
+      <td>${s.count}</td>
+      <td style="text-align:right;font-weight:700;">฿${s.revenue.toLocaleString()}</td>
+      <td style="text-align:right;">฿${s.count>0?Math.round(s.revenue/s.count).toLocaleString():0}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:80px;height:6px;background:var(--bdr);border-radius:99px;overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:var(--gold);border-radius:99px;"></div>
+          </div>
+          <span style="font-size:11px;color:var(--tx3);">${pct}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="6" class="empty">ไม่มีข้อมูล</td></tr>';
+}
+
+window.setBr=function(b,el){currentBranch=b;document.querySelectorAll('.sb-br').forEach(x=>x.classList.remove('active'));el.classList.add('active');rToday();rHistory();rStaff();rAnalytics();};
 window.setHRange=function(r){const n2=new Date(),fmt=d=>d.toISOString().slice(0,10);if(r==='today'){G('h-from').value=fmt(n2);G('h-to').value=fmt(n2);}else if(r==='week'){const s=new Date(n2);s.setDate(s.getDate()-6);G('h-from').value=fmt(s);G('h-to').value=fmt(n2);}else if(r==='month'){G('h-from').value=fmt(new Date(n2.getFullYear(),n2.getMonth(),1));G('h-to').value=fmt(n2);}else{G('h-from').value='';G('h-to').value='';}rHistory();};
 window.exportData=function(){const f=txns.filter(filterBranch);let c='﻿';c+=`Receipt	ลูกค้า	ทะเบียน	พนักงาน	สาขา	วิธีชำระ	รายการ	รวม	วันที่
 `;f.forEach(t=>{c+=`${t.id}	${t.customer}	${t.plate||''}	${t.staff||''}	${t.branch||''}	${t.payment||''}	"${t.items||''}"	${t.total||0}	${t.date||''}
@@ -443,13 +659,14 @@ window.nav=function(id,el){
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active'));
   document.getElementById('sc-'+id).classList.add('active');
   el.classList.add('active');
-  const titles={today:'Today — Overview',history:'Transaction History',staff:'Staff Incentive',customers:'Customer List',stock:'Stock Levels',ceramic:'Ceramic Maintenance Due'};
+  const titles={today:'Today — Overview',history:'Transaction History',staff:'Staff Incentive',customers:'Customer List',stock:'Stock Levels',ceramic:'Ceramic Maintenance Due',analytics:'Analytics & Insights'};
   G('page-title').textContent=titles[id]||id;
   G('export-btn').style.display=id==='history'?'inline-flex':'none';
   if(id==='history')rHistory();
   if(id==='staff')rStaff();
   if(id==='customers')rCustomers();
   if(id==='ceramic')rCeramic();
+  if(id==='analytics')rAnalytics();
 };
 
 // Init range

@@ -248,7 +248,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .slot-active{box-shadow:0 0 0 3px #C9A84C!important;transform:scale(1.06);}
 .slot-done .slot-time{color:#3B6D11;}
 /* BILL DETAIL FULL SCREEN */
-.bd-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;overflow:hidden;}
+.bd-screen{display:flex;flex-direction:column;overflow:hidden;}
 .bd-topbar{background:var(--blk);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .bd-back{color:var(--gold);font-size:22px;cursor:pointer;line-height:1;}
 .bd-title{flex:1;color:#fff;font-size:15px;font-weight:700;}
@@ -290,7 +290,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 #sc-pos.bill-view #pay-method-section,
 #sc-pos.bill-view #bill-status-bar{display:none!important;}
 #sc-pos.bill-view #bill-detail-view{display:block!important;}
-#sc-pos.bill-view #bill-slot-wrap{display:none!important;}
+#sc-pos.bill-view #bill-slot-wrap{display:block!important;}
 .ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
 /* CATEGORY TOP NAV */
 .cat-nav{flex:1;min-width:fit-content;padding:9px 10px;font-size:11px;font-weight:700;cursor:pointer;border:none;border-right:1px solid var(--bdr);background:var(--sur);color:var(--tx2);white-space:nowrap;transition:all .15s;-webkit-appearance:none;}
@@ -1236,18 +1236,16 @@ function startApp(){
   if(!localStorage.getItem('line_server_url')){
     localStorage.setItem('line_server_url','https://carcare-pos.vercel.app');
   }
-  // PIN login — wait for staff list to load from Firebase first
+  // PIN login shown after staff collection loads (see subscribe())
+  // Just show badge immediately
   setTimeout(()=>{
     const saved=localStorage.getItem('loggedStaff');
     const badge=G('logged-staff-badge');
     if(badge)badge.style.display='inline-block';
-    // Always show PIN screen — staff must log in each session
-    showPinLogin();
-    // If staff was saved, pre-fill after Firebase loads
-    if(saved){
-      window._savedStaffName=saved;
-    }
-  },1500);
+    if(saved){window._savedStaffName=saved;}
+    // If offline mode, show PIN immediately (no Firebase)
+    if(LM){showPinLogin();}
+  },300);
   // setRange called after module loads via window.setRange
   setTimeout(function(){if(window.setRange)window.setRange('today');else{var n=new Date(),f=n.toISOString().slice(0,10);document.getElementById('d-from').value=f;document.getElementById('d-to').value=f;}},200);
   initStaffDropdown();
@@ -1271,8 +1269,8 @@ function subscribe(){
   staffList=s.docs.map(d=>({...d.data(),_id:d.id}));
   initStaffDropdown();
   rStaffManage();
-  // If PIN screen is showing and staff was previously logged in, keep showing PIN
-  // They must re-enter PIN each session for security
+  // Show PIN login only after staff list is loaded from Firebase
+  if(!window._pinShown){window._pinShown=true;showPinLogin();}
 });
 }
 
