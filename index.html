@@ -391,7 +391,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9o</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9q</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1992,19 +1992,17 @@ window.addCust=async function(){
   const data={name:fullName,phone:G('cp').value,lineUserId:lineId,plate:G('cpl').value,car:G('cc2').value,size:G('csz').value,points:0,visits:0,redeemed:0,coupons:[],serviceHistory:[],createdAt:serverTimestamp()};
   if(db&&!LM){
     const ref=await addDoc(collection(db,'customers'),data);
-    // Apply new customer to current bill immediately
+    // Apply new customer to current bill immediately using selCust logic
     const newCust={...data,_id:ref.id};
-    selC=newCust;
-    if(typeof CZ!=='undefined'&&data.size)CZ=data.size;
-    if(typeof rCust==='function')rCust();
-    if(typeof rCart==='function')rCart();
+    custs.push(newCust);
+    selCust(ref.id);
+    if(data.size)CZ=data.size;
   } else {
-    const newCust={...data,id:Date.now(),createdAt:new Date()};
+    const newId=Date.now();
+    const newCust={...data,id:newId,_id:String(newId),createdAt:new Date()};
     custs.push(newCust);LS('cu',custs);rLoy();
-    selC=newCust;
-    if(typeof CZ!=='undefined'&&data.size)CZ=data.size;
-    if(typeof rCust==='function')rCust();
-    if(typeof rCart==='function')rCart();
+    selCust(String(newId));
+    if(data.size)CZ=data.size;
   }
   hs('sh-nc');['cf','cl2','cp','cpl','cc2','c-line'].forEach(i=>G(i).value='');
 };
