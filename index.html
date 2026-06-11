@@ -248,7 +248,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .slot-active{box-shadow:0 0 0 3px #C9A84C!important;transform:scale(1.06);}
 .slot-done .slot-time{color:#3B6D11;}
 /* BILL DETAIL FULL SCREEN */
-.bd-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;overflow:hidden;}
+.bd-screen{display:flex;flex-direction:column;overflow:hidden;}
 .bd-topbar{background:var(--blk);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .bd-back{color:var(--gold);font-size:22px;cursor:pointer;line-height:1;}
 .bd-title{flex:1;color:#fff;font-size:15px;font-weight:700;}
@@ -290,7 +290,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 #sc-pos.bill-view #pay-method-section,
 #sc-pos.bill-view #bill-status-bar{display:none!important;}
 #sc-pos.bill-view #bill-detail-view{display:block!important;}
-#sc-pos.bill-view #bill-slot-wrap{display:none!important;}
+#sc-pos.bill-view #bill-slot-wrap{display:block!important;}
 .ceramic-alert{background:var(--pur-bg);color:var(--pur);border-radius:var(--rs);padding:6px 10px;font-size:11px;margin-top:6px;font-weight:700;}
 /* CATEGORY TOP NAV */
 .cat-nav{flex:1;min-width:fit-content;padding:9px 10px;font-size:11px;font-weight:700;cursor:pointer;border:none;border-right:1px solid var(--bdr);background:var(--sur);color:var(--tx2);white-space:nowrap;transition:all .15s;-webkit-appearance:none;}
@@ -1988,9 +1988,24 @@ window.delCustDetail=async function(){
 window.addCust=async function(){
   const fn=G('cf').value.trim();if(!fn){alert('กรุณาระบุชื่อ');return;}
   const lineId=(G('c-line').value||'').trim();
-  const data={name:fn+' '+G('cl2').value.trim(),phone:G('cp').value,lineUserId:lineId,plate:G('cpl').value,car:G('cc2').value,size:G('csz').value,points:0,visits:0,redeemed:0,coupons:[],serviceHistory:[],createdAt:serverTimestamp()};
-  if(db&&!LM)await addDoc(collection(db,'customers'),data);
-  else{custs.push({...data,id:Date.now(),createdAt:new Date()});LS('cu',custs);rLoy();}
+  const fullName=(fn+' '+G('cl2').value.trim()).trim();
+  const data={name:fullName,phone:G('cp').value,lineUserId:lineId,plate:G('cpl').value,car:G('cc2').value,size:G('csz').value,points:0,visits:0,redeemed:0,coupons:[],serviceHistory:[],createdAt:serverTimestamp()};
+  if(db&&!LM){
+    const ref=await addDoc(collection(db,'customers'),data);
+    // Apply new customer to current bill immediately
+    const newCust={...data,_id:ref.id};
+    selC=newCust;
+    if(typeof CZ!=='undefined'&&data.size)CZ=data.size;
+    if(typeof rCust==='function')rCust();
+    if(typeof rCart==='function')rCart();
+  } else {
+    const newCust={...data,id:Date.now(),createdAt:new Date()};
+    custs.push(newCust);LS('cu',custs);rLoy();
+    selC=newCust;
+    if(typeof CZ!=='undefined'&&data.size)CZ=data.size;
+    if(typeof rCust==='function')rCust();
+    if(typeof rCart==='function')rCart();
+  }
   hs('sh-nc');['cf','cl2','cp','cpl','cc2','c-line'].forEach(i=>G(i).value='');
 };
 
