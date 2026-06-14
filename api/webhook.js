@@ -107,12 +107,26 @@ export default async function handler(req, res) {
           `คุณจะได้รับใบเสร็จผ่าน Line หลังชำระเงิน 🧾`
         );
       } else {
+        // *** NEW: ไม่พบในระบบ → บันทึก pending ไว้ก่อน ***
+        const pendingUrl = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/pendingLine?key=${FB_APIKEY}`;
+        await fetch(pendingUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: {
+              lineUserId: { stringValue: lineUserId },
+              plate: { stringValue: norm },
+              plateRaw: { stringValue: plateText },
+              createdAt: { stringValue: new Date().toISOString() }
+            }
+          })
+        });
+
         await lineReply(LINE_TOKEN, event.replyToken,
-          `ไม่พบทะเบียน "${plateText}" ในระบบ\n\n` +
-          `ลองพิมพ์:\n` +
-          `• #ทะเบียนรถ เช่น #กข1234\n` +
-          `• #เบอร์โทร เช่น #0812345678\n\n` +
-          `หรือแจ้งพนักงานเพิ่มข้อมูลในระบบ`
+          `รับทราบแล้วครับ! 📝\n\n` +
+          `ทะเบียน "${plateText}" ถูกบันทึกไว้แล้ว\n` +
+          `พนักงานจะเพิ่มข้อมูลให้เร็วๆ นี้\n\n` +
+          `เมื่อลงทะเบียนเสร็จ คุณจะได้รับการแจ้งเตือนทันที 😊`
         );
       }
     } catch (e) {
