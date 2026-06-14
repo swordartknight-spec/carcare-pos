@@ -113,6 +113,16 @@ input:focus,select:focus{border-color:var(--gold);}
 
 /* DATEPICKER ROW */
 .filter-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+
+/* EDIT MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:center;justify-content:center;}
+.modal{background:var(--sur);border-radius:16px;width:420px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.18);overflow:hidden;}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:15px;}
+.modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:14px;}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--bdr);display:flex;gap:10px;justify-content:flex-end;}
+.field-label{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:4px;}
+.field-input{width:100%;padding:9px 12px;border:1px solid var(--bdr2);border-radius:8px;font-size:13px;font-family:inherit;color:var(--tx);background:var(--sur);}
+.field-input:focus{outline:none;border-color:var(--gold);}
 </style>
 </head>
 <body>
@@ -135,6 +145,7 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="sb-item" onclick="nav('stock',this)"><span class="sb-icon">📦</span>Stock</div>
     <div class="sb-item" onclick="nav('ceramic',this)"><span class="sb-icon">🛡</span>Ceramic Due</div>
     <div class="sb-item" onclick="nav('analytics',this)"><span class="sb-icon">📈</span>Analytics</div>
+    <div class="sb-item" onclick="nav('backfill',this)"><span class="sb-icon">📝</span>เพิ่มข้อมูลย้อนหลัง</div>
   </nav>
   <div class="sb-footer">
     <div class="sb-staff"><b id="sb-date"></b>Dashboard View</div>
@@ -384,7 +395,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import{getFirestore,collection,onSnapshot,query,orderBy,limit}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+import{getFirestore,collection,onSnapshot,query,orderBy,limit,doc,updateDoc,addDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 
 const FB={apiKey:'AIzaSyDSuBAXVbzaMwNJEVQYxYDF8Q0zPWYxUhQ',authDomain:'carcare-pos-559ef.firebaseapp.com',projectId:'carcare-pos-559ef',storageBucket:'carcare-pos-559ef.appspot.com',appId:'1:562909364593:web:549e45b521adb45247f6d0'};
 const app=initializeApp(FB);
@@ -499,7 +510,7 @@ function rCustomers(){
   }).join('')||'<div class="empty">ไม่พบสมาชิก</div>';
 }
 
-window.toggleCustExpand=function(cid, custName){
+window.toggleCustExpand=function(cid, custName, custId){
   const panel=G(cid);
   const arrow=G(cid+'-arrow');
   const body=G(cid+'-body');
@@ -515,14 +526,23 @@ window.toggleCustExpand=function(cid, custName){
       try{const pa=a.date.split('/'),pb=b.date.split('/');
         return new Date(parseInt(pb[2]),parseInt(pb[1])-1,parseInt(pb[0]))- new Date(parseInt(pa[2]),parseInt(pa[1])-1,parseInt(pa[0]));}catch{return 0;}
     });
+    // Store custId for editing
+    const custObj=custs.find(c=>c.name===custName);
+    const custId=custObj?custObj._id:'';
     if(hist.length===0){
-      body.innerHTML='<div style="padding:12px 0;color:var(--tx3);font-size:13px;">ยังไม่มีประวัติการใช้บริการ</div>';
+      body.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 6px;">
+        <span style="color:var(--tx3);font-size:13px;">ยังไม่มีประวัติการใช้บริการ</span>
+        <button class="btn btn-g" style="font-size:12px;padding:6px 12px;" onclick="openEditCust('${custId}')">✏️ แก้ไขข้อมูล</button>
+      </div>`;
     } else {
       const total=hist.reduce((a,t)=>a+(t.total||0),0);
       body.innerHTML=`
-        <div style="display:flex;gap:16px;padding:10px 0 6px;font-size:12px;color:var(--tx3);">
-          <span>รวมทั้งหมด <b style="color:var(--gold);">฿${total.toLocaleString()}</b></span>
-          <span>${hist.length} ครั้ง</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 6px;">
+          <div style="font-size:12px;color:var(--tx3);display:flex;gap:16px;">
+            <span>รวมทั้งหมด <b style="color:var(--gold);">฿${total.toLocaleString()}</b></span>
+            <span>${hist.length} ครั้ง</span>
+          </div>
+          <button class="btn btn-g" style="font-size:12px;padding:6px 12px;" onclick="openEditCust('${custId}')">✏️ แก้ไขข้อมูล</button>
         </div>
         <div class="ch-row ch-head"><span>#</span><span>วันที่</span><span>บริการ</span><span>เวลา</span><span style="text-align:right;">ยอด</span><span>ชำระ</span></div>
         ${hist.slice(0,20).map(t=>`<div class="ch-row">
@@ -705,6 +725,187 @@ function rAnalytics(){
   }).join('')||'<tr><td colspan="6" class="empty">ไม่มีข้อมูล</td></tr>';
 }
 
+// ── BACKFILL ──
+let bfRows=[];
+let bfCounter=0;
+
+function rBackfill(){
+  if(bfRows.length===0)addBackfillRow();
+}
+
+window.addBackfillRow=function(){
+  bfCounter++;
+  const id='bf-'+bfCounter;
+  const today=new Date().toISOString().slice(0,10);
+  const staffOptions=staffList.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+  const row=document.createElement('tr');
+  row.id=id;
+  row.style.cssText='border-bottom:1px solid var(--bdr);';
+  row.innerHTML=`
+    <td style="padding:6px 8px;color:var(--tx3);font-weight:700;">${bfCounter}</td>
+    <td style="padding:6px 8px;"><input type="date" class="field-input" style="padding:6px 8px;font-size:12px;width:120px;" value="${today}" id="${id}-date"/></td>
+    <td style="padding:6px 8px;"><input type="text" class="field-input" style="padding:6px 8px;font-size:12px;width:120px;" placeholder="กข1234" id="${id}-plate"/></td>
+    <td style="padding:6px 8px;"><input type="text" class="field-input" style="padding:6px 8px;font-size:12px;" placeholder="ชื่อลูกค้า (ถ้ามี)" id="${id}-cust"/></td>
+    <td style="padding:6px 8px;"><input type="text" class="field-input" style="padding:6px 8px;font-size:12px;" placeholder="ล้างสี & ดูดฝุ่น" id="${id}-items"/></td>
+    <td style="padding:6px 8px;">
+      <select class="field-input" style="padding:6px 8px;font-size:12px;width:100px;" id="${id}-staff">
+        <option value="">— เลือก —</option>
+        ${staffOptions}
+      </select>
+    </td>
+    <td style="padding:6px 8px;">
+      <select class="field-input" style="padding:6px 8px;font-size:12px;width:100px;" id="${id}-pay">
+        <option value="เงินสด">เงินสด</option>
+        <option value="โอน">โอน</option>
+        <option value="QR">QR</option>
+        <option value="บัตร">บัตร</option>
+      </select>
+    </td>
+    <td style="padding:6px 8px;"><input type="number" class="field-input" style="padding:6px 8px;font-size:12px;width:90px;" placeholder="0" min="0" id="${id}-total"/></td>
+    <td style="padding:6px 8px;"><span onclick="removeBackfillRow('${id}')" style="cursor:pointer;color:var(--tx3);font-size:16px;padding:2px 6px;" title="ลบแถว">✕</span></td>
+  `;
+  document.getElementById('bf-tbody').appendChild(row);
+  bfRows.push(id);
+  // Focus plate field
+  setTimeout(()=>document.getElementById(id+'-plate')?.focus(),50);
+};
+
+window.removeBackfillRow=function(id){
+  document.getElementById(id)?.remove();
+  bfRows=bfRows.filter(r=>r!==id);
+};
+
+window.submitBackfill=async function(){
+  const btn=G('bf-submit-btn');
+  const rows=bfRows.filter(id=>document.getElementById(id));
+  if(rows.length===0){alert('ไม่มีรายการที่จะบันทึก');return;}
+
+  // Validate
+  let errors=[];
+  rows.forEach((id,i)=>{
+    const total=parseFloat(document.getElementById(id+'-total')?.value||0);
+    const items=document.getElementById(id+'-items')?.value.trim();
+    const date=document.getElementById(id+'-date')?.value;
+    if(!date)errors.push('แถว '+(i+1)+': ไม่มีวันที่');
+    if(!items)errors.push('แถว '+(i+1)+': ไม่มีบริการ');
+    if(isNaN(total)||total<0)errors.push('แถว '+(i+1)+': ยอดไม่ถูกต้อง');
+  });
+  if(errors.length>0){alert(errors.join('\n'));return;}
+
+  btn.disabled=true;btn.textContent='กำลังบันทึก...';
+  let success=0;let fail=0;const log=[];
+
+  for(const id of rows){
+    const dateVal=document.getElementById(id+'-date').value; // YYYY-MM-DD
+    const dp=dateVal.split('-');
+    const dateDisplay=dp[2]+'/'+dp[1]+'/'+dp[0];
+    const plate=document.getElementById(id+'-plate').value.trim().toUpperCase();
+    const custInput=document.getElementById(id+'-cust').value.trim();
+    const items=document.getElementById(id+'-items').value.trim();
+    const staff=document.getElementById(id+'-staff').value;
+    const pay=document.getElementById(id+'-pay').value;
+    const total=parseFloat(document.getElementById(id+'-total').value||0);
+
+    // Try to match customer
+    const custMatch=plate?custs.find(c=>(c.plate||'').replace(/\s+/g,'').toUpperCase()===plate.replace(/\s+/g,'').toUpperCase()):null;
+    const custName=custMatch?.name||custInput||'Walk-in';
+
+    const tdata={
+      date:dateDisplay,
+      time:'00:00',
+      plate:plate||'—',
+      customer:custName,
+      items:items,
+      staff:staff||'—',
+      payment:pay,
+      total:total,
+      branch:currentBranch,
+      backfill:true,
+      createdAt:serverTimestamp()
+    };
+
+    try{
+      await addDoc(collection(db,'transactions'),tdata);
+      success++;
+      log.push({ok:true,date:dateDisplay,plate,items,total});
+    }catch(e){
+      fail++;
+      log.push({ok:false,date:dateDisplay,plate,items,total,err:e.message});
+    }
+  }
+
+  btn.disabled=false;btn.textContent='💾 บันทึกทั้งหมด';
+
+  // Show log
+  const logEl=G('bf-log');
+  const logTitle=G('bf-log-title');
+  const logBody=G('bf-log-body');
+  logEl.style.display='block';
+  logTitle.textContent='บันทึกสำเร็จ '+success+' รายการ'+(fail>0?' / ล้มเหลว '+fail+' รายการ':'');
+  logBody.innerHTML=log.map(l=>
+    `<div style="padding:4px 0;display:flex;gap:12px;align-items:center;color:${l.ok?'var(--ok)':'var(--err)'};">
+      <span>${l.ok?'✅':'❌'}</span>
+      <span style="color:var(--tx3);width:90px;">${l.date}</span>
+      <span style="width:90px;font-weight:700;">${l.plate}</span>
+      <span style="flex:1;">${l.items}</span>
+      <span style="font-weight:700;">฿${l.total.toLocaleString()}</span>
+      ${!l.ok?'<span style="color:var(--err);font-size:11px;">'+l.err+'</span>':''}
+    </div>`
+  ).join('');
+
+  if(success>0){
+    // Clear successfully saved rows
+    rows.forEach(id=>{
+      const row=document.getElementById(id);
+      if(row)row.remove();
+    });
+    bfRows=[];
+    // Add fresh row
+    addBackfillRow();
+  }
+};
+
+// ── EDIT CUSTOMER ──
+let _editCustId=null;
+window.openEditCust=function(id){
+  const c=custs.find(x=>x._id===id);if(!c)return;
+  _editCustId=id;
+  G('ef-name').value=c.name||'';
+  G('ef-phone').value=c.phone||'';
+  G('ef-car').value=c.car||'';
+  G('ef-plate').value=c.plate||'';
+  G('ef-size').value=c.size||'M';
+  G('ef-points').value=c.points||0;
+  G('edit-cust-modal').style.display='flex';
+};
+window.closeEditCust=function(){
+  G('edit-cust-modal').style.display='none';
+  _editCustId=null;
+};
+window.saveEditCust=async function(){
+  if(!_editCustId)return;
+  const data={
+    name:G('ef-name').value.trim(),
+    phone:G('ef-phone').value.trim(),
+    car:G('ef-car').value.trim(),
+    plate:G('ef-plate').value.trim(),
+    size:G('ef-size').value,
+    points:parseInt(G('ef-points').value)||0,
+  };
+  if(!data.name){alert('กรุณากรอกชื่อลูกค้า');return;}
+  try{
+    await updateDoc(doc(db,'customers',_editCustId),data);
+    closeEditCust();
+    showToast('✅ บันทึกข้อมูลลูกค้าแล้ว');
+  }catch(e){alert('บันทึกไม่สำเร็จ: '+e.message);}
+};
+function showToast(msg){
+  let t=document.getElementById('dash-toast');
+  if(!t){t=document.createElement('div');t.id='dash-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:700;z-index:999;transition:opacity .3s;';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._to);t._to=setTimeout(()=>{t.style.opacity='0';},2500);
+}
+
 window.setBr=function(b,el){currentBranch=b;document.querySelectorAll('.sb-br').forEach(x=>x.classList.remove('active'));el.classList.add('active');rToday();rHistory();rStaff();rAnalytics();};
 window.setHRange=function(r){const n2=new Date(),fmt=d=>d.toISOString().slice(0,10);if(r==='today'){G('h-from').value=fmt(n2);G('h-to').value=fmt(n2);}else if(r==='week'){const s=new Date(n2);s.setDate(s.getDate()-6);G('h-from').value=fmt(s);G('h-to').value=fmt(n2);}else if(r==='month'){G('h-from').value=fmt(new Date(n2.getFullYear(),n2.getMonth(),1));G('h-to').value=fmt(n2);}else{G('h-from').value='';G('h-to').value='';}rHistory();};
 window.exportData=function(){const f=txns.filter(filterBranch);let c='﻿';c+=`Receipt	ลูกค้า	ทะเบียน	พนักงาน	สาขา	วิธีชำระ	รายการ	รวม	วันที่
@@ -718,7 +919,7 @@ window.nav=function(id,el){
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active'));
   document.getElementById('sc-'+id).classList.add('active');
   el.classList.add('active');
-  const titles={today:'Today — Overview',history:'Transaction History',staff:'Staff Incentive',customers:'Customer List',stock:'Stock Levels',ceramic:'Ceramic Maintenance Due',analytics:'Analytics & Insights'};
+  const titles={today:'Today — Overview',history:'Transaction History',staff:'Staff Incentive',customers:'Customer List',stock:'Stock Levels',ceramic:'Ceramic Maintenance Due',analytics:'Analytics & Insights',backfill:'เพิ่มข้อมูลย้อนหลัง'};
   G('page-title').textContent=titles[id]||id;
   G('export-btn').style.display=id==='history'?'inline-flex':'none';
   if(id==='history')rHistory();
@@ -726,6 +927,7 @@ window.nav=function(id,el){
   if(id==='customers')rCustomers();
   if(id==='ceramic')rCeramic();
   if(id==='analytics')rAnalytics();
+  if(id==='backfill')rBackfill();
 };
 
 // Init range
