@@ -436,7 +436,7 @@ const FB={apiKey:'AIzaSyDSuBAXVbzaMwNJEVQYxYDF8Q0zPWYxUhQ',authDomain:'carcare-p
 const app=initializeApp(FB);
 const db=getFirestore(app);
 
-let txns=[],custs=[],stock=[],expenses=[],staffList=[];
+let txns=[],custs=[],stock=[],expenses=[],staffList=[],services=[];
 let currentBranch='all';
 let chart7day=null,chartPay=null,chartStaff=null;
 function G(id){return document.getElementById(id);}
@@ -460,6 +460,7 @@ onSnapshot(collection(db,'customers'),s=>{custs=s.docs.map(d=>({...d.data(),_id:
 onSnapshot(collection(db,'stock'),s=>{stock=s.docs.map(d=>({...d.data(),_id:d.id}));rStock();});
 onSnapshot(collection(db,'expenses'),s=>{expenses=s.docs.map(d=>({...d.data(),_id:d.id}));rToday();});
 onSnapshot(collection(db,'staff'),s=>{staffList=s.docs.map(d=>({...d.data(),_id:d.id}));});
+onSnapshot(collection(db,'services'),s=>{services=s.docs.map(d=>({...d.data(),_id:d.id}));});
 
 function filterBranch(t){if(currentBranch==='all')return true;if(!t.branch)return true;return t.branch===currentBranch;}
 
@@ -774,15 +775,30 @@ window.addBackfillRow=function(){
   const id='bf-'+bfCounter;
   const today=new Date().toISOString().slice(0,10);
   const staffOptions=staffList.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+  const svcOptions=services.sort((a,b)=>(a.name||'').localeCompare(b.name||'')).map(s=>`<option value="${s._id}" data-s="${s.S||0}" data-m="${s.M||0}" data-l="${s.L||0}" data-xl="${s.XL||0}" data-xxl="${s.XXL||0}">${s.name}</option>`).join('');
   const row=document.createElement('tr');
   row.id=id;
   row.style.cssText='border-bottom:1px solid var(--bdr);';
   row.innerHTML=`
     <td style="padding:6px 8px;color:var(--tx3);font-weight:700;">${bfCounter}</td>
     <td style="padding:6px 8px;"><input type="date" class="field-input" style="padding:6px 8px;font-size:12px;width:120px;" value="${today}" id="${id}-date"/></td>
-    <td style="padding:6px 8px;"><input type="text" class="field-input" style="padding:6px 8px;font-size:12px;width:120px;" placeholder="กข1234" id="${id}-plate"/></td>
-    <td style="padding:6px 8px;"><input type="text" class="field-input" style="padding:6px 8px;font-size:12px;" placeholder="ชื่อลูกค้า (ถ้ามี)" id="${id}-cust"/></td>
-    <td style="padding:6px 8px;"><input type="text" class="field-input" style="padding:6px 8px;font-size:12px;" placeholder="ล้างสี & ดูดฝุ่น" id="${id}-items"/></td>
+    <td style="padding:6px 8px;position:relative;">
+      <input type="text" class="field-input" style="padding:6px 8px;font-size:12px;width:120px;" placeholder="กข1234" id="${id}-plate" autocomplete="off" oninput="bfPlateSearch('${id}')"/>
+      <div id="${id}-plate-drop" style="display:none;position:absolute;top:100%;left:0;background:var(--sur);border:1px solid var(--bdr2);border-radius:8px;z-index:50;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,.12);max-height:180px;overflow-y:auto;"></div>
+    </td>
+    <td style="padding:6px 8px;"><input type="text" class="field-input" style="padding:6px 8px;font-size:12px;" placeholder="ชื่อลูกค้า" id="${id}-cust" readonly style="background:#f9f9f7;"/></td>
+    <td style="padding:6px 8px;">
+      <div style="display:flex;gap:6px;align-items:center;">
+        <select class="field-input" style="padding:6px 8px;font-size:12px;flex:1;" id="${id}-svc" onchange="bfSvcChange('${id}')">
+          <option value="">— เลือกบริการ —</option>
+          ${svcOptions}
+        </select>
+        <select class="field-input" style="padding:6px 8px;font-size:12px;width:60px;" id="${id}-size" onchange="bfSvcChange('${id}')">
+          <option value="S">S</option><option value="M" selected>M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option>
+        </select>
+      </div>
+      <input type="hidden" id="${id}-items"/>
+    </td>
     <td style="padding:6px 8px;">
       <select class="field-input" style="padding:6px 8px;font-size:12px;width:100px;" id="${id}-staff">
         <option value="">— เลือก —</option>
@@ -790,7 +806,7 @@ window.addBackfillRow=function(){
       </select>
     </td>
     <td style="padding:6px 8px;">
-      <select class="field-input" style="padding:6px 8px;font-size:12px;width:100px;" id="${id}-pay">
+      <select class="field-input" style="padding:6px 8px;font-size:12px;width:90px;" id="${id}-pay">
         <option value="เงินสด">เงินสด</option>
         <option value="โอน">โอน</option>
         <option value="QR">QR</option>
@@ -802,8 +818,40 @@ window.addBackfillRow=function(){
   `;
   document.getElementById('bf-tbody').appendChild(row);
   bfRows.push(id);
-  // Focus plate field
   setTimeout(()=>document.getElementById(id+'-plate')?.focus(),50);
+};
+
+window.bfPlateSearch=function(id){
+  const val=(document.getElementById(id+'-plate').value||'').replace(/\s+/g,'').toUpperCase();
+  const drop=document.getElementById(id+'-plate-drop');
+  const custEl=document.getElementById(id+'-cust');
+  if(val.length<2){drop.style.display='none';custEl.value='';return;}
+  const matches=custs.filter(c=>(c.plate||'').replace(/\s+/g,'').toUpperCase().includes(val));
+  if(matches.length===0){drop.style.display='none';custEl.value='';return;}
+  drop.style.display='block';
+  drop.innerHTML=matches.slice(0,8).map(c=>`
+    <div onclick="bfSelectCust('${id}','${c._id}')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--bdr);font-size:12px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      <b>${c.plate||''}</b> — ${c.name||''} <span style="color:var(--tx3);">${c.car||''} (${c.size||''})</span>
+    </div>`).join('');
+};
+
+window.bfSelectCust=function(id,custId){
+  const c=custs.find(x=>x._id===custId);if(!c)return;
+  document.getElementById(id+'-plate').value=c.plate||'';
+  document.getElementById(id+'-cust').value=c.name||'';
+  if(c.size)document.getElementById(id+'-size').value=c.size;
+  document.getElementById(id+'-plate-drop').style.display='none';
+  bfSvcChange(id);
+};
+
+window.bfSvcChange=function(id){
+  const sel=document.getElementById(id+'-svc');
+  const size=document.getElementById(id+'-size').value||'M';
+  if(!sel.value){return;}
+  const opt=sel.options[sel.selectedIndex];
+  const price=parseFloat(opt.getAttribute('data-'+size.toLowerCase())||opt.getAttribute('data-m')||0);
+  document.getElementById(id+'-total').value=price||'';
+  document.getElementById(id+'-items').value=sel.options[sel.selectedIndex].text;
 };
 
 window.removeBackfillRow=function(id){
@@ -820,7 +868,7 @@ window.submitBackfill=async function(){
   let errors=[];
   rows.forEach((id,i)=>{
     const total=parseFloat(document.getElementById(id+'-total')?.value||0);
-    const items=document.getElementById(id+'-items')?.value.trim();
+    const svcEl=document.getElementById(id+'-svc');const itemsHidden=document.getElementById(id+'-items')?.value.trim();const items=itemsHidden||(svcEl?.options[svcEl.selectedIndex]?.text||'').replace('— เลือกบริการ —','').trim();
     const date=document.getElementById(id+'-date')?.value;
     if(!date)errors.push('แถว '+(i+1)+': ไม่มีวันที่');
     if(!items)errors.push('แถว '+(i+1)+': ไม่มีบริการ');
