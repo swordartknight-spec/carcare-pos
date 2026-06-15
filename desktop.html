@@ -436,7 +436,7 @@ const FB={apiKey:'AIzaSyDSuBAXVbzaMwNJEVQYxYDF8Q0zPWYxUhQ',authDomain:'carcare-p
 const app=initializeApp(FB);
 const db=getFirestore(app);
 
-let txns=[],custs=[],stock=[],expenses=[];
+let txns=[],custs=[],stock=[],expenses=[],staffList=[];
 let currentBranch='all';
 let chart7day=null,chartPay=null,chartStaff=null;
 function G(id){return document.getElementById(id);}
@@ -458,7 +458,8 @@ onSnapshot(query(collection(db,'transactions'),orderBy('createdAt','desc'),limit
 });
 onSnapshot(collection(db,'customers'),s=>{custs=s.docs.map(d=>({...d.data(),_id:d.id}));rCustomers();rCeramic();});
 onSnapshot(collection(db,'stock'),s=>{stock=s.docs.map(d=>({...d.data(),_id:d.id}));rStock();});
-onSnapshot(query(collection(db,'expenses'),orderBy('createdAt','desc'),limit(500)),s=>{expenses=s.docs.map(d=>({...d.data(),_id:d.id}));rToday();});
+onSnapshot(collection(db,'expenses'),s=>{expenses=s.docs.map(d=>({...d.data(),_id:d.id}));rToday();});
+onSnapshot(collection(db,'staff'),s=>{staffList=s.docs.map(d=>({...d.data(),_id:d.id}));});
 
 function filterBranch(t){if(currentBranch==='all')return true;if(!t.branch)return true;return t.branch===currentBranch;}
 
