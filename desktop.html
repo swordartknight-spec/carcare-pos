@@ -174,7 +174,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
     <!-- TODAY -->
     <div class="screen active" id="sc-today">
-      <div class="stat-grid">
+      <div class="stat-grid" style="grid-template-columns:repeat(5,1fr);">
         <div class="stat-card gold">
           <div class="stat-lbl">ยอดขายวันนี้</div>
           <div class="stat-val" id="t-total">฿0</div>
@@ -194,6 +194,11 @@ input:focus,select:focus{border-color:var(--gold);}
           <div class="stat-lbl">Points ที่ให้</div>
           <div class="stat-val" id="t-pts">0</div>
           <div class="stat-sub">pts วันนี้</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-lbl">Retention Rate</div>
+          <div class="stat-val" id="t-retention" style="font-size:28px;">—%</div>
+          <div class="stat-sub" id="t-retention-sub">ลูกค้ากลับมาซ้ำ</div>
         </div>
       </div>
 
@@ -477,6 +482,14 @@ function rToday(){
   G('t-cust').textContent=n;
   G('t-avg').textContent='Avg ฿'+(n?Math.round(tot/n):0).toLocaleString()+'/คน';
   G('t-pts').textContent=today.reduce((a,t)=>a+(t.pts||0),0).toLocaleString();
+  // Retention rate (overall, all-time)
+  const custVisits={};
+  txns.filter(t=>filterBranch(t)&&t.customer&&t.customer!=='Walk-in'&&t.customer!=='ลูกค้า').forEach(t=>{custVisits[t.customer]=(custVisits[t.customer]||0)+1;});
+  const totalC=Object.keys(custVisits).length;
+  const returnC=Object.values(custVisits).filter(v=>v>1).length;
+  const retRate=totalC>0?Math.round(returnC/totalC*100):0;
+  G('t-retention').textContent=retRate+'%';
+  G('t-retention-sub').textContent=returnC+' จาก '+totalC+' สมาชิก';
   G('t-cash').textContent='฿'+today.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
   G('t-qr').textContent='฿'+today.filter(t=>t.payment==='QR').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
   G('t-transfer').textContent='฿'+today.filter(t=>t.payment==='โอน').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
@@ -528,6 +541,13 @@ function rCustomers(){
   const q=(G('c-search').value||'').toLowerCase();
   const list=custs.filter(c=>!q||c.name?.toLowerCase().includes(q)||(c.plate||'').toLowerCase().includes(q)||(c.phone||'').includes(q));
   G('c-count').textContent=list.length+' สมาชิก';
+  // Overall retention rate
+  const _cv={};
+  txns.filter(t=>filterBranch(t)&&t.customer&&t.customer!=='Walk-in'&&t.customer!=='ลูกค้า').forEach(t=>{_cv[t.customer]=(_cv[t.customer]||0)+1;});
+  const _tc=Object.keys(_cv).length;const _rc=Object.values(_cv).filter(v=>v>1).length;
+  const _rr=_tc>0?Math.round(_rc/_tc*100):0;
+  const retEl=G('c-retention-badge');
+  if(retEl)retEl.innerHTML='Retention Rate: <b style="color:var(--ok);">'+_rr+'%</b> <span style="color:var(--tx3);font-size:11px;">('+_rc+' จาก '+_tc+' กลับมาซ้ำ)</span>';
   G('cust-list').innerHTML=list.map((c,i)=>{
     const cid='cexp-'+i;
     return `<div>
@@ -770,6 +790,27 @@ function rBackfill(){
   if(bfRows.length===0)addBackfillRow();
 }
 
+window.bfClearCust=function(id){
+  const el=document.getElementById(id+'-cust');
+  el.removeAttribute('readonly');
+  el.value='';
+  el.focus();
+};
+
+window.bfOpenNewCust=function(rowId){
+  const plate=document.getElementById(rowId+'-plate')?.value||'';
+  G('ef-name').value='';
+  G('ef-phone').value='';
+  G('ef-car').value='';
+  G('ef-plate').value=plate;
+  G('ef-size').value='M';
+  G('ef-points').value=0;
+  _editCustId=null;
+  _bfNewCustRow=rowId;
+  G('edit-cust-modal').querySelector('.modal-head span').textContent='➕ เพิ่มลูกค้าใหม่';
+  G('edit-cust-modal').style.display='flex';
+};
+
 window.addBackfillRow=function(){
   bfCounter++;
   const id='bf-'+bfCounter;
@@ -786,7 +827,13 @@ window.addBackfillRow=function(){
       <input type="text" class="field-input" style="padding:6px 8px;font-size:12px;width:120px;" placeholder="กข1234" id="${id}-plate" autocomplete="off" oninput="bfPlateSearch('${id}')"/>
       <div id="${id}-plate-drop" style="display:none;position:absolute;top:100%;left:0;background:var(--sur);border:1px solid var(--bdr2);border-radius:8px;z-index:50;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,.12);max-height:180px;overflow-y:auto;"></div>
     </td>
-    <td style="padding:6px 8px;"><input type="text" class="field-input" style="padding:6px 8px;font-size:12px;" placeholder="ชื่อลูกค้า" id="${id}-cust" readonly style="background:#f9f9f7;"/></td>
+    <td style="padding:6px 8px;">
+      <div style="display:flex;gap:4px;align-items:center;">
+        <input type="text" class="field-input" style="padding:6px 8px;font-size:12px;flex:1;" placeholder="ชื่อลูกค้า" id="${id}-cust" readonly/>
+        <span onclick="bfClearCust('${id}')" title="กรอกชื่อเอง" style="cursor:pointer;font-size:14px;color:var(--tx3);padding:2px 4px;">✏️</span>
+        <span onclick="bfOpenNewCust('${id}')" title="เพิ่มลูกค้าใหม่" style="cursor:pointer;font-size:14px;padding:2px 4px;">➕</span>
+      </div>
+    </td>
     <td style="padding:6px 8px;">
       <div style="display:flex;gap:6px;align-items:center;">
         <select class="field-input" style="padding:6px 8px;font-size:12px;flex:1;" id="${id}-svc" onchange="bfSvcChange('${id}')">
@@ -951,6 +998,7 @@ window.submitBackfill=async function(){
 
 // ── EDIT CUSTOMER ──
 let _editCustId=null;
+let _bfNewCustRow=null;
 window.openEditCust=function(id){
   const c=custs.find(x=>x._id===id);if(!c)return;
   _editCustId=id;
@@ -965,9 +1013,9 @@ window.openEditCust=function(id){
 window.closeEditCust=function(){
   G('edit-cust-modal').style.display='none';
   _editCustId=null;
+  _bfNewCustRow=null;
 };
 window.saveEditCust=async function(){
-  if(!_editCustId)return;
   const data={
     name:G('ef-name').value.trim(),
     phone:G('ef-phone').value.trim(),
@@ -978,9 +1026,22 @@ window.saveEditCust=async function(){
   };
   if(!data.name){alert('กรุณากรอกชื่อลูกค้า');return;}
   try{
-    await updateDoc(doc(db,'customers',_editCustId),data);
+    if(_editCustId){
+      // Edit existing
+      await updateDoc(doc(db,'customers',_editCustId),data);
+      showToast('✅ บันทึกข้อมูลลูกค้าแล้ว');
+    } else {
+      // Add new customer from backfill
+      const ref=await addDoc(collection(db,'customers'),{...data,points:0,visits:0,redeemed:0,coupons:[],serviceHistory:[]});
+      if(_bfNewCustRow){
+        document.getElementById(_bfNewCustRow+'-cust').value=data.name;
+        document.getElementById(_bfNewCustRow+'-plate').value=data.plate;
+        if(data.size)document.getElementById(_bfNewCustRow+'-size').value=data.size;
+        document.getElementById(_bfNewCustRow+'-cust').removeAttribute('readonly');
+      }
+      showToast('✅ เพิ่มลูกค้าใหม่แล้ว');
+    }
     closeEditCust();
-    showToast('✅ บันทึกข้อมูลลูกค้าแล้ว');
   }catch(e){alert('บันทึกไม่สำเร็จ: '+e.message);}
 };
 function showToast(msg){
