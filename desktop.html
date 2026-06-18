@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS</h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">v9r</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -468,6 +468,12 @@ onSnapshot(collection(db,'staff'),s=>{staffList=s.docs.map(d=>({...d.data(),_id:
 onSnapshot(collection(db,'services'),s=>{services=s.docs.map(d=>({...d.data(),_id:d.id}));});
 
 function filterBranch(t){if(currentBranch==='all')return true;if(!t.branch)return true;return t.branch===currentBranch;}
+function renderItems(t){
+  if(t.itemDetails&&Array.isArray(t.itemDetails)&&t.itemDetails.length>0){
+    return t.itemDetails.map(it=>(it.code?`<span style="background:var(--gold-lt);color:var(--blk);font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:3px;">${it.code}</span>`:'')+'<span style="font-size:12px;">'+( it.name||'')+'</span>').join('<span style="color:var(--tx3);margin:0 4px;"> · </span>');
+  }
+  return '<span style="font-size:12px;">'+(t.items||'')+'</span>';
+}
 
 // ── TODAY ──
 function rToday(){
@@ -504,7 +510,7 @@ function rToday(){
   const payData=[today.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0),today.filter(t=>t.payment==='QR').reduce((a,t)=>a+(t.total||0),0),today.filter(t=>t.payment==='โอน').reduce((a,t)=>a+(t.total||0),0),today.filter(t=>t.payment==='บัตร').reduce((a,t)=>a+(t.total||0),0)];
   if(chartPay)chartPay.destroy();
   chartPay=new Chart(G('chart-pay'),{type:'doughnut',data:{labels:['เงินสด','QR','โอน','บัตร'],datasets:[{data:payData,backgroundColor:['#3B6D11','#185FA5','#534AB7','#854F0B'],borderWidth:0}]},options:{plugins:{legend:{position:'bottom'}},responsive:true,cutout:'65%'}});
-  G('today-table').innerHTML=today.map(t=>`<tr><td style="font-weight:700;color:var(--gold);">${t.id||''}</td><td>${t.customer||'Walk-in'}</td><td>${t.plate||'—'}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.items||''}</td><td>${t.staff||'—'}</td><td style="color:var(--tx3);font-size:12px;">${t.time||'—'}</td><td style="font-size:12px;">${t.washDuration>0?'<span style="background:var(--inf-bg);color:var(--inf);padding:2px 7px;border-radius:99px;font-weight:700;">'+t.washDuration+' น.</span>':'<span style="color:var(--tx3);">—</span>'}</td><td><span class="badge b-${payClass(t.payment)}">${t.payment||''}</span></td><td style="text-align:right;font-weight:700;">฿${(t.total||0).toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">ยังไม่มีรายการ</td></tr>';
+  G('today-table').innerHTML=today.map(t=>`<tr><td style="font-weight:700;color:var(--gold);">${t.id||''}</td><td>${t.customer||'Walk-in'}</td><td>${t.plate||'—'}</td><td style="max-width:220px;">${renderItems(t)}</td><td>${t.staff||'—'}</td><td style="color:var(--tx3);font-size:12px;">${t.time||'—'}</td><td style="font-size:12px;">${t.washDuration>0?'<span style="background:var(--inf-bg);color:var(--inf);padding:2px 7px;border-radius:99px;font-weight:700;">'+t.washDuration+' น.</span>':'<span style="color:var(--tx3);">—</span>'}</td><td><span class="badge b-${payClass(t.payment)}">${t.payment||''}</span></td><td style="text-align:right;font-weight:700;">฿${(t.total||0).toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">ยังไม่มีรายการ</td></tr>';
 }
 
 // ── HISTORY ──
@@ -520,7 +526,7 @@ function rHistory(){
   G('h-total').textContent='฿'+tot.toLocaleString();G('h-count').textContent=f.length;
   G('h-csale').textContent='฿'+f.reduce((a,t)=>a+(t.csaleTotal||0),0).toLocaleString();
   G('h-cop').textContent='฿'+f.reduce((a,t)=>a+(t.copTotal||0),0).toLocaleString();
-  G('hist-table').innerHTML=f.slice(0,200).map(t=>`<tr><td style="font-weight:700;color:var(--gold);">${t.id||''}</td><td style="color:var(--tx3);">${t.date||''}</td><td>${t.customer||'Walk-in'}</td><td>${t.plate||'—'}</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.items||''}</td><td>${t.staff||'—'}</td><td><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--inf-bg);color:var(--inf);">${t.branch||'—'}</span></td><td><span class="badge b-${payClass(t.payment)}">${t.payment||''}</span></td><td style="text-align:right;font-weight:700;">฿${(t.total||0).toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="9" class="empty">ไม่มีรายการ</td></tr>';
+  G('hist-table').innerHTML=f.slice(0,200).map(t=>`<tr><td style="font-weight:700;color:var(--gold);">${t.id||''}</td><td style="color:var(--tx3);">${t.date||''}</td><td>${t.customer||'Walk-in'}</td><td>${t.plate||'—'}</td><td style="max-width:200px;">${renderItems(t)}</td><td>${t.staff||'—'}</td><td><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--inf-bg);color:var(--inf);">${t.branch||'—'}</span></td><td><span class="badge b-${payClass(t.payment)}">${t.payment||''}</span></td><td style="text-align:right;font-weight:700;">฿${(t.total||0).toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="9" class="empty">ไม่มีรายการ</td></tr>';
 }
 
 // ── STAFF ──
@@ -605,7 +611,7 @@ window.toggleCustExpand=function(cid, custName, custId){
         ${hist.slice(0,20).map(t=>`<div class="ch-row">
           <span style="color:var(--gold);font-weight:700;">${t.id||''}</span>
           <span style="color:var(--tx3);">${t.date||''}</span>
-          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.items||''}</span>
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${renderItems(t)}</span>
           <span style="color:var(--tx3);">${t.time||'—'}</span>
           <span style="text-align:right;font-weight:700;">฿${(t.total||0).toLocaleString()}</span>
           <span><span class="badge b-${payClass(t.payment)}">${t.payment||''}</span></span>
@@ -785,6 +791,7 @@ function rAnalytics(){
 // ── BACKFILL ──
 let bfRows=[];
 let bfCounter=0;
+let bfData={};
 
 function rBackfill(){
   if(bfRows.length===0)addBackfillRow();
@@ -814,45 +821,47 @@ window.bfOpenNewCust=function(rowId){
 window.addBackfillRow=function(){
   bfCounter++;
   const id='bf-'+bfCounter;
+  bfData[id]={services:[],size:'M'};
   const today=new Date().toISOString().slice(0,10);
   const staffOptions=staffList.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
-  const svcOptions=services.sort((a,b)=>(a.name||'').localeCompare(b.name||'')).map(s=>`<option value="${s._id}" data-s="${s.S||0}" data-m="${s.M||0}" data-l="${s.L||0}" data-xl="${s.XL||0}" data-xxl="${s.XXL||0}">${s.name}</option>`).join('');
   const row=document.createElement('tr');
   row.id=id;
-  row.style.cssText='border-bottom:1px solid var(--bdr);';
+  row.style.cssText='border-bottom:2px solid var(--bdr);vertical-align:top;';
   row.innerHTML=`
-    <td style="padding:6px 8px;color:var(--tx3);font-weight:700;">${bfCounter}</td>
-    <td style="padding:6px 8px;"><input type="date" class="field-input" style="padding:6px 8px;font-size:12px;width:120px;" value="${today}" id="${id}-date"/></td>
-    <td style="padding:6px 8px;position:relative;">
+    <td style="padding:10px 8px;color:var(--tx3);font-weight:700;">${bfCounter}</td>
+    <td style="padding:10px 8px;"><input type="date" class="field-input" style="padding:6px 8px;font-size:12px;width:120px;" value="${today}" id="${id}-date"/></td>
+    <td style="padding:10px 8px;position:relative;">
       <input type="text" class="field-input" style="padding:6px 8px;font-size:12px;width:120px;" placeholder="กข1234" id="${id}-plate" autocomplete="off" oninput="bfPlateSearch('${id}')"/>
       <div id="${id}-plate-drop" style="display:none;position:absolute;top:100%;left:0;background:var(--sur);border:1px solid var(--bdr2);border-radius:8px;z-index:50;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,.12);max-height:180px;overflow-y:auto;"></div>
     </td>
-    <td style="padding:6px 8px;">
+    <td style="padding:10px 8px;">
       <div style="display:flex;gap:4px;align-items:center;">
-        <input type="text" class="field-input" style="padding:6px 8px;font-size:12px;flex:1;" placeholder="ชื่อลูกค้า" id="${id}-cust" readonly/>
-        <span onclick="bfClearCust('${id}')" title="กรอกชื่อเอง" style="cursor:pointer;font-size:14px;color:var(--tx3);padding:2px 4px;">✏️</span>
+        <input type="text" class="field-input" style="padding:6px 8px;font-size:12px;flex:1;min-width:110px;" placeholder="ชื่อลูกค้า" id="${id}-cust"/>
         <span onclick="bfOpenNewCust('${id}')" title="เพิ่มลูกค้าใหม่" style="cursor:pointer;font-size:14px;padding:2px 4px;">➕</span>
       </div>
     </td>
-    <td style="padding:6px 8px;">
-      <div style="display:flex;gap:6px;align-items:center;">
-        <select class="field-input" style="padding:6px 8px;font-size:12px;flex:1;" id="${id}-svc" onchange="bfSvcChange('${id}')">
+    <td style="padding:10px 8px;min-width:280px;">
+      <!-- Service add row -->
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+        <select class="field-input" style="padding:6px 8px;font-size:12px;flex:1;" id="${id}-svc">
           <option value="">— เลือกบริการ —</option>
-          ${svcOptions}
+          ${bfSvcOptions()}
         </select>
-        <select class="field-input" style="padding:6px 8px;font-size:12px;width:60px;" id="${id}-size" onchange="bfSvcChange('${id}')">
+        <select class="field-input" style="padding:6px 8px;font-size:12px;width:58px;" id="${id}-size" onchange="bfData['${id}'].size=this.value;bfRenderSvc('${id}')">
           <option value="S">S</option><option value="M" selected>M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option>
         </select>
+        <button class="btn" style="padding:6px 10px;font-size:12px;" onclick="bfAddSvc('${id}')">＋</button>
       </div>
-      <input type="hidden" id="${id}-items"/>
+      <!-- Service list -->
+      <div id="${id}-svclist" style="display:flex;flex-direction:column;gap:4px;"></div>
     </td>
-    <td style="padding:6px 8px;">
+    <td style="padding:10px 8px;">
       <select class="field-input" style="padding:6px 8px;font-size:12px;width:100px;" id="${id}-staff">
         <option value="">— เลือก —</option>
         ${staffOptions}
       </select>
     </td>
-    <td style="padding:6px 8px;">
+    <td style="padding:10px 8px;">
       <select class="field-input" style="padding:6px 8px;font-size:12px;width:90px;" id="${id}-pay">
         <option value="เงินสด">เงินสด</option>
         <option value="โอน">โอน</option>
@@ -860,21 +869,71 @@ window.addBackfillRow=function(){
         <option value="บัตร">บัตร</option>
       </select>
     </td>
-    <td style="padding:6px 8px;"><input type="number" class="field-input" style="padding:6px 8px;font-size:12px;width:90px;" placeholder="0" min="0" id="${id}-total"/></td>
-    <td style="padding:6px 8px;"><span onclick="removeBackfillRow('${id}')" style="cursor:pointer;color:var(--tx3);font-size:16px;padding:2px 6px;" title="ลบแถว">✕</span></td>
+    <td style="padding:10px 8px;text-align:right;"><span id="${id}-total-disp" style="font-weight:700;font-size:15px;color:var(--gold);">฿0</span></td>
+    <td style="padding:10px 8px;"><span onclick="removeBackfillRow('${id}')" style="cursor:pointer;color:var(--tx3);font-size:16px;padding:2px 6px;" title="ลบแถว">✕</span></td>
   `;
   document.getElementById('bf-tbody').appendChild(row);
   bfRows.push(id);
   setTimeout(()=>document.getElementById(id+'-plate')?.focus(),50);
 };
 
+// Dedupe services by code+name
+function bfUniqueServices(){
+  const seen=new Set();const out=[];
+  services.slice().sort((a,b)=>(a.name||'').localeCompare(b.name||'')).forEach(s=>{
+    const key=(s.code||'')+'|'+(s.name||'');
+    if(seen.has(key))return;
+    seen.add(key);out.push(s);
+  });
+  return out;
+}
+
+function bfSvcOptions(){
+  return bfUniqueServices().map(s=>`<option value="${s._id}" data-code="${s.code||''}" data-name="${s.name||''}" data-s="${s.S||0}" data-m="${s.M||0}" data-l="${s.L||0}" data-xl="${s.XL||0}" data-xxl="${s.XXL||0}">${s.code?'['+s.code+'] ':''}${s.name}</option>`).join('');
+}
+
+window.bfAddSvc=function(id){
+  const sel=document.getElementById(id+'-svc');
+  if(!sel.value){return;}
+  const opt=sel.options[sel.selectedIndex];
+  const size=bfData[id].size||'M';
+  const price=parseFloat(opt.getAttribute('data-'+size.toLowerCase())||opt.getAttribute('data-m')||0);
+  bfData[id].services.push({
+    code:opt.getAttribute('data-code')||'',
+    name:opt.getAttribute('data-name')||'',
+    size:size,
+    price:price
+  });
+  sel.value='';
+  bfRenderSvc(id);
+};
+
+window.bfRemoveSvc=function(id,idx){
+  bfData[id].services.splice(idx,1);
+  bfRenderSvc(id);
+};
+
+window.bfRenderSvc=function(id){
+  const list=document.getElementById(id+'-svclist');
+  const d=bfData[id];
+  // Recompute prices for current size
+  list.innerHTML=d.services.map((sv,i)=>`
+    <div style="display:flex;align-items:center;gap:6px;background:var(--bg);border-radius:6px;padding:4px 8px;font-size:12px;">
+      ${sv.code?`<span style="background:var(--gold-lt);color:var(--blk);font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;">${sv.code}</span>`:''}
+      <span style="flex:1;">${sv.name} <span style="color:var(--tx3);">(${sv.size})</span></span>
+      <span style="font-weight:700;">฿${sv.price.toLocaleString()}</span>
+      <span onclick="bfRemoveSvc('${id}',${i})" style="cursor:pointer;color:var(--tx3);font-size:13px;">✕</span>
+    </div>`).join('');
+  const total=d.services.reduce((a,s)=>a+(s.price||0),0);
+  document.getElementById(id+'-total-disp').textContent='฿'+total.toLocaleString();
+};
+
 window.bfPlateSearch=function(id){
   const val=(document.getElementById(id+'-plate').value||'').replace(/\s+/g,'').toUpperCase();
   const drop=document.getElementById(id+'-plate-drop');
-  const custEl=document.getElementById(id+'-cust');
-  if(val.length<2){drop.style.display='none';custEl.value='';return;}
+  if(val.length<2){drop.style.display='none';return;}
   const matches=custs.filter(c=>(c.plate||'').replace(/\s+/g,'').toUpperCase().includes(val));
-  if(matches.length===0){drop.style.display='none';custEl.value='';return;}
+  if(matches.length===0){drop.style.display='none';return;}
   drop.style.display='block';
   drop.innerHTML=matches.slice(0,8).map(c=>`
     <div onclick="bfSelectCust('${id}','${c._id}')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--bdr);font-size:12px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
@@ -886,24 +945,14 @@ window.bfSelectCust=function(id,custId){
   const c=custs.find(x=>x._id===custId);if(!c)return;
   document.getElementById(id+'-plate').value=c.plate||'';
   document.getElementById(id+'-cust').value=c.name||'';
-  if(c.size)document.getElementById(id+'-size').value=c.size;
+  if(c.size){document.getElementById(id+'-size').value=c.size;bfData[id].size=c.size;}
   document.getElementById(id+'-plate-drop').style.display='none';
-  bfSvcChange(id);
-};
-
-window.bfSvcChange=function(id){
-  const sel=document.getElementById(id+'-svc');
-  const size=document.getElementById(id+'-size').value||'M';
-  if(!sel.value){return;}
-  const opt=sel.options[sel.selectedIndex];
-  const price=parseFloat(opt.getAttribute('data-'+size.toLowerCase())||opt.getAttribute('data-m')||0);
-  document.getElementById(id+'-total').value=price||'';
-  document.getElementById(id+'-items').value=sel.options[sel.selectedIndex].text;
 };
 
 window.removeBackfillRow=function(id){
   document.getElementById(id)?.remove();
   bfRows=bfRows.filter(r=>r!==id);
+  delete bfData[id];
 };
 
 window.submitBackfill=async function(){
@@ -914,12 +963,10 @@ window.submitBackfill=async function(){
   // Validate
   let errors=[];
   rows.forEach((id,i)=>{
-    const total=parseFloat(document.getElementById(id+'-total')?.value||0);
-    const svcEl=document.getElementById(id+'-svc');const itemsHidden=document.getElementById(id+'-items')?.value.trim();const items=itemsHidden||(svcEl?.options[svcEl.selectedIndex]?.text||'').replace('— เลือกบริการ —','').trim();
     const date=document.getElementById(id+'-date')?.value;
+    const svcs=bfData[id]?.services||[];
     if(!date)errors.push('แถว '+(i+1)+': ไม่มีวันที่');
-    if(!items)errors.push('แถว '+(i+1)+': ไม่มีบริการ');
-    if(isNaN(total)||total<0)errors.push('แถว '+(i+1)+': ยอดไม่ถูกต้อง');
+    if(svcs.length===0)errors.push('แถว '+(i+1)+': ยังไม่ได้เพิ่มบริการ');
   });
   if(errors.length>0){alert(errors.join('\n'));return;}
 
@@ -927,17 +974,19 @@ window.submitBackfill=async function(){
   let success=0;let fail=0;const log=[];
 
   for(const id of rows){
-    const dateVal=document.getElementById(id+'-date').value; // YYYY-MM-DD
+    const dateVal=document.getElementById(id+'-date').value;
     const dp=dateVal.split('-');
     const dateDisplay=dp[2]+'/'+dp[1]+'/'+dp[0];
     const plate=document.getElementById(id+'-plate').value.trim().toUpperCase();
     const custInput=document.getElementById(id+'-cust').value.trim();
-    const items=document.getElementById(id+'-items').value.trim();
     const staff=document.getElementById(id+'-staff').value;
     const pay=document.getElementById(id+'-pay').value;
-    const total=parseFloat(document.getElementById(id+'-total').value||0);
+    const svcs=bfData[id].services;
+    const total=svcs.reduce((a,s)=>a+(s.price||0),0);
+    const itemsStr=svcs.map(s=>s.name).join(', ');
+    const itemDetails=svcs.map(s=>({name:s.name,code:s.code,size:s.size,price:s.price}));
 
-    // Try to match customer
+    // Match customer
     const custMatch=plate?custs.find(c=>(c.plate||'').replace(/\s+/g,'').toUpperCase()===plate.replace(/\s+/g,'').toUpperCase()):null;
     const custName=custMatch?.name||custInput||'Walk-in';
 
@@ -946,7 +995,8 @@ window.submitBackfill=async function(){
       time:'00:00',
       plate:plate||'—',
       customer:custName,
-      items:items,
+      items:itemsStr,
+      itemDetails:itemDetails,
       staff:staff||'—',
       payment:pay,
       total:total,
@@ -958,19 +1008,16 @@ window.submitBackfill=async function(){
     try{
       await addDoc(collection(db,'transactions'),tdata);
       success++;
-      log.push({ok:true,date:dateDisplay,plate,items,total});
+      log.push({ok:true,date:dateDisplay,plate,items:itemsStr,total});
     }catch(e){
       fail++;
-      log.push({ok:false,date:dateDisplay,plate,items,total,err:e.message});
+      log.push({ok:false,date:dateDisplay,plate,items:itemsStr,total,err:e.message});
     }
   }
 
   btn.disabled=false;btn.textContent='💾 บันทึกทั้งหมด';
 
-  // Show log
-  const logEl=G('bf-log');
-  const logTitle=G('bf-log-title');
-  const logBody=G('bf-log-body');
+  const logEl=G('bf-log');const logTitle=G('bf-log-title');const logBody=G('bf-log-body');
   logEl.style.display='block';
   logTitle.textContent='บันทึกสำเร็จ '+success+' รายการ'+(fail>0?' / ล้มเหลว '+fail+' รายการ':'');
   logBody.innerHTML=log.map(l=>
@@ -985,13 +1032,8 @@ window.submitBackfill=async function(){
   ).join('');
 
   if(success>0){
-    // Clear successfully saved rows
-    rows.forEach(id=>{
-      const row=document.getElementById(id);
-      if(row)row.remove();
-    });
+    rows.forEach(id=>{document.getElementById(id)?.remove();delete bfData[id];});
     bfRows=[];
-    // Add fresh row
     addBackfillRow();
   }
 };
