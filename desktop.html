@@ -342,8 +342,9 @@ input:focus,select:focus{border-color:var(--gold);}
   <!-- BACKFILL -->
     <div class="screen" id="sc-backfill">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div style="font-size:13px;color:var(--tx3);">เพิ่มรายการที่ลืมบันทึก — กด <b>+ เพิ่มแถว</b> ได้เรื่อยๆ แล้วกด บันทึกทั้งหมด</div>
+        <div style="font-size:13px;color:var(--tx3);">เพิ่มรายการที่ลืมบันทึก — เลือกลูกค้าจากรายการ แล้วเพิ่มบริการ</div>
         <div style="display:flex;gap:8px;">
+          <button class="btn" onclick="bfOpenNewCust(null)">👤＋ เพิ่มลูกค้าใหม่</button>
           <button class="btn" onclick="addBackfillRow()">+ เพิ่มแถว</button>
           <button class="btn btn-g" onclick="submitBackfill()" id="bf-submit-btn">💾 บันทึกทั้งหมด</button>
         </div>
@@ -354,8 +355,7 @@ input:focus,select:focus{border-color:var(--gold);}
             <tr style="background:var(--bg);text-align:left;">
               <th style="padding:10px 8px;font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;width:40px;">#</th>
               <th style="padding:10px 8px;font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;width:120px;">วันที่</th>
-              <th style="padding:10px 8px;font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;width:120px;">ทะเบียน</th>
-              <th style="padding:10px 8px;font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;">ชื่อลูกค้า</th>
+              <th style="padding:10px 8px;font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;width:240px;">ลูกค้า (ทะเบียน / ชื่อ)</th>
               <th style="padding:10px 8px;font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;">บริการ</th>
               <th style="padding:10px 8px;font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;width:110px;">พนักงาน</th>
               <th style="padding:10px 8px;font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;width:110px;">วิธีชำระ</th>
@@ -805,15 +805,14 @@ window.bfClearCust=function(id){
 };
 
 window.bfOpenNewCust=function(rowId){
-  const plate=document.getElementById(rowId+'-plate')?.value||'';
   G('ef-name').value='';
   G('ef-phone').value='';
   G('ef-car').value='';
-  G('ef-plate').value=plate;
+  G('ef-plate').value='';
   G('ef-size').value='M';
   G('ef-points').value=0;
   _editCustId=null;
-  _bfNewCustRow=rowId;
+  _bfNewCustRow=rowId||null;
   G('edit-cust-modal').querySelector('.modal-head span').textContent='➕ เพิ่มลูกค้าใหม่';
   G('edit-cust-modal').style.display='flex';
 };
@@ -830,15 +829,14 @@ window.addBackfillRow=function(){
   row.innerHTML=`
     <td style="padding:10px 8px;color:var(--tx3);font-weight:700;">${bfCounter}</td>
     <td style="padding:10px 8px;"><input type="date" class="field-input" style="padding:6px 8px;font-size:12px;width:120px;" value="${today}" id="${id}-date"/></td>
-    <td style="padding:10px 8px;position:relative;">
-      <input type="text" class="field-input" style="padding:6px 8px;font-size:12px;width:120px;" placeholder="กข1234" id="${id}-plate" autocomplete="off" oninput="bfPlateSearch('${id}')"/>
-      <div id="${id}-plate-drop" style="display:none;position:absolute;top:100%;left:0;background:var(--sur);border:1px solid var(--bdr2);border-radius:8px;z-index:50;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,.12);max-height:180px;overflow-y:auto;"></div>
-    </td>
     <td style="padding:10px 8px;">
-      <div style="display:flex;gap:4px;align-items:center;">
-        <input type="text" class="field-input" style="padding:6px 8px;font-size:12px;flex:1;min-width:110px;" placeholder="ชื่อลูกค้า" id="${id}-cust"/>
-        <span onclick="bfOpenNewCust('${id}')" title="เพิ่มลูกค้าใหม่" style="cursor:pointer;font-size:14px;padding:2px 4px;">➕</span>
-      </div>
+      <select class="field-input" style="padding:6px 8px;font-size:12px;width:230px;" id="${id}-cust-sel" onchange="bfCustSelect('${id}')">
+        <option value="">— เลือกลูกค้า —</option>
+        <option value="__walkin">Walk-in (ไม่ระบุ)</option>
+        ${bfCustOptions()}
+      </select>
+      <input type="hidden" id="${id}-plate"/>
+      <input type="hidden" id="${id}-cust"/>
     </td>
     <td style="padding:10px 8px;min-width:280px;">
       <!-- Service add row -->
@@ -888,6 +886,25 @@ function bfUniqueServices(){
   return out;
 }
 
+function bfCustOptions(){
+  return custs.slice().sort((a,b)=>(a.plate||'').localeCompare(b.plate||'')).map(c=>`<option value="${c._id}">${c.plate||'(ไม่มีทะเบียน)'} — ${c.name||''}${c.size?' ('+c.size+')':''}</option>`).join('');
+}
+
+window.bfCustSelect=function(id){
+  const sel=document.getElementById(id+'-cust-sel');
+  const val=sel.value;
+  if(val==='__walkin'){
+    document.getElementById(id+'-plate').value='';
+    document.getElementById(id+'-cust').value='Walk-in';
+    return;
+  }
+  const c=custs.find(x=>x._id===val);
+  if(!c){document.getElementById(id+'-plate').value='';document.getElementById(id+'-cust').value='';return;}
+  document.getElementById(id+'-plate').value=c.plate||'';
+  document.getElementById(id+'-cust').value=c.name||'';
+  if(c.size){document.getElementById(id+'-size').value=c.size;if(bfData[id]){bfData[id].size=c.size;bfRenderSvc(id);}}
+};
+
 function bfSvcOptions(){
   return bfUniqueServices().map(s=>`<option value="${s._id}" data-code="${s.code||''}" data-name="${s.name||''}" data-s="${s.S||0}" data-m="${s.M||0}" data-l="${s.L||0}" data-xl="${s.XL||0}" data-xxl="${s.XXL||0}">${s.code?'['+s.code+'] ':''}${s.name}</option>`).join('');
 }
@@ -926,27 +943,6 @@ window.bfRenderSvc=function(id){
     </div>`).join('');
   const total=d.services.reduce((a,s)=>a+(s.price||0),0);
   document.getElementById(id+'-total-disp').textContent='฿'+total.toLocaleString();
-};
-
-window.bfPlateSearch=function(id){
-  const val=(document.getElementById(id+'-plate').value||'').replace(/\s+/g,'').toUpperCase();
-  const drop=document.getElementById(id+'-plate-drop');
-  if(val.length<2){drop.style.display='none';return;}
-  const matches=custs.filter(c=>(c.plate||'').replace(/\s+/g,'').toUpperCase().includes(val));
-  if(matches.length===0){drop.style.display='none';return;}
-  drop.style.display='block';
-  drop.innerHTML=matches.slice(0,8).map(c=>`
-    <div onclick="bfSelectCust('${id}','${c._id}')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--bdr);font-size:12px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-      <b>${c.plate||''}</b> — ${c.name||''} <span style="color:var(--tx3);">${c.car||''} (${c.size||''})</span>
-    </div>`).join('');
-};
-
-window.bfSelectCust=function(id,custId){
-  const c=custs.find(x=>x._id===custId);if(!c)return;
-  document.getElementById(id+'-plate').value=c.plate||'';
-  document.getElementById(id+'-cust').value=c.name||'';
-  if(c.size){document.getElementById(id+'-size').value=c.size;bfData[id].size=c.size;}
-  document.getElementById(id+'-plate-drop').style.display='none';
 };
 
 window.removeBackfillRow=function(id){
@@ -1073,13 +1069,21 @@ window.saveEditCust=async function(){
       await updateDoc(doc(db,'customers',_editCustId),data);
       showToast('✅ บันทึกข้อมูลลูกค้าแล้ว');
     } else {
-      // Add new customer from backfill
+      // Add new customer (from backfill top button or row)
       const ref=await addDoc(collection(db,'customers'),{...data,points:0,visits:0,redeemed:0,coupons:[],serviceHistory:[]});
-      if(_bfNewCustRow){
-        document.getElementById(_bfNewCustRow+'-cust').value=data.name;
-        document.getElementById(_bfNewCustRow+'-plate').value=data.plate;
-        if(data.size)document.getElementById(_bfNewCustRow+'-size').value=data.size;
-        document.getElementById(_bfNewCustRow+'-cust').removeAttribute('readonly');
+      // Add to local array immediately so dropdowns update without waiting for snapshot
+      const newC={...data,_id:ref.id,points:0,visits:0};
+      custs.push(newC);
+      // Refresh all backfill row customer dropdowns
+      bfRows.filter(rid=>document.getElementById(rid)).forEach(rid=>{
+        const sel=document.getElementById(rid+'-cust-sel');
+        if(sel){const cur=sel.value;sel.innerHTML='<option value="">— เลือกลูกค้า —</option><option value="__walkin">Walk-in (ไม่ระบุ)</option>'+bfCustOptions();sel.value=cur;}
+      });
+      // If opened from a specific row, auto-select the new customer there
+      if(_bfNewCustRow&&document.getElementById(_bfNewCustRow+'-cust-sel')){
+        const sel=document.getElementById(_bfNewCustRow+'-cust-sel');
+        sel.value=ref.id;
+        bfCustSelect(_bfNewCustRow);
       }
       showToast('✅ เพิ่มลูกค้าใหม่แล้ว');
     }
