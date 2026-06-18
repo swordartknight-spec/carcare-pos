@@ -887,7 +887,13 @@ function bfUniqueServices(){
 }
 
 function bfCustOptions(){
-  return custs.slice().sort((a,b)=>(a.plate||'').localeCompare(b.plate||'')).map(c=>`<option value="${c._id}">${c.plate||'(ไม่มีทะเบียน)'} — ${c.name||''}${c.size?' ('+c.size+')':''}</option>`).join('');
+  const seen=new Set();const uniq=[];
+  custs.slice().sort((a,b)=>(a.plate||'').localeCompare(b.plate||'')).forEach(c=>{
+    const key=((c.plate||'').replace(/\s+/g,'').toUpperCase())+'|'+(c.name||'').trim();
+    if(seen.has(key))return;
+    seen.add(key);uniq.push(c);
+  });
+  return uniq.map(c=>`<option value="${c._id}">${c.plate||'(ไม่มีทะเบียน)'} — ${c.name||''}${c.size?' ('+c.size+')':''}</option>`).join('');
 }
 
 window.bfCustSelect=function(id){
