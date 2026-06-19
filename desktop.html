@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">v9r</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v3</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -146,6 +146,7 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="sb-item" onclick="nav('ceramic',this)"><span class="sb-icon">🛡</span>Ceramic Due</div>
     <div class="sb-item" onclick="nav('analytics',this)"><span class="sb-icon">📈</span>Analytics</div>
     <div class="sb-item" onclick="nav('backfill',this)"><span class="sb-icon">📝</span>เพิ่มข้อมูลย้อนหลัง</div>
+    <div class="sb-item" onclick="nav('pricing',this)"><span class="sb-icon">🏷️</span>จัดการราคา</div>
   </nav>
   <div class="sb-footer">
     <div class="sb-staff"><b id="sb-date"></b>Dashboard View</div>
@@ -339,6 +340,60 @@ input:focus,select:focus{border-color:var(--gold);}
       </div>
     </div>
 
+  <!-- PRICING -->
+    <div class="screen" id="sc-pricing">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div style="font-size:13px;color:var(--tx3);">แก้ราคาได้โดยคลิกที่ช่อง แล้วกด <b>บันทึก</b> — หรือเพิ่มบริการใหม่</div>
+        <button class="btn btn-g" onclick="openSvcModal(null)">＋ เพิ่มบริการใหม่</button>
+      </div>
+      <div id="pricing-cats"></div>
+    </div>
+
+    <!-- ADD/EDIT SERVICE MODAL -->
+    <div class="modal-bg" id="svc-modal" style="display:none;" onclick="if(event.target===this)closeSvcModal()">
+      <div class="modal" style="width:480px;">
+        <div class="modal-head">
+          <span id="svc-modal-title">＋ เพิ่มบริการใหม่</span>
+          <span onclick="closeSvcModal()" style="cursor:pointer;font-size:18px;color:var(--tx3);">✕</span>
+        </div>
+        <div class="modal-body">
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;">
+            <div><div class="field-label">ชื่อบริการ</div><input class="field-input" id="sf-name" placeholder="ล้างสี & ดูดฝุ่น"/></div>
+            <div><div class="field-label">Code</div><input class="field-input" id="sf-code" placeholder="P01"/></div>
+          </div>
+          <div><div class="field-label">หมวดหมู่</div>
+            <select class="field-input" id="sf-cat">
+              <option value="ล้างรถ">ล้างรถ</option>
+              <option value="เคลือบสี">เคลือบสี</option>
+              <option value="ภายใน">ภายใน</option>
+              <option value="บริการอื่น">บริการอื่น</option>
+              <option value="ใบปัดน้ำฝน">ใบปัดน้ำฝน</option>
+              <option value="โปรโมชั่น">โปรโมชั่น</option>
+            </select>
+          </div>
+          <div class="field-label" style="margin-bottom:0;">ราคาตามขนาดรถ</div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+            <div><div style="font-size:10px;color:var(--tx3);text-align:center;margin-bottom:2px;">S</div><input class="field-input" id="sf-S" type="number" min="0" style="text-align:center;padding:8px 4px;"/></div>
+            <div><div style="font-size:10px;color:var(--tx3);text-align:center;margin-bottom:2px;">M</div><input class="field-input" id="sf-M" type="number" min="0" style="text-align:center;padding:8px 4px;"/></div>
+            <div><div style="font-size:10px;color:var(--tx3);text-align:center;margin-bottom:2px;">L</div><input class="field-input" id="sf-L" type="number" min="0" style="text-align:center;padding:8px 4px;"/></div>
+            <div><div style="font-size:10px;color:var(--tx3);text-align:center;margin-bottom:2px;">XL</div><input class="field-input" id="sf-XL" type="number" min="0" style="text-align:center;padding:8px 4px;"/></div>
+            <div><div style="font-size:10px;color:var(--tx3);text-align:center;margin-bottom:2px;">XXL</div><input class="field-input" id="sf-XXL" type="number" min="0" style="text-align:center;padding:8px 4px;"/></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><div class="field-label">คอม Sale (SC)</div><input class="field-input" id="sf-SC" type="number" min="0" placeholder="0"/></div>
+            <div><div class="field-label">คอม Op (SCo)</div><input class="field-input" id="sf-SCo" type="number" min="0" placeholder="0"/></div>
+          </div>
+        </div>
+        <div class="modal-foot" style="justify-content:space-between;">
+          <button class="btn" id="svc-delete-btn" onclick="deleteSvc()" style="color:var(--err);display:none;">🗑 ลบบริการ</button>
+          <div style="display:flex;gap:10px;margin-left:auto;">
+            <button class="btn" onclick="closeSvcModal()">ยกเลิก</button>
+            <button class="btn btn-g" onclick="saveSvc()">💾 บันทึก</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   <!-- BACKFILL -->
     <div class="screen" id="sc-backfill">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -435,7 +490,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import{getFirestore,collection,onSnapshot,query,orderBy,limit,doc,updateDoc,addDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+import{getFirestore,collection,onSnapshot,query,orderBy,limit,doc,updateDoc,addDoc,deleteDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 
 const FB={apiKey:'AIzaSyDSuBAXVbzaMwNJEVQYxYDF8Q0zPWYxUhQ',authDomain:'carcare-pos-559ef.firebaseapp.com',projectId:'carcare-pos-559ef',storageBucket:'carcare-pos-559ef.appspot.com',appId:'1:562909364593:web:549e45b521adb45247f6d0'};
 const app=initializeApp(FB);
@@ -465,7 +520,7 @@ onSnapshot(collection(db,'customers'),s=>{custs=s.docs.map(d=>({...d.data(),_id:
 onSnapshot(collection(db,'stock'),s=>{stock=s.docs.map(d=>({...d.data(),_id:d.id}));rStock();});
 onSnapshot(collection(db,'expenses'),s=>{expenses=s.docs.map(d=>({...d.data(),_id:d.id}));rToday();});
 onSnapshot(collection(db,'staff'),s=>{staffList=s.docs.map(d=>({...d.data(),_id:d.id}));});
-onSnapshot(collection(db,'services'),s=>{services=s.docs.map(d=>({...d.data(),_id:d.id}));});
+onSnapshot(collection(db,'services'),s=>{services=s.docs.map(d=>({...d.data(),_id:d.id}));if(document.getElementById('sc-pricing')?.classList.contains('active'))rPricing();});
 
 function filterBranch(t){if(currentBranch==='all')return true;if(!t.branch)return true;return t.branch===currentBranch;}
 function renderItems(t){
@@ -1040,6 +1095,109 @@ window.submitBackfill=async function(){
   }
 };
 
+// ── PRICING ──
+const PRICE_CATS=['ล้างรถ','เคลือบสี','ภายใน','บริการอื่น','ใบปัดน้ำฝน','โปรโมชั่น'];
+const SIZES=['S','M','L','XL','XXL'];
+
+function rPricing(){
+  const con=G('pricing-cats');
+  // Dedupe services
+  const seen=new Set();const uniq=[];
+  services.forEach(s=>{const k=(s.code||'')+'|'+(s.name||'');if(!seen.has(k)){seen.add(k);uniq.push(s);}});
+
+  con.innerHTML=PRICE_CATS.map(cat=>{
+    const items=uniq.filter(s=>s.cat===cat);
+    if(items.length===0)return '';
+    return `<div class="table-card" style="margin-bottom:16px;">
+      <div class="table-head"><span style="font-weight:700;">${cat} <span style="color:var(--tx3);font-size:12px;font-weight:400;">(${items.length})</span></span></div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:var(--bg);text-align:left;">
+          <th style="padding:8px;font-size:11px;color:var(--tx3);width:70px;">Code</th>
+          <th style="padding:8px;font-size:11px;color:var(--tx3);">ชื่อบริการ</th>
+          ${SIZES.map(sz=>`<th style="padding:8px;font-size:11px;color:var(--tx3);text-align:center;width:75px;">${sz}</th>`).join('')}
+          <th style="padding:8px;width:40px;"></th>
+        </tr></thead>
+        <tbody>
+          ${items.map(s=>`<tr style="border-bottom:1px solid var(--bdr);">
+            <td style="padding:6px 8px;"><span style="background:var(--gold-lt);color:var(--blk);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;">${s.code||'-'}</span></td>
+            <td style="padding:6px 8px;font-weight:600;">${s.name||''}</td>
+            ${SIZES.map(sz=>`<td style="padding:6px 4px;">
+              <input type="number" value="${s[sz]||0}" min="0"
+                onchange="updateSvcPrice('${s._id}','${sz}',this.value)"
+                style="width:65px;padding:5px 6px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;text-align:center;font-family:inherit;background:var(--sur);color:var(--tx);"/>
+            </td>`).join('')}
+            <td style="padding:6px 8px;"><span onclick="openSvcModal('${s._id}')" style="cursor:pointer;font-size:14px;" title="แก้ไข/ลบ">✏️</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+
+window.updateSvcPrice=async function(id,size,val){
+  const price=parseInt(val)||0;
+  try{
+    await updateDoc(doc(db,'services',id),{[size]:price});
+    showToast('✅ อัปเดตราคา '+size+' = ฿'+price);
+  }catch(e){alert('บันทึกไม่สำเร็จ: '+e.message);}
+};
+
+let _editSvcId=null;
+window.openSvcModal=function(id){
+  _editSvcId=id;
+  const delBtn=G('svc-delete-btn');
+  if(id){
+    const s=services.find(x=>x._id===id);if(!s)return;
+    G('svc-modal-title').textContent='✏️ แก้ไขบริการ';
+    G('sf-name').value=s.name||'';
+    G('sf-code').value=s.code||'';
+    G('sf-cat').value=s.cat||'ล้างรถ';
+    SIZES.forEach(sz=>G('sf-'+sz).value=s[sz]||0);
+    G('sf-SC').value=s.SC||0;
+    G('sf-SCo').value=s.SCo||0;
+    delBtn.style.display='inline-block';
+  } else {
+    G('svc-modal-title').textContent='＋ เพิ่มบริการใหม่';
+    G('sf-name').value='';G('sf-code').value='';G('sf-cat').value='ล้างรถ';
+    SIZES.forEach(sz=>G('sf-'+sz).value=0);
+    G('sf-SC').value=0;G('sf-SCo').value=0;
+    delBtn.style.display='none';
+  }
+  G('svc-modal').style.display='flex';
+};
+
+window.closeSvcModal=function(){G('svc-modal').style.display='none';_editSvcId=null;};
+
+window.saveSvc=async function(){
+  const data={
+    name:G('sf-name').value.trim(),
+    code:G('sf-code').value.trim(),
+    cat:G('sf-cat').value,
+    SC:parseInt(G('sf-SC').value)||0,
+    SCo:parseInt(G('sf-SCo').value)||0,
+    cpnWash:0,cpnMonth:0
+  };
+  SIZES.forEach(sz=>data[sz]=parseInt(G('sf-'+sz).value)||0);
+  if(!data.name){alert('กรุณากรอกชื่อบริการ');return;}
+  try{
+    if(_editSvcId)await updateDoc(doc(db,'services',_editSvcId),data);
+    else await addDoc(collection(db,'services'),data);
+    closeSvcModal();
+    showToast(_editSvcId?'✅ บันทึกบริการแล้ว':'✅ เพิ่มบริการใหม่แล้ว');
+  }catch(e){alert('บันทึกไม่สำเร็จ: '+e.message);}
+};
+
+window.deleteSvc=async function(){
+  if(!_editSvcId)return;
+  const s=services.find(x=>x._id===_editSvcId);
+  if(!confirm('ลบบริการ "'+(s?.name||'')+'" ?\nการลบไม่สามารถย้อนกลับได้'))return;
+  try{
+    await deleteDoc(doc(db,'services',_editSvcId));
+    closeSvcModal();
+    showToast('🗑 ลบบริการแล้ว');
+  }catch(e){alert('ลบไม่สำเร็จ: '+e.message);}
+};
+
 // ── EDIT CUSTOMER ──
 let _editCustId=null;
 let _bfNewCustRow=null;
@@ -1116,7 +1274,7 @@ window.nav=function(id,el){
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active'));
   document.getElementById('sc-'+id).classList.add('active');
   el.classList.add('active');
-  const titles={today:'Today — Overview',history:'Transaction History',staff:'Staff Incentive',customers:'Customer List',stock:'Stock Levels',ceramic:'Ceramic Maintenance Due',analytics:'Analytics & Insights',backfill:'เพิ่มข้อมูลย้อนหลัง'};
+  const titles={today:'Today — Overview',history:'Transaction History',staff:'Staff Incentive',customers:'Customer List',stock:'Stock Levels',ceramic:'Ceramic Maintenance Due',analytics:'Analytics & Insights',backfill:'เพิ่มข้อมูลย้อนหลัง',pricing:'จัดการราคาบริการ'};
   G('page-title').textContent=titles[id]||id;
   G('export-btn').style.display=id==='history'?'inline-flex':'none';
   if(id==='history')rHistory();
@@ -1125,6 +1283,7 @@ window.nav=function(id,el){
   if(id==='ceramic')rCeramic();
   if(id==='analytics')rAnalytics();
   if(id==='backfill')rBackfill();
+  if(id==='pricing')rPricing();
 };
 
 // Init range
