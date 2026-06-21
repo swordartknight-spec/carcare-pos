@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v4</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v5</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -175,7 +175,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
     <!-- TODAY -->
     <div class="screen active" id="sc-today">
-      <div class="stat-grid" style="grid-template-columns:repeat(5,1fr);">
+      <div class="stat-grid" style="grid-template-columns:repeat(6,1fr);">
         <div class="stat-card gold">
           <div class="stat-lbl">ยอดขายวันนี้</div>
           <div class="stat-val" id="t-total">฿0</div>
@@ -196,8 +196,13 @@ input:focus,select:focus{border-color:var(--gold);}
           <div class="stat-val" id="t-pts">0</div>
           <div class="stat-sub">pts วันนี้</div>
         </div>
+        <div class="stat-card blue">
+          <div class="stat-lbl">Daily Retention</div>
+          <div class="stat-val" id="t-retention-daily" style="font-size:28px;">—%</div>
+          <div class="stat-sub" id="t-retention-daily-sub">ลูกค้าเก่าที่มาวันนี้</div>
+        </div>
         <div class="stat-card green">
-          <div class="stat-lbl">Retention Rate</div>
+          <div class="stat-lbl">Overall Retention</div>
           <div class="stat-val" id="t-retention" style="font-size:28px;">—%</div>
           <div class="stat-sub" id="t-retention-sub">ลูกค้ากลับมาซ้ำ</div>
         </div>
@@ -561,7 +566,7 @@ function rToday(){
   G('t-cust').textContent=n;
   G('t-avg').textContent='Avg ฿'+(n?Math.round(tot/n):0).toLocaleString()+'/คน';
   G('t-pts').textContent=today.reduce((a,t)=>a+(t.pts||0),0).toLocaleString();
-  // Retention rate (overall, all-time)
+  // Overall retention rate (all-time)
   const custVisits={};
   txns.filter(t=>filterBranch(t)&&t.customer&&t.customer!=='Walk-in'&&t.customer!=='ลูกค้า').forEach(t=>{custVisits[t.customer]=(custVisits[t.customer]||0)+1;});
   const totalC=Object.keys(custVisits).length;
@@ -569,6 +574,17 @@ function rToday(){
   const retRate=totalC>0?Math.round(returnC/totalC*100):0;
   G('t-retention').textContent=retRate+'%';
   G('t-retention-sub').textContent=returnC+' จาก '+totalC+' สมาชิก';
+  // Daily retention — of today's named customers, how many visited before today
+  const todayNamed=today.filter(t=>t.customer&&t.customer!=='Walk-in'&&t.customer!=='ลูกค้า');
+  const uniqueTodayCusts=[...new Set(todayNamed.map(t=>t.customer))];
+  let returningToday=0;
+  uniqueTodayCusts.forEach(cust=>{
+    const hadPriorVisit=txns.some(t=>filterBranch(t)&&t.customer===cust&&t.date!==td);
+    if(hadPriorVisit)returningToday++;
+  });
+  const dailyRet=uniqueTodayCusts.length>0?Math.round(returningToday/uniqueTodayCusts.length*100):0;
+  G('t-retention-daily').textContent=dailyRet+'%';
+  G('t-retention-daily-sub').textContent=returningToday+' จาก '+uniqueTodayCusts.length+' คนวันนี้';
   G('t-cash').textContent='฿'+today.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
   G('t-qr').textContent='฿'+today.filter(t=>t.payment==='QR').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
   G('t-transfer').textContent='฿'+today.filter(t=>t.payment==='โอน').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
