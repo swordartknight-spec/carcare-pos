@@ -391,7 +391,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9r</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9s</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1659,8 +1659,8 @@ window.checkout=async function(){
   const recId='#'+String(++txnN);
   const svcEntries=cart.map(c=>({name:c.name,code:c.code,cat:c.cat,size:c.size,price:c.price,date:now.toISOString()}));
   const hasCeramic=cart.some(c=>c.code==='P07'||c.code==='S11');
-  const csaleTotal=cart.reduce((a,c)=>a+(c.SC||0)*c.qty,0);
-  const copTotal=cart.reduce((a,c)=>a+(c.SCo||0)*c.qty,0);
+  const csaleTotal=cart.reduce((a,c)=>{const sz=c.size||'M';const v=(c['CS_'+sz]!==undefined&&c['CS_'+sz]!==null)?c['CS_'+sz]:(c.SC||0);return a+v*c.qty;},0);
+  const copTotal=cart.reduce((a,c)=>{const sz=c.size||'M';const v=(c['CO_'+sz]!==undefined&&c['CO_'+sz]!==null)?c['CO_'+sz]:(c.SCo||0);return a+v*c.qty;},0);
 
   // Build new coupons from service recipes
   let newCoupons=[],cpnMsg=[];

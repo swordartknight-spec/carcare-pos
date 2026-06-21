@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v3</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v4</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -351,7 +351,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
     <!-- ADD/EDIT SERVICE MODAL -->
     <div class="modal-bg" id="svc-modal" style="display:none;" onclick="if(event.target===this)closeSvcModal()">
-      <div class="modal" style="width:480px;">
+      <div class="modal" style="width:560px;">
         <div class="modal-head">
           <span id="svc-modal-title">＋ เพิ่มบริการใหม่</span>
           <span onclick="closeSvcModal()" style="cursor:pointer;font-size:18px;color:var(--tx3);">✕</span>
@@ -371,17 +371,35 @@ input:focus,select:focus{border-color:var(--gold);}
               <option value="โปรโมชั่น">โปรโมชั่น</option>
             </select>
           </div>
-          <div class="field-label" style="margin-bottom:0;">ราคาตามขนาดรถ</div>
-          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
-            <div><div style="font-size:10px;color:var(--tx3);text-align:center;margin-bottom:2px;">S</div><input class="field-input" id="sf-S" type="number" min="0" style="text-align:center;padding:8px 4px;"/></div>
-            <div><div style="font-size:10px;color:var(--tx3);text-align:center;margin-bottom:2px;">M</div><input class="field-input" id="sf-M" type="number" min="0" style="text-align:center;padding:8px 4px;"/></div>
-            <div><div style="font-size:10px;color:var(--tx3);text-align:center;margin-bottom:2px;">L</div><input class="field-input" id="sf-L" type="number" min="0" style="text-align:center;padding:8px 4px;"/></div>
-            <div><div style="font-size:10px;color:var(--tx3);text-align:center;margin-bottom:2px;">XL</div><input class="field-input" id="sf-XL" type="number" min="0" style="text-align:center;padding:8px 4px;"/></div>
-            <div><div style="font-size:10px;color:var(--tx3);text-align:center;margin-bottom:2px;">XXL</div><input class="field-input" id="sf-XXL" type="number" min="0" style="text-align:center;padding:8px 4px;"/></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div><div class="field-label">คอม Sale (SC)</div><input class="field-input" id="sf-SC" type="number" min="0" placeholder="0"/></div>
-            <div><div class="field-label">คอม Op (SCo)</div><input class="field-input" id="sf-SCo" type="number" min="0" placeholder="0"/></div>
+          <div class="field-label" style="margin-bottom:0;">ราคา + Commission ตามขนาด</div>
+          <div style="display:grid;grid-template-columns:40px repeat(5,1fr);gap:6px;align-items:center;font-size:11px;">
+            <div></div>
+            <div style="text-align:center;font-weight:700;color:var(--tx3);">S</div>
+            <div style="text-align:center;font-weight:700;color:var(--tx3);">M</div>
+            <div style="text-align:center;font-weight:700;color:var(--tx3);">L</div>
+            <div style="text-align:center;font-weight:700;color:var(--tx3);">XL</div>
+            <div style="text-align:center;font-weight:700;color:var(--tx3);">XXL</div>
+
+            <div style="font-size:10px;color:var(--tx3);">ราคา</div>
+            <input class="field-input" id="sf-S" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;"/>
+            <input class="field-input" id="sf-M" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;"/>
+            <input class="field-input" id="sf-L" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;"/>
+            <input class="field-input" id="sf-XL" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;"/>
+            <input class="field-input" id="sf-XXL" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;"/>
+
+            <div style="font-size:10px;color:var(--ok);">C-Sale</div>
+            <input class="field-input" id="sf-CS_S" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;background:#f0faf0;"/>
+            <input class="field-input" id="sf-CS_M" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;background:#f0faf0;"/>
+            <input class="field-input" id="sf-CS_L" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;background:#f0faf0;"/>
+            <input class="field-input" id="sf-CS_XL" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;background:#f0faf0;"/>
+            <input class="field-input" id="sf-CS_XXL" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;background:#f0faf0;"/>
+
+            <div style="font-size:10px;color:var(--inf);">C-Op</div>
+            <input class="field-input" id="sf-CO_S" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;background:#eef5fb;"/>
+            <input class="field-input" id="sf-CO_M" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;background:#eef5fb;"/>
+            <input class="field-input" id="sf-CO_L" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;background:#eef5fb;"/>
+            <input class="field-input" id="sf-CO_XL" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;background:#eef5fb;"/>
+            <input class="field-input" id="sf-CO_XXL" type="number" min="0" style="text-align:center;padding:6px 2px;font-size:11px;background:#eef5fb;"/>
           </div>
         </div>
         <div class="modal-foot" style="justify-content:space-between;">
@@ -1110,35 +1128,46 @@ function rPricing(){
     if(items.length===0)return '';
     return `<div class="table-card" style="margin-bottom:16px;">
       <div class="table-head"><span style="font-weight:700;">${cat} <span style="color:var(--tx3);font-size:12px;font-weight:400;">(${items.length})</span></span></div>
-      <table style="width:100%;border-collapse:collapse;font-size:13px;">
-        <thead><tr style="background:var(--bg);text-align:left;">
-          <th style="padding:8px;font-size:11px;color:var(--tx3);width:70px;">Code</th>
-          <th style="padding:8px;font-size:11px;color:var(--tx3);">ชื่อบริการ</th>
-          ${SIZES.map(sz=>`<th style="padding:8px;font-size:11px;color:var(--tx3);text-align:center;width:75px;">${sz}</th>`).join('')}
-          <th style="padding:8px;width:40px;"></th>
-        </tr></thead>
+      <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:900px;">
+        <thead>
+          <tr style="background:var(--bg);">
+            <th rowspan="2" style="padding:6px;font-size:11px;color:var(--tx3);width:60px;border-right:1px solid var(--bdr);">Code</th>
+            <th rowspan="2" style="padding:6px;font-size:11px;color:var(--tx3);text-align:left;border-right:1px solid var(--bdr);">ชื่อบริการ</th>
+            ${SIZES.map(sz=>`<th colspan="3" style="padding:5px;font-size:11px;color:var(--blk);text-align:center;border-right:2px solid var(--bdr);background:var(--gold-lt);">${sz}</th>`).join('')}
+            <th rowspan="2" style="padding:6px;width:36px;"></th>
+          </tr>
+          <tr style="background:var(--bg);">
+            ${SIZES.map(sz=>`
+              <th style="padding:4px;font-size:9px;color:var(--tx3);text-align:center;">ราคา</th>
+              <th style="padding:4px;font-size:9px;color:var(--ok);text-align:center;">C-S</th>
+              <th style="padding:4px;font-size:9px;color:var(--inf);text-align:center;border-right:2px solid var(--bdr);">C-O</th>
+            `).join('')}
+          </tr>
+        </thead>
         <tbody>
           ${items.map(s=>`<tr style="border-bottom:1px solid var(--bdr);">
-            <td style="padding:6px 8px;"><span style="background:var(--gold-lt);color:var(--blk);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;">${s.code||'-'}</span></td>
-            <td style="padding:6px 8px;font-weight:600;">${s.name||''}</td>
-            ${SIZES.map(sz=>`<td style="padding:6px 4px;">
-              <input type="number" value="${s[sz]||0}" min="0"
-                onchange="updateSvcPrice('${s._id}','${sz}',this.value)"
-                style="width:65px;padding:5px 6px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;text-align:center;font-family:inherit;background:var(--sur);color:var(--tx);"/>
-            </td>`).join('')}
-            <td style="padding:6px 8px;"><span onclick="openSvcModal('${s._id}')" style="cursor:pointer;font-size:14px;" title="แก้ไข/ลบ">✏️</span></td>
+            <td style="padding:5px 6px;border-right:1px solid var(--bdr);"><span style="background:var(--gold-lt);color:var(--blk);font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;">${s.code||'-'}</span></td>
+            <td style="padding:5px 6px;font-weight:600;font-size:12px;border-right:1px solid var(--bdr);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${s.name||''}">${s.name||''}</td>
+            ${SIZES.map(sz=>`
+              <td style="padding:3px 2px;"><input type="number" value="${s[sz]||0}" min="0" onchange="updateSvcField('${s._id}','${sz}',this.value)" style="width:48px;padding:4px 2px;border:1px solid var(--bdr);border-radius:5px;font-size:11px;text-align:center;font-family:inherit;background:var(--sur);color:var(--tx);"/></td>
+              <td style="padding:3px 2px;"><input type="number" value="${s['CS_'+sz]||0}" min="0" onchange="updateSvcField('${s._id}','CS_${sz}',this.value)" style="width:38px;padding:4px 2px;border:1px solid var(--bdr);border-radius:5px;font-size:11px;text-align:center;font-family:inherit;background:#f0faf0;color:var(--ok);"/></td>
+              <td style="padding:3px 2px;border-right:2px solid var(--bdr);"><input type="number" value="${s['CO_'+sz]||0}" min="0" onchange="updateSvcField('${s._id}','CO_${sz}',this.value)" style="width:38px;padding:4px 2px;border:1px solid var(--bdr);border-radius:5px;font-size:11px;text-align:center;font-family:inherit;background:#eef5fb;color:var(--inf);"/></td>
+            `).join('')}
+            <td style="padding:5px 6px;"><span onclick="openSvcModal('${s._id}')" style="cursor:pointer;font-size:13px;" title="แก้ไข/ลบ">✏️</span></td>
           </tr>`).join('')}
         </tbody>
       </table>
+      </div>
     </div>`;
   }).join('');
 }
 
-window.updateSvcPrice=async function(id,size,val){
-  const price=parseInt(val)||0;
+window.updateSvcField=async function(id,field,val){
+  const v=parseInt(val)||0;
   try{
-    await updateDoc(doc(db,'services',id),{[size]:price});
-    showToast('✅ อัปเดตราคา '+size+' = ฿'+price);
+    await updateDoc(doc(db,'services',id),{[field]:v});
+    showToast('✅ อัปเดต '+field+' = '+v);
   }catch(e){alert('บันทึกไม่สำเร็จ: '+e.message);}
 };
 
@@ -1152,15 +1181,16 @@ window.openSvcModal=function(id){
     G('sf-name').value=s.name||'';
     G('sf-code').value=s.code||'';
     G('sf-cat').value=s.cat||'ล้างรถ';
-    SIZES.forEach(sz=>G('sf-'+sz).value=s[sz]||0);
-    G('sf-SC').value=s.SC||0;
-    G('sf-SCo').value=s.SCo||0;
+    SIZES.forEach(sz=>{
+      G('sf-'+sz).value=s[sz]||0;
+      G('sf-CS_'+sz).value=s['CS_'+sz]||0;
+      G('sf-CO_'+sz).value=s['CO_'+sz]||0;
+    });
     delBtn.style.display='inline-block';
   } else {
     G('svc-modal-title').textContent='＋ เพิ่มบริการใหม่';
     G('sf-name').value='';G('sf-code').value='';G('sf-cat').value='ล้างรถ';
-    SIZES.forEach(sz=>G('sf-'+sz).value=0);
-    G('sf-SC').value=0;G('sf-SCo').value=0;
+    SIZES.forEach(sz=>{G('sf-'+sz).value=0;G('sf-CS_'+sz).value=0;G('sf-CO_'+sz).value=0;});
     delBtn.style.display='none';
   }
   G('svc-modal').style.display='flex';
@@ -1173,11 +1203,15 @@ window.saveSvc=async function(){
     name:G('sf-name').value.trim(),
     code:G('sf-code').value.trim(),
     cat:G('sf-cat').value,
-    SC:parseInt(G('sf-SC').value)||0,
-    SCo:parseInt(G('sf-SCo').value)||0,
     cpnWash:0,cpnMonth:0
   };
-  SIZES.forEach(sz=>data[sz]=parseInt(G('sf-'+sz).value)||0);
+  SIZES.forEach(sz=>{
+    data[sz]=parseInt(G('sf-'+sz).value)||0;
+    data['CS_'+sz]=parseInt(G('sf-CS_'+sz).value)||0;
+    data['CO_'+sz]=parseInt(G('sf-CO_'+sz).value)||0;
+  });
+  // Keep SC/SCo as M-size fallback for backward compat
+  data.SC=data.CS_M;data.SCo=data.CO_M;
   if(!data.name){alert('กรุณากรอกชื่อบริการ');return;}
   try{
     if(_editSvcId)await updateDoc(doc(db,'services',_editSvcId),data);
