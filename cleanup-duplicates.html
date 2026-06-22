@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8"><title>ล้างข้อมูลซ้ำ → Firebase</title>
+<style>body{font-family:system-ui;max-width:900px;margin:30px auto;padding:20px;background:#1a1a1a;color:#eee;}
+button{background:#C9A84C;color:#000;border:none;padding:14px 28px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-right:10px;}
+button.scan{background:#4a9eff;color:#fff;}
+button:disabled{opacity:.5;cursor:not-allowed;}
+#log{margin-top:20px;font-size:13px;line-height:1.7;max-height:450px;overflow-y:auto;background:#000;padding:16px;border-radius:10px;}
+.ok{color:#6cd86c;} .err{color:#ff6b6b;} .info{color:#888;} .warn-txt{color:#ffc107;}
+h1{font-size:20px;} h2{font-size:15px;margin-top:24px;color:#C9A84C;}
+.warn{background:#3a2a00;border:1px solid #C9A84C;padding:14px;border-radius:10px;margin:16px 0;font-size:13px;}
+.box{background:#222;border-radius:10px;padding:16px;margin:12px 0;}</style>
+</head><body>
+<h1>🧹 ล้างข้อมูลซ้ำ (ลูกค้า + บริการ)</h1>
+<div class="warn">⚠️ <b>กด "สแกนหาข้อมูลซ้ำ" ก่อน</b> เพื่อดูว่าจะลบอะไรบ้าง — ยังไม่ลบจริงจนกว่าจะกดปุ่มลบ<br>
+กฎ: <b>ลูกค้า</b>ที่ทะเบียน+ชื่อซ้ำ จะเก็บอันที่ <b>points มากสุด</b> ไว้ · <b>บริการ</b>ที่ code+ชื่อซ้ำ จะเก็บอันแรกไว้</div>
+
+<button class="scan" id="scanBtn" onclick="scan()">🔍 สแกนหาข้อมูลซ้ำ</button>
+<button id="delBtn" onclick="doDelete()" disabled>🗑 ลบข้อมูลซ้ำทั้งหมด</button>
+
+<div id="log"></div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import{getFirestore,collection,getDocs,deleteDoc,doc}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+const FB={apiKey:'AIzaSyDSuBAXVbzaMwNJEVQYxYDF8Q0zPWYxUhQ',authDomain:'carcare-pos-559ef.firebaseapp.com',projectId:'carcare-pos-559ef',storageBucket:'carcare-pos-559ef.appspot.com',appId:'1:562909364593:web:549e45b521adb45247f6d0'};
+const app=initializeApp(FB);const db=getFirestore(app);
+const L=(m,c='info')=>{const d=document.getElementById('log');d.innerHTML+=`<div class="${c}">${m}</div>`;d.scrollTop=d.scrollHeight;};
+
+let toDelete={customers:[],services:[]};
+
+function num(v){return parseInt(v)||0;}
+
+window.scan=async function(){
+  document.getElementById('log').innerHTML='';
+  toDelete={customers:[],services:[]};
+  L('🔍 กำลังสแกน...');
+
+  // ── CUSTOMERS ──
+  const custSnap=await getDocs(collection(db,'customers'));
+  const custs=custSnap.docs.map(d=>({_id:d.id,...d.data()}));
+  L(`<br><b>ลูกค้าทั้งหมด: ${custs.length} รายการ</b>`);
+
+  const custGroups={};
+  custs.forEach(c=>{
+    const key=((c.plate||'').replace(/\s+/g,'').toUpperCase())+'|'+((c.name||'').trim());
+    if(!custGroups[key])custGroups[key]=[];
+    custGroups[key].push(c);
+  });
+
+  let custDupCount=0;
+  Object.entries(custGroups).forEach(([key,group])=>{
+    if(group.length<2)return;
+    // Keep one with most points (then most visits)
+    group.sort((a,b)=>num(b.points)-num(a.points)||num(b.visits)-num(a.visits));
+    const keep=group[0];
+    const remove=group.slice(1);
+    custDupCount+=remove.length;
+    L(`<div class="box">🔁 <b>${keep.name||'(ไม่มีชื่อ)'}</b> (${keep.plate||'-'}) — ซ้ำ ${group.length} รายการ<br>
+      <span class="ok">✓ เก็บ: ${keep.points||0} pts, ${keep.visits||0} visits</span><br>
+      ${remove.map(r=>`<span class="err">✗ ลบ: ${r.points||0} pts, ${r.visits||0} visits (id: ${r._id.slice(0,8)})</span>`).join('<br>')}
+    </div>`);
+    remove.forEach(r=>toDelete.customers.push(r._id));
+  });
+  if(custDupCount===0)L('✅ ไม่พบลูกค้าซ้ำ','ok');
+  else L(`⚠️ พบลูกค้าซ้ำที่จะลบ: ${custDupCount} รายการ`,'warn-txt');
+
+  // ── SERVICES ──
+  const svcSnap=await getDocs(collection(db,'services'));
+  const svcs=svcSnap.docs.map(d=>({_id:d.id,...d.data()}));
+  L(`<br><b>บริการทั้งหมด: ${svcs.length} รายการ</b>`);
+
+  const svcGroups={};
+  svcs.forEach(s=>{
+    const key=((s.code||'').trim())+'|'+((s.name||'').trim());
+    if(!svcGroups[key])svcGroups[key]=[];
+    svcGroups[key].push(s);
+  });
+
+  let svcDupCount=0;
+  Object.entries(svcGroups).forEach(([key,group])=>{
+    if(group.length<2)return;
+    const keep=group[0];const remove=group.slice(1);
+    svcDupCount+=remove.length;
+    L(`🔁 ${keep.code||'-'} ${keep.name} — ซ้ำ ${group.length} → ลบ ${remove.length}`,'warn-txt');
+    remove.forEach(r=>toDelete.services.push(r._id));
+  });
+  if(svcDupCount===0)L('✅ ไม่พบบริการซ้ำ','ok');
+  else L(`⚠️ พบบริการซ้ำที่จะลบ: ${svcDupCount} รายการ`,'warn-txt');
+
+  // Summary
+  const total=toDelete.customers.length+toDelete.services.length;
+  L(`<br><b>📊 สรุป: จะลบทั้งหมด ${total} รายการ</b> (ลูกค้า ${toDelete.customers.length} + บริการ ${toDelete.services.length})`,total>0?'warn-txt':'ok');
+  if(total>0){document.getElementById('delBtn').disabled=false;L('👉 กดปุ่ม "ลบข้อมูลซ้ำทั้งหมด" เพื่อดำเนินการ');}
+};
+
+window.doDelete=async function(){
+  const total=toDelete.customers.length+toDelete.services.length;
+  if(total===0)return;
+  if(!confirm(`ยืนยันลบ ${total} รายการ?\nการลบไม่สามารถย้อนกลับได้`))return;
+  const btn=document.getElementById('delBtn');btn.disabled=true;btn.textContent='กำลังลบ...';
+  document.getElementById('scanBtn').disabled=true;
+
+  L('<br>🗑 เริ่มลบ...','warn-txt');
+  let done=0;
+  for(const id of toDelete.customers){
+    try{await deleteDoc(doc(db,'customers',id));done++;}catch(e){L('❌ '+e.message,'err');}
+  }
+  L(`✅ ลบลูกค้าซ้ำ ${toDelete.customers.length} รายการ`,'ok');
+  let sdone=0;
+  for(const id of toDelete.services){
+    try{await deleteDoc(doc(db,'services',id));sdone++;}catch(e){L('❌ '+e.message,'err');}
+  }
+  L(`✅ ลบบริการซ้ำ ${toDelete.services.length} รายการ`,'ok');
+  L(`<br>🎉 เสร็จสมบูรณ์! ลบไปทั้งหมด ${done+sdone} รายการ`,'ok');
+  btn.textContent='✅ ลบเสร็จแล้ว';
+  toDelete={customers:[],services:[]};
+};
+</script></body></html>
