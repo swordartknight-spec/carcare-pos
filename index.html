@@ -391,7 +391,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9s</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9t</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -805,9 +805,12 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div class="fr"><label class="lbl">เบอร์โทร</label><input id="cp" type="text" placeholder="08x-xxx-xxxx"/></div>
   <div class="fr"><label class="lbl">Line User ID <span style="font-size:9px;color:var(--tx3);font-weight:400;">(Uxxxxxxxx — ดูวิธีรับ ID ด้านล่าง)</span></label><input id="c-line" type="text" placeholder="Uxxxxxxxx"/></div>
   <div class="fr2">
-    <div><label class="lbl">ทะเบียน</label><input id="cpl" type="text" placeholder="กข 1234"/></div>
+    <div style="position:relative;"><label class="lbl">ทะเบียน</label><input id="cpl" type="text" placeholder="กข 1234" autocomplete="off" oninput="ncPlateSearch()"/>
+      <div id="nc-plate-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--sur,#fff);border:1px solid var(--bdr,#ddd);border-radius:8px;z-index:60;box-shadow:0 4px 16px rgba(0,0,0,.15);max-height:200px;overflow-y:auto;margin-top:2px;"></div>
+    </div>
     <div><label class="lbl">รุ่นรถ</label><input id="cc2" type="text" placeholder="Toyota Camry"/></div>
   </div>
+  <div id="nc-dup-warn" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:8px 12px;font-size:12px;color:#856404;margin-bottom:10px;"></div>
   <div class="fr"><label class="lbl">ขนาดรถ</label>
     <select id="csz"><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select>
   </div>
@@ -1984,6 +1987,36 @@ window.delCustDetail=async function(){
   else{custs=custs.filter(c=>(c._id||c.id)!=viewCustId);LS('cu',custs);rLoy();}
   hs('sh-cust');
 };
+// Live plate search in add-member form — detect existing customers
+window.ncPlateSearch=function(){
+  const val=(G('cpl').value||'').replace(/\s+/g,'').toUpperCase();
+  const drop=G('nc-plate-drop');
+  const warn=G('nc-dup-warn');
+  if(val.length<2){drop.style.display='none';warn.style.display='none';return;}
+  const matches=custs.filter(c=>(c.plate||'').replace(/\s+/g,'').toUpperCase().includes(val));
+  if(matches.length===0){drop.style.display='none';warn.style.display='none';return;}
+  // Exact match → strong warning
+  const exact=matches.find(c=>(c.plate||'').replace(/\s+/g,'').toUpperCase()===val);
+  if(exact){
+    warn.style.display='block';
+    warn.innerHTML='⚠️ ทะเบียนนี้มีในระบบแล้ว: <b>'+(exact.name||'')+'</b><br><span style="font-size:11px;">กด "ใช้ลูกค้านี้" เพื่อเปิดบิลแทนการเพิ่มซ้ำ</span>';
+  } else { warn.style.display='none'; }
+  drop.style.display='block';
+  drop.innerHTML=matches.slice(0,6).map(c=>`
+    <div onclick="ncUseCust('${c._id}')" style="padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--bdr,#eee);font-size:13px;">
+      <b style="color:var(--gold,#C9A84C);">${c.plate||''}</b> — ${c.name||''} <span style="color:var(--tx3,#999);font-size:11px;">${c.car||''} (${c.size||''})</span>
+    </div>`).join('')+`<div style="padding:8px 12px;font-size:11px;color:var(--tx3,#999);border-top:1px solid var(--bdr,#eee);">หรือกรอกต่อเพื่อเพิ่มลูกค้าใหม่</div>`;
+};
+
+window.ncUseCust=function(id){
+  // Close add form, select existing customer onto current bill
+  G('nc-plate-drop').style.display='none';
+  G('nc-dup-warn').style.display='none';
+  hs('sh-nc');
+  ['cf','cl2','cp','cpl','cc2','c-line'].forEach(i=>G(i).value='');
+  selCust(id);
+};
+
 window.addCust=async function(){
   const fn=G('cf').value.trim();if(!fn){alert('กรุณาระบุชื่อ');return;}
   const manualLineId=(G('c-line').value||'').trim();
@@ -2023,7 +2056,7 @@ window.addCust=async function(){
     selCust(newId);
     if(data.size)CZ=data.size;
   }
-  hs('sh-nc');['cf','cl2','cp','cpl','cc2','c-line'].forEach(i=>G(i).value='');
+  hs('sh-nc');['cf','cl2','cp','cpl','cc2','c-line'].forEach(i=>G(i).value='');const _d=G('nc-plate-drop');if(_d)_d.style.display='none';const _w=G('nc-dup-warn');if(_w)_w.style.display='none';
 };
 
 // ══ STOCK ══
