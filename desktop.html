@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v7</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v8</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -732,7 +732,7 @@ function daysAgo(dt){
 }
 function rCustomers(){
   const q=(G('c-search').value||'').toLowerCase();
-  let list=custs.filter(c=>!q||c.name?.toLowerCase().includes(q)||(c.plate||'').toLowerCase().includes(q)||(c.phone||'').includes(q));
+  let list=custs.filter(c=>!c.hidden).filter(c=>!q||c.name?.toLowerCase().includes(q)||(c.plate||'').toLowerCase().includes(q)||(c.phone||'').includes(q));
   // Attach last visit + sort by most recent
   list=list.map(c=>({...c,_lastVisit:lastVisitOf(c.name)}));
   list.sort((a,b)=>{
@@ -1114,7 +1114,7 @@ window.addBackfillRow=function(){
 // Dedupe services by code+name
 function bfUniqueServices(){
   const seen=new Set();const out=[];
-  services.slice().sort((a,b)=>(a.name||'').localeCompare(b.name||'')).forEach(s=>{
+  services.filter(s=>!s.hidden).slice().sort((a,b)=>(a.name||'').localeCompare(b.name||'')).forEach(s=>{
     const key=(s.code||'')+'|'+(s.name||'');
     if(seen.has(key))return;
     seen.add(key);out.push(s);
@@ -1124,7 +1124,7 @@ function bfUniqueServices(){
 
 function bfCustOptions(){
   const seen=new Set();const uniq=[];
-  custs.slice().sort((a,b)=>(a.plate||'').localeCompare(b.plate||'')).forEach(c=>{
+  custs.filter(c=>!c.hidden).slice().sort((a,b)=>(a.plate||'').localeCompare(b.plate||'')).forEach(c=>{
     const key=((c.plate||'').replace(/\s+/g,'').toUpperCase())+'|'+(c.name||'').trim();
     if(seen.has(key))return;
     seen.add(key);uniq.push(c);
@@ -1328,7 +1328,7 @@ function rPricing(){
   const con=G('pricing-cats');
   // Dedupe services
   const seen=new Set();const uniq=[];
-  services.forEach(s=>{const k=(s.code||'')+'|'+(s.name||'');if(!seen.has(k)){seen.add(k);uniq.push(s);}});
+  services.filter(s=>!s.hidden).forEach(s=>{const k=(s.code||'')+'|'+(s.name||'');if(!seen.has(k)){seen.add(k);uniq.push(s);}});
 
   con.innerHTML=PRICE_CATS.map(cat=>{
     const items=uniq.filter(s=>s.cat===cat);
