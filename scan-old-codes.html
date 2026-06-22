@@ -47,11 +47,23 @@ const RULES=[
   {oldCode:'P01', nameHas:'เคลือบด่วน', newCode:'P01', newName:'เคลือบเงาเร่งด่วน'},
 ];
 
-function findRule(code,name){
+// Excel canonical names by code
+const EXCEL_NAMES={"W00": "ล้างรถ + ดูดฝุ่น", "W01": "ล้างสี มอเตอร์ไซค์", "W02": "Rainy Season Pass (ล้างฟรีตรอดเดือน)", "W03": "คูปองล้าง+เคลือบ 10 ครั้ง (ประหยัด 30-40%)", "W03-1": "คูปองล้างรถเครื่อบสี 10 ครั้ง", "P01": "เคลือบเงาเร่งด่วน", "P02": "ขัดเริ่ม - ดินน้ำมัน + ขัดเงา", "P03": "ขัดกลาง - ดินน้ำมัน+ขัดละเอียด + ขัดเงา", "P04": "ขัดเต็มระบบ -  ดินน้ำมัน+ขัดหยาบ+ขัดละเอียบ + ขัดเงา", "P05": "เคลือบเเก้วเซรามิก - ดินน้ำมัน+ขัดหยาบ+ขัดละเอียบ + ขัดเงา", "I01": "ซักพรมภายในทั้งคัน", "I02": "ซักพรมพื้นทั้งคัน + แผงประตู และแผงข้าง", "I03": "ซักพรมพื้น", "I04": "ซักแผงหลังคา", "I05": "ฟอกเบาะ Spa + อบโอโซน", "I06": "เคลือบเบาะภายในรถหนัง", "I07": "ขัดเคลือบพลาสติก", "S01": "เครือบกระจก-น้ำไม่เกาะ", "S02": "ขัดไฟหน้า - ลบราบเหลือง หรือ คราบหมอง", "S03": "เติมน้ำยาแอร์", "S04": "ล้างแอร์ทั้งระบบ แอร์เย็นแรง + กำจัดกลิ่นอับ", "S05": "ล้างล้อแม็ก คราบฝังลึก", "S06": "ฟื้นฟูสถาพพลาสติกรอบคั้น", "S07": "ฟื้นฟูสถาพพลาสติกถายใน", "S08": "อบโอโซน - กำจัดกลิ่น", "S09": "ห้องเครื่อง", "S10": "น้ำยาขัดเครือบ", "S11": "เคลือบเเก้วเซรามิก - มัดจำ", "S12": "ทำความสอาดลอยเล็บ", "S13": "กำจัดคราบยางมะตอย - คราบน้อย", "L01": "ติดสติกเกอร์ Lalamove", "O01": "ใบบัดน้ำฝน 14 นิว", "O02": "ใบบัดน้ำฝน 16 นิว", "O03": "ใบบัดน้ำฝน 17 นิว", "O04": "ใบบัดน้ำฝน 18 นิว", "O05": "ใบบัดน้ำฝน 19 นิว", "O06": "ใบบัดน้ำฝน 20 นิว", "O07": "ใบบัดน้ำฝน 21 นิว", "O08": "ใบบัดน้ำฝน 22 นิว", "O09": "ใบบัดน้ำฝน 24 นิว", "O10": "ใบบัดน้ำฝน 26 นิว"};
+
+// Returns {code,name} after migration, or null if no change
+function resolve(code,name){
   code=(code||'').trim();name=(name||'');
+  // Step 1: apply migration rules (old code → new code)
+  let newCode=code, newName=name;
   for(const r of RULES){
-    if(r.oldCode===code && (r.nameHas===''||name.includes(r.nameHas)))return r;
+    if(r.oldCode===code && (r.nameHas===''||name.includes(r.nameHas))){
+      newCode=r.newCode; newName=r.newName; break;
+    }
   }
+  // Step 2: normalize name to Excel canonical (by final code)
+  if(EXCEL_NAMES[newCode]) newName=EXCEL_NAMES[newCode];
+  // Return only if something changed
+  if(newCode!==code || newName!==name) return {newCode,newName};
   return null;
 }
 
@@ -70,12 +82,12 @@ window.scan=async function(){
     if(!t.itemDetails||!Array.isArray(t.itemDetails))return;
     let changed=false;
     const newItems=t.itemDetails.map(it=>{
-      const rule=findRule(it.code,it.name);
-      if(rule&&(rule.newCode!==it.code||rule.newName!==it.name)){
+      const res=resolve(it.code,it.name);
+      if(res){
         changed=true;
-        const k=(it.code||'-')+' → '+rule.newCode;
+        const k=(it.code||'-')+' → '+res.newCode;
         changeSummary[k]=(changeSummary[k]||0)+1;
-        return {...it,code:rule.newCode,name:rule.newName};
+        return {...it,code:res.newCode,name:res.newName};
       }
       return it;
     });
@@ -92,8 +104,8 @@ window.scan=async function(){
     if(!c.serviceHistory||!Array.isArray(c.serviceHistory))return;
     let changed=false;
     const newHist=c.serviceHistory.map(it=>{
-      const rule=findRule(it.code,it.name);
-      if(rule&&(rule.newCode!==it.code||rule.newName!==it.name)){changed=true;return {...it,code:rule.newCode,name:rule.newName};}
+      const res=resolve(it.code,it.name);
+      if(res){changed=true;return {...it,code:res.newCode,name:res.newName};}
       return it;
     });
     if(changed){plan.custs.push({id:d.id,serviceHistory:newHist});custChanges++;}
