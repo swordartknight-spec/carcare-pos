@@ -30,8 +30,8 @@ window.scan=async function(){
   txns.forEach(t=>{
     if(t.itemDetails&&Array.isArray(t.itemDetails)&&t.itemDetails.length){
       t.itemDetails.forEach(it=>{
-        const key=(it.code||'(ไม่มี)')+'|||'+(it.name||'');
-        if(!combo[key])combo[key]={code:it.code||'(ไม่มี)',name:it.name||'',count:0};
+        const key=(it.code||'(ไม่มี)')+'|||'+(it.name||'')+'|||'+(it.price||0)+'|||'+(it.size||'');
+        if(!combo[key])combo[key]={code:it.code||'(ไม่มี)',name:it.name||'',price:it.price||0,size:it.size||'',count:0};
         combo[key].count++;
       });
     } else {
@@ -47,8 +47,8 @@ window.scan=async function(){
 
   const rows=Object.values(combo).sort((a,b)=>b.count-a.count);
   let html=`<p class="info">รวม ${txns.length} transactions · ${rows.length} code/ชื่อ ที่ต่างกัน · ${noDetail} บิลไม่มี itemDetails</p>`;
-  html+='<table><thead><tr><th>Code</th><th>ชื่อบริการ (ตามที่บันทึกไว้)</th><th style="text-align:right;">จำนวนครั้ง</th></tr></thead><tbody>';
-  rows.forEach(r=>{html+=`<tr><td class="code">${r.code}</td><td>${r.name}</td><td class="num">${r.count}</td></tr>`;});
+  html+='<table><thead><tr><th>Code</th><th>ชื่อบริการ</th><th>ขนาด</th><th style="text-align:right;">ราคา</th><th style="text-align:right;">จำนวนครั้ง</th></tr></thead><tbody>';
+  rows.forEach(r=>{html+=`<tr><td class="code">${r.code}</td><td>${r.name}</td><td>${r.size||'-'}</td><td class="num">฿${(r.price||0).toLocaleString()}</td><td class="num">${r.count}</td></tr>`;});
   html+='</tbody></table>';
   document.getElementById('result').innerHTML=html;
 };
