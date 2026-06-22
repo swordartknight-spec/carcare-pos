@@ -95,7 +95,7 @@ input:focus,select:focus{border-color:var(--gold);}
 .prog-fill{height:100%;border-radius:99px;background:var(--gold);}
 
 /* CUSTOMER */
-.cust-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 30px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bdr);font-size:13px;}
+.cust-row{display:grid;grid-template-columns:2fr 1fr 0.8fr 1.2fr 1fr 1fr 1.2fr 30px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bdr);font-size:13px;}
 .cust-row:hover{background:#fafaf8;}
 .cust-row:last-child{border-bottom:none;}
 
@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v5</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v6</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -147,6 +147,7 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="sb-item" onclick="nav('analytics',this)"><span class="sb-icon">📈</span>Analytics</div>
     <div class="sb-item" onclick="nav('backfill',this)"><span class="sb-icon">📝</span>เพิ่มข้อมูลย้อนหลัง</div>
     <div class="sb-item" onclick="nav('pricing',this)"><span class="sb-icon">🏷️</span>จัดการราคา</div>
+    <div class="sb-item" onclick="nav('expenses',this)"><span class="sb-icon">💸</span>รายจ่าย</div>
   </nav>
   <div class="sb-footer">
     <div class="sb-staff"><b id="sb-date"></b>Dashboard View</div>
@@ -302,10 +303,11 @@ input:focus,select:focus{border-color:var(--gold);}
         <span id="c-count" style="color:var(--tx3);font-size:12px;"></span>
       </div>
       <div class="table-card">
-        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 30px;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--bdr);">
+        <div style="display:grid;grid-template-columns:2fr 1fr 0.8fr 1.2fr 1fr 1fr 1.2fr 30px;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--bdr);">
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">ชื่อ / รถ</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">Points</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">Visits</span>
+          <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">วันล่าสุด</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">Tier</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">LINE</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">เบอร์โทร</span>
@@ -341,6 +343,40 @@ input:focus,select:focus{border-color:var(--gold);}
         <table>
           <thead><tr><th>ชื่อ</th><th>รถ / ทะเบียน</th><th>เบอร์โทร</th><th>Ceramic ล่าสุด</th><th>นานเท่าไหร่</th><th>โทร</th></tr></thead>
           <tbody id="ceramic-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+  <!-- EXPENSES -->
+    <div class="screen" id="sc-expenses">
+      <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
+        <div class="stat-card" style="flex:1;min-width:160px;"><div class="stat-lbl">รายจ่ายเดือนนี้</div><div class="stat-val" id="ex-month" style="font-size:24px;">฿0</div></div>
+        <div class="stat-card" style="flex:1;min-width:160px;"><div class="stat-lbl">รายจ่ายวันนี้</div><div class="stat-val" id="ex-today" style="font-size:24px;">฿0</div></div>
+      </div>
+      <div class="table-card" style="margin-bottom:16px;">
+        <div class="table-head"><span style="font-weight:700;">＋ เพิ่มรายจ่าย</span></div>
+        <div style="padding:14px;display:grid;grid-template-columns:140px 1fr 140px 120px auto;gap:10px;align-items:end;">
+          <div><div class="field-label">วันที่</div><input type="date" class="field-input" id="ex-date"/></div>
+          <div><div class="field-label">รายการ</div><input type="text" class="field-input" id="ex-name" placeholder="ค่าน้ำยา, ค่าเช่า, เงินเดือน..."/></div>
+          <div><div class="field-label">หมวด</div>
+            <select class="field-input" id="ex-cat">
+              <option value="น้ำยา/วัสดุ">น้ำยา/วัสดุ</option>
+              <option value="เงินเดือน">เงินเดือน</option>
+              <option value="ค่าเช่า">ค่าเช่า</option>
+              <option value="ค่าน้ำ/ไฟ">ค่าน้ำ/ไฟ</option>
+              <option value="อุปกรณ์">อุปกรณ์</option>
+              <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+          </div>
+          <div><div class="field-label">จำนวน (฿)</div><input type="number" class="field-input" id="ex-amount" min="0" placeholder="0"/></div>
+          <button class="btn btn-g" onclick="addExpense()">บันทึก</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-head"><span style="font-weight:700;">รายการรายจ่าย</span></div>
+        <table>
+          <thead><tr><th>วันที่</th><th>รายการ</th><th>หมวด</th><th style="text-align:right;">จำนวน</th><th style="width:40px;"></th></tr></thead>
+          <tbody id="ex-table"></tbody>
         </table>
       </div>
     </div>
@@ -499,11 +535,26 @@ input:focus,select:focus{border-color:var(--gold);}
       </div>
 
       <!-- Service code detail table -->
-      <div class="table-card">
+      <div class="table-card" style="margin-bottom:16px;">
         <div class="table-head"><span style="font-weight:700;">รายได้แยก Service Code — ใช้วางแผนสั่งน้ำยา</span></div>
         <table>
           <thead><tr><th>Code</th><th>ชื่อบริการ</th><th>จำนวนครั้ง</th><th style="text-align:right;">รายได้รวม</th><th style="text-align:right;">เฉลี่ย/ครั้ง</th><th>สัดส่วน</th></tr></thead>
           <tbody id="an-svc-table"></tbody>
+        </table>
+      </div>
+
+      <!-- Monthly trend -->
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="card-title">แนวโน้มรายเดือน (12 เดือนล่าสุด)</div>
+        <canvas id="chart-monthly" height="90"></canvas>
+      </div>
+
+      <!-- Branch comparison -->
+      <div class="table-card">
+        <div class="table-head"><span style="font-weight:700;">เปรียบเทียบสาขา HO vs MK</span></div>
+        <table>
+          <thead><tr><th>ตัวชี้วัด</th><th style="text-align:right;">HO</th><th style="text-align:right;">MK</th></tr></thead>
+          <tbody id="an-branch-table"></tbody>
         </table>
       </div>
     </div>
@@ -541,7 +592,7 @@ onSnapshot(query(collection(db,'transactions'),orderBy('createdAt','desc'),limit
 });
 onSnapshot(collection(db,'customers'),s=>{custs=s.docs.map(d=>({...d.data(),_id:d.id}));rCustomers();rCeramic();});
 onSnapshot(collection(db,'stock'),s=>{stock=s.docs.map(d=>({...d.data(),_id:d.id}));rStock();});
-onSnapshot(collection(db,'expenses'),s=>{expenses=s.docs.map(d=>({...d.data(),_id:d.id}));rToday();});
+onSnapshot(collection(db,'expenses'),s=>{expenses=s.docs.map(d=>({...d.data(),_id:d.id}));rToday();if(document.getElementById('sc-expenses')?.classList.contains('active'))rExpenses();});
 onSnapshot(collection(db,'staff'),s=>{staffList=s.docs.map(d=>({...d.data(),_id:d.id}));});
 onSnapshot(collection(db,'services'),s=>{services=s.docs.map(d=>({...d.data(),_id:d.id}));if(document.getElementById('sc-pricing')?.classList.contains('active'))rPricing();});
 
@@ -632,9 +683,36 @@ function rStaff(){
 }
 
 // ── CUSTOMERS ──
+function parseThDate(d){
+  // d in DD/MM/YYYY (Thai Buddhist year) → JS Date
+  if(!d)return null;
+  const p=d.split('/');if(p.length!==3)return null;
+  let y=parseInt(p[2]);if(y>2400)y-=543; // convert BE to CE
+  return new Date(y,parseInt(p[1])-1,parseInt(p[0]));
+}
+function lastVisitOf(custName){
+  let latest=null;
+  txns.filter(t=>filterBranch(t)&&t.customer===custName).forEach(t=>{
+    const dt=parseThDate(t.date);
+    if(dt&&(!latest||dt>latest))latest=dt;
+  });
+  return latest;
+}
+function daysAgo(dt){
+  if(!dt)return null;
+  return Math.floor((Date.now()-dt.getTime())/86400000);
+}
 function rCustomers(){
   const q=(G('c-search').value||'').toLowerCase();
-  const list=custs.filter(c=>!q||c.name?.toLowerCase().includes(q)||(c.plate||'').toLowerCase().includes(q)||(c.phone||'').includes(q));
+  let list=custs.filter(c=>!q||c.name?.toLowerCase().includes(q)||(c.plate||'').toLowerCase().includes(q)||(c.phone||'').includes(q));
+  // Attach last visit + sort by most recent
+  list=list.map(c=>({...c,_lastVisit:lastVisitOf(c.name)}));
+  list.sort((a,b)=>{
+    if(!a._lastVisit&&!b._lastVisit)return 0;
+    if(!a._lastVisit)return 1;
+    if(!b._lastVisit)return -1;
+    return b._lastVisit-a._lastVisit;
+  });
   G('c-count').textContent=list.length+' สมาชิก';
   // Overall retention rate
   const _cv={};
@@ -650,6 +728,7 @@ function rCustomers(){
         <div><div style="font-weight:700;">${c.name||''}</div><div style="font-size:11px;color:var(--tx3);">${c.car||''} · ${c.plate||''} · ${c.size||''}</div></div>
         <div style="font-weight:700;">${(c.points||0).toLocaleString()} pts</div>
         <div>${c.visits||0}</div>
+        <div style="font-size:12px;">${(()=>{const da=daysAgo(c._lastVisit);if(da===null)return '<span style="color:var(--tx3);">—</span>';const col=da<=30?'var(--ok)':da<=60?'#d68910':'var(--err)';const lbl=da===0?'วันนี้':da+' วันก่อน';return '<span style="color:'+col+';font-weight:600;">'+lbl+'</span>';})()}</div>
         <div>${tier(c.points||0)}</div>
         <div>${c.lineUserId?'<span style="background:#00b900;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;">LINE ✓</span>':'<span style="color:var(--tx3);font-size:11px;">ไม่มี</span>'}</div>
         <div style="font-size:12px;color:var(--tx2);">${c.phone?'<a href="tel:'+c.phone.replace(/[-\s]/g,'')+'" style="color:var(--inf);text-decoration:none;font-weight:600;" onclick="event.stopPropagation()">📞 '+c.phone+'</a>':'<span style="color:var(--tx3);">—</span>'}</div>
@@ -728,6 +807,7 @@ function rCeramic(){
 // ── EXPOSE TO GLOBAL (for onclick handlers) ──
 // ── ANALYTICS ──
 let chartSvcCode=null;
+let chartMonthly=null;
 let anRange='month';
 
 window.setAnRange=function(r,el){
@@ -875,6 +955,45 @@ function rAnalytics(){
       </td>
     </tr>`;
   }).join('')||'<tr><td colspan="6" class="empty">ไม่มีข้อมูล</td></tr>';
+
+  // ── Monthly trend (12 months) ──
+  const months=[];const monthRev={};
+  const nowD=new Date();
+  for(let i=11;i>=0;i--){
+    const d=new Date(nowD.getFullYear(),nowD.getMonth()-i,1);
+    const key=d.getFullYear()+'-'+(d.getMonth()+1);
+    months.push({key,label:d.toLocaleDateString('th-TH',{month:'short',year:'2-digit'})});
+    monthRev[key]=0;
+  }
+  txns.filter(t=>filterBranch(t)).forEach(t=>{
+    const dt=parseThDate(t.date);if(!dt)return;
+    const key=dt.getFullYear()+'-'+(dt.getMonth()+1);
+    if(monthRev[key]!==undefined)monthRev[key]+=(t.total||0);
+  });
+  if(chartMonthly)chartMonthly.destroy();
+  chartMonthly=new Chart(G('chart-monthly'),{
+    type:'line',
+    data:{labels:months.map(m=>m.label),datasets:[{label:'รายได้',data:months.map(m=>monthRev[m.key]),borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,.1)',fill:true,tension:.3,borderWidth:2,pointRadius:3}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'฿'+(v/1000)+'k'}}},responsive:true}
+  });
+
+  // ── Branch comparison HO vs MK ──
+  function branchStats(br){
+    const bt=txns.filter(t=>t.branch===br);
+    const rev=bt.reduce((a,t)=>a+(t.total||0),0);
+    const cnt=bt.length;
+    const cv={};bt.filter(t=>t.customer&&t.customer!=='Walk-in'&&t.customer!=='ลูกค้า').forEach(t=>{cv[t.customer]=(cv[t.customer]||0)+1;});
+    const tc=Object.keys(cv).length;const rc=Object.values(cv).filter(v=>v>1).length;
+    return{rev,cnt,avg:cnt>0?Math.round(rev/cnt):0,ret:tc>0?Math.round(rc/tc*100):0,custs:tc};
+  }
+  const ho=branchStats('HO');const mk=branchStats('MK');
+  G('an-branch-table').innerHTML=`
+    <tr><td>รายได้รวม</td><td style="text-align:right;font-weight:700;">฿${ho.rev.toLocaleString()}</td><td style="text-align:right;font-weight:700;">฿${mk.rev.toLocaleString()}</td></tr>
+    <tr><td>จำนวนบิล</td><td style="text-align:right;">${ho.cnt.toLocaleString()}</td><td style="text-align:right;">${mk.cnt.toLocaleString()}</td></tr>
+    <tr><td>เฉลี่ยต่อบิล</td><td style="text-align:right;">฿${ho.avg.toLocaleString()}</td><td style="text-align:right;">฿${mk.avg.toLocaleString()}</td></tr>
+    <tr><td>ลูกค้าสมาชิก</td><td style="text-align:right;">${ho.custs}</td><td style="text-align:right;">${mk.custs}</td></tr>
+    <tr><td>Retention Rate</td><td style="text-align:right;font-weight:700;color:var(--ok);">${ho.ret}%</td><td style="text-align:right;font-weight:700;color:var(--ok);">${mk.ret}%</td></tr>
+  `;
 }
 
 // ── BACKFILL ──
@@ -1129,6 +1248,50 @@ window.submitBackfill=async function(){
   }
 };
 
+// ── EXPENSES ──
+function rExpenses(){
+  const d=G('ex-date');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);
+  const now=new Date();
+  const td=now.toLocaleDateString('th-TH');
+  const extoday=expenses.filter(e=>filterBranch(e)&&e.date===td).reduce((a,e)=>a+(e.amount||0),0);
+  // month
+  let exmonth=0;
+  expenses.filter(e=>filterBranch(e)).forEach(e=>{
+    const dt=parseThDate(e.date);
+    if(dt&&dt.getMonth()===now.getMonth()&&dt.getFullYear()===now.getFullYear())exmonth+=(e.amount||0);
+  });
+  G('ex-month').textContent='฿'+exmonth.toLocaleString();
+  G('ex-today').textContent='฿'+extoday.toLocaleString();
+  const sorted=expenses.filter(e=>filterBranch(e)).slice().sort((a,b)=>{const da=parseThDate(a.date),db2=parseThDate(b.date);return (db2||0)-(da||0);});
+  G('ex-table').innerHTML=sorted.slice(0,100).map(e=>`<tr style="border-bottom:1px solid var(--bdr);">
+    <td style="padding:8px;color:var(--tx3);">${e.date||''}</td>
+    <td style="padding:8px;font-weight:600;">${e.name||''}</td>
+    <td style="padding:8px;"><span style="background:var(--bg);padding:2px 8px;border-radius:99px;font-size:11px;">${e.cat||''}</span></td>
+    <td style="padding:8px;text-align:right;font-weight:700;color:var(--err);">฿${(e.amount||0).toLocaleString()}</td>
+    <td style="padding:8px;"><span onclick="delExpense('${e._id}')" style="cursor:pointer;color:var(--tx3);">🗑</span></td>
+  </tr>`).join('')||'<tr><td colspan="5" class="empty">ยังไม่มีรายจ่าย</td></tr>';
+}
+window.addExpense=async function(){
+  const dateVal=G('ex-date').value;
+  const name=G('ex-name').value.trim();
+  const cat=G('ex-cat').value;
+  const amount=parseFloat(G('ex-amount').value)||0;
+  if(!dateVal||!name||amount<=0){alert('กรุณากรอกวันที่ รายการ และจำนวนเงิน');return;}
+  const dp=dateVal.split('-');
+  const dateDisplay=parseInt(dp[2])>2400?dp[2]+'/'+dp[1]+'/'+dp[0]:(parseInt(dp[0])+543)+'/'+dp[1]+'/'+dp[2];
+  // store Thai-format date matching txns (DD/MM/BE)
+  const dThai=dp[2]+'/'+dp[1]+'/'+dp[0]; // keep CE; parseThDate handles both
+  try{
+    await addDoc(collection(db,'expenses'),{date:new Date(dateVal).toLocaleDateString('th-TH'),name,cat,amount,branch:currentBranch,createdAt:serverTimestamp()});
+    G('ex-name').value='';G('ex-amount').value='';
+    showToast('✅ บันทึกรายจ่ายแล้ว');
+  }catch(e){alert('บันทึกไม่สำเร็จ: '+e.message);}
+};
+window.delExpense=async function(id){
+  if(!confirm('ลบรายจ่ายนี้?'))return;
+  try{await deleteDoc(doc(db,'expenses',id));showToast('🗑 ลบแล้ว');}catch(e){alert(e.message);}
+};
+
 // ── PRICING ──
 const PRICE_CATS=['ล้างรถ','เคลือบสี','ภายใน','บริการอื่น','ใบปัดน้ำฝน','โปรโมชั่น'];
 const SIZES=['S','M','L','XL','XXL'];
@@ -1324,7 +1487,7 @@ window.nav=function(id,el){
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active'));
   document.getElementById('sc-'+id).classList.add('active');
   el.classList.add('active');
-  const titles={today:'Today — Overview',history:'Transaction History',staff:'Staff Incentive',customers:'Customer List',stock:'Stock Levels',ceramic:'Ceramic Maintenance Due',analytics:'Analytics & Insights',backfill:'เพิ่มข้อมูลย้อนหลัง',pricing:'จัดการราคาบริการ'};
+  const titles={today:'Today — Overview',history:'Transaction History',staff:'Staff Incentive',customers:'Customer List',stock:'Stock Levels',ceramic:'Ceramic Maintenance Due',analytics:'Analytics & Insights',backfill:'เพิ่มข้อมูลย้อนหลัง',pricing:'จัดการราคาบริการ',expenses:'จัดการรายจ่าย'};
   G('page-title').textContent=titles[id]||id;
   G('export-btn').style.display=id==='history'?'inline-flex':'none';
   if(id==='history')rHistory();
@@ -1334,6 +1497,7 @@ window.nav=function(id,el){
   if(id==='analytics')rAnalytics();
   if(id==='backfill')rBackfill();
   if(id==='pricing')rPricing();
+  if(id==='expenses')rExpenses();
 };
 
 // Init range
