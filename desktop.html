@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v6</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v7</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -449,6 +449,34 @@ input:focus,select:focus{border-color:var(--gold);}
             <button class="btn" onclick="closeSvcModal()">ยกเลิก</button>
             <button class="btn btn-g" onclick="saveSvc()">💾 บันทึก</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT/ADD CUSTOMER MODAL -->
+    <div class="modal-bg" id="edit-cust-modal" style="display:none;" onclick="if(event.target===this)closeEditCust()">
+      <div class="modal" style="width:440px;">
+        <div class="modal-head">
+          <span>✏️ แก้ไขข้อมูลลูกค้า</span>
+          <span onclick="closeEditCust()" style="cursor:pointer;font-size:18px;color:var(--tx3);">✕</span>
+        </div>
+        <div class="modal-body">
+          <div><div class="field-label">ชื่อ</div><input class="field-input" id="ef-name" placeholder="ชื่อลูกค้า"/></div>
+          <div><div class="field-label">เบอร์โทร</div><input class="field-input" id="ef-phone" placeholder="08x-xxx-xxxx"/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><div class="field-label">รุ่นรถ</div><input class="field-input" id="ef-car" placeholder="Toyota Camry"/></div>
+            <div><div class="field-label">ทะเบียน</div><input class="field-input" id="ef-plate" placeholder="กข 1234"/></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><div class="field-label">ขนาดรถ</div>
+              <select class="field-input" id="ef-size"><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select>
+            </div>
+            <div><div class="field-label">Points</div><input class="field-input" id="ef-points" type="number" min="0" placeholder="0"/></div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn" onclick="closeEditCust()">ยกเลิก</button>
+          <button class="btn btn-g" onclick="saveEditCust()">💾 บันทึก</button>
         </div>
       </div>
     </div>
