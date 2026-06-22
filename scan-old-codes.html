@@ -1,55 +1,123 @@
 <!DOCTYPE html>
-<html lang="th"><head><meta charset="utf-8"><title>สแกน Code เก่าใน Transactions</title>
-<style>body{font-family:system-ui;max-width:960px;margin:30px auto;padding:20px;background:#1a1a1a;color:#eee;}
-button{background:#4a9eff;color:#fff;border:none;padding:12px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;}
-table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px;background:#000;border-radius:10px;overflow:hidden;}
-th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #333;}
-th{background:#222;color:#C9A84C;}
-td.code{color:#C9A84C;font-weight:700;} td.num{text-align:right;}
-h1{font-size:20px;} .info{color:#888;margin-top:10px;}</style>
+<html lang="th"><head><meta charset="utf-8"><title>Migrate Code เก่า → ใหม่</title>
+<style>body{font-family:system-ui;max-width:940px;margin:30px auto;padding:20px;background:#1a1a1a;color:#eee;}
+button{background:#C9A84C;color:#000;border:none;padding:12px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin:4px;}
+button.scan{background:#4a9eff;color:#fff;} button.go{background:#5cb85c;color:#fff;}
+button:disabled{opacity:.4;cursor:not-allowed;}
+#log{margin-top:20px;font-size:13px;line-height:1.7;max-height:480px;overflow-y:auto;background:#000;padding:16px;border-radius:10px;}
+.ok{color:#6cd86c;} .err{color:#ff6b6b;} .info{color:#888;} .warn-txt{color:#ffc107;}
+h1{font-size:20px;}
+.warn{background:#1e3a1e;border:1px solid #6cd86c;padding:14px;border-radius:10px;margin:16px 0;font-size:13px;}
+.box{background:#222;border-radius:8px;padding:10px;margin:6px 0;}</style>
 </head><body>
-<h1>🔍 สแกน Service Code/ชื่อ ที่ใช้จริงใน Transactions</h1>
-<p class="info">ดูว่าข้อมูลเก่ามี code + ชื่อ อะไรบ้าง เพื่อวางแผน migrate</p>
-<button onclick="scan()">🔍 สแกน Transactions ทั้งหมด</button>
-<div id="result"></div>
+<h1>🔄 Migrate Service Code เก่า → ใหม่</h1>
+<div class="warn">
+แก้ทั้ง <b>transactions.itemDetails</b> และ <b>customers.serviceHistory</b><br>
+จับคู่ด้วย <b>code + ชื่อ</b> เดิม แล้วเปลี่ยนเป็น code/ชื่อ ใหม่ตาม Excel<br>
+✅ สแกนดูก่อน ค่อยกด Migrate
+</div>
+
+<button class="scan" id="scanBtn" onclick="scan()">🔍 สแกนก่อน</button>
+<button class="go" id="goBtn" onclick="doMigrate()" disabled>🔄 Migrate ทั้งหมด</button>
+<div id="log"></div>
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import{getFirestore,collection,getDocs}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+import{getFirestore,collection,getDocs,updateDoc,doc}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 const FB={apiKey:'AIzaSyDSuBAXVbzaMwNJEVQYxYDF8Q0zPWYxUhQ',authDomain:'carcare-pos-559ef.firebaseapp.com',projectId:'carcare-pos-559ef',storageBucket:'carcare-pos-559ef.appspot.com',appId:'1:562909364593:web:549e45b521adb45247f6d0'};
 const app=initializeApp(FB);const db=getFirestore(app);
+const L=(m,c='info')=>{const d=document.getElementById('log');d.innerHTML+=`<div class="${c}">${m}</div>`;d.scrollTop=d.scrollHeight;};
+
+// MIGRATION RULES — match by (oldCode + nameContains) → new {code,name}
+// Order matters: first match wins
+const RULES=[
+  // ล้างลูกค้าเก่า/เครื่องล่วง P01 → W00 (ล้างรถ)
+  {oldCode:'P01', nameHas:'ลูกค้าเก่า', newCode:'W00', newName:'ล้างรถ + ดูดฝุ่น'},
+  {oldCode:'P01', nameHas:'เครื่องล่วง', newCode:'W00', newName:'ล้างรถ + ดูดฝุ่น'},
+  // ล้างสี & ดูดฝุ่น (code -) → W00
+  {oldCode:'-', nameHas:'ล้างสี', newCode:'W00', newName:'ล้างรถ + ดูดฝุ่น'},
+  {oldCode:'-', nameHas:'ดูดฝุ่น', newCode:'W00', newName:'ล้างรถ + ดูดฝุ่น'},
+  {oldCode:'(string)', nameHas:'', newCode:'W00', newName:'ล้างรถ + ดูดฝุ่น'},
+  {oldCode:'(ไม่มี)', nameHas:'ล้างสี', newCode:'W00', newName:'ล้างรถ + ดูดฝุ่น'},
+  // มัดจำเคลือบ ceramic → S11
+  {oldCode:'P07-1', nameHas:'', newCode:'S11', newName:'เคลือบเเก้วเซรามิก - มัดจำ'},
+  // ใบปัดน้ำฝน 19 (no code) → O05
+  {oldCode:'(ไม่มี)', nameHas:'19', newCode:'O05', newName:'ใบบัดน้ำฝน 19 นิว'},
+  // P01 "ล้างรถ เคลือบด่วน" stays P01 but normalize name
+  {oldCode:'P01', nameHas:'เคลือบด่วน', newCode:'P01', newName:'เคลือบเงาเร่งด่วน'},
+];
+
+function findRule(code,name){
+  code=(code||'').trim();name=(name||'');
+  for(const r of RULES){
+    if(r.oldCode===code && (r.nameHas===''||name.includes(r.nameHas)))return r;
+  }
+  return null;
+}
+
+let plan={txns:[],custs:[]};
 
 window.scan=async function(){
-  document.getElementById('result').innerHTML='<p class="info">กำลังสแกน...</p>';
-  const snap=await getDocs(collection(db,'transactions'));
-  const txns=snap.docs.map(d=>d.data());
+  document.getElementById('log').innerHTML='';
+  plan={txns:[],custs:[]};
+  L('🔍 กำลังสแกน...');
 
-  // Count by code+name combo from itemDetails
-  const combo={};
-  let noDetail=0;
-  txns.forEach(t=>{
-    if(t.itemDetails&&Array.isArray(t.itemDetails)&&t.itemDetails.length){
-      t.itemDetails.forEach(it=>{
-        const key=(it.code||'(ไม่มี)')+'|||'+(it.name||'')+'|||'+(it.price||0)+'|||'+(it.size||'');
-        if(!combo[key])combo[key]={code:it.code||'(ไม่มี)',name:it.name||'',price:it.price||0,size:it.size||'',count:0};
-        combo[key].count++;
-      });
-    } else {
-      noDetail++;
-      // try items string
-      if(t.items){
-        const key='(string)|||'+t.items;
-        if(!combo[key])combo[key]={code:'(string)',name:t.items,count:0};
-        combo[key].count++;
+  // TRANSACTIONS
+  const tSnap=await getDocs(collection(db,'transactions'));
+  let txnChanges=0;const changeSummary={};
+  tSnap.docs.forEach(d=>{
+    const t=d.data();
+    if(!t.itemDetails||!Array.isArray(t.itemDetails))return;
+    let changed=false;
+    const newItems=t.itemDetails.map(it=>{
+      const rule=findRule(it.code,it.name);
+      if(rule&&(rule.newCode!==it.code||rule.newName!==it.name)){
+        changed=true;
+        const k=(it.code||'-')+' → '+rule.newCode;
+        changeSummary[k]=(changeSummary[k]||0)+1;
+        return {...it,code:rule.newCode,name:rule.newName};
       }
-    }
+      return it;
+    });
+    if(changed){plan.txns.push({id:d.id,itemDetails:newItems});txnChanges++;}
   });
+  L(`<b>📄 Transactions: ${tSnap.size} บิล → จะแก้ ${txnChanges} บิล</b>`);
+  Object.entries(changeSummary).forEach(([k,v])=>L('  '+k+' : '+v+' รายการ','warn-txt'));
 
-  const rows=Object.values(combo).sort((a,b)=>b.count-a.count);
-  let html=`<p class="info">รวม ${txns.length} transactions · ${rows.length} code/ชื่อ ที่ต่างกัน · ${noDetail} บิลไม่มี itemDetails</p>`;
-  html+='<table><thead><tr><th>Code</th><th>ชื่อบริการ</th><th>ขนาด</th><th style="text-align:right;">ราคา</th><th style="text-align:right;">จำนวนครั้ง</th></tr></thead><tbody>';
-  rows.forEach(r=>{html+=`<tr><td class="code">${r.code}</td><td>${r.name}</td><td>${r.size||'-'}</td><td class="num">฿${(r.price||0).toLocaleString()}</td><td class="num">${r.count}</td></tr>`;});
-  html+='</tbody></table>';
-  document.getElementById('result').innerHTML=html;
+  // CUSTOMERS serviceHistory
+  const cSnap=await getDocs(collection(db,'customers'));
+  let custChanges=0;
+  cSnap.docs.forEach(d=>{
+    const c=d.data();
+    if(!c.serviceHistory||!Array.isArray(c.serviceHistory))return;
+    let changed=false;
+    const newHist=c.serviceHistory.map(it=>{
+      const rule=findRule(it.code,it.name);
+      if(rule&&(rule.newCode!==it.code||rule.newName!==it.name)){changed=true;return {...it,code:rule.newCode,name:rule.newName};}
+      return it;
+    });
+    if(changed){plan.custs.push({id:d.id,serviceHistory:newHist});custChanges++;}
+  });
+  L(`<b>👥 Customers: ${cSnap.size} คน → จะแก้ประวัติ ${custChanges} คน</b>`);
+
+  L(`<br>📊 รวมที่จะแก้: ${txnChanges} บิล + ${custChanges} ลูกค้า`,'warn-txt');
+  if(txnChanges+custChanges>0)document.getElementById('goBtn').disabled=false;
+  else L('✅ ไม่มีอะไรต้องแก้','ok');
+};
+
+window.doMigrate=async function(){
+  if(!confirm(`Migrate ${plan.txns.length} บิล + ${plan.custs.length} ลูกค้า?`))return;
+  const btn=document.getElementById('goBtn');btn.disabled=true;btn.textContent='กำลังแก้...';
+  document.getElementById('scanBtn').disabled=true;
+  L('<br>🔄 แก้ transactions...','warn-txt');
+  let n=0;
+  for(const t of plan.txns){try{await updateDoc(doc(db,'transactions',t.id),{itemDetails:t.itemDetails});n++;if(n%20===0)L('  '+n+'...');}catch(e){L('❌ '+e.message,'err');}}
+  L(`✅ แก้ transactions ${n} บิล`,'ok');
+  let m=0;
+  L('🔄 แก้ customers...','warn-txt');
+  for(const c of plan.custs){try{await updateDoc(doc(db,'customers',c.id),{serviceHistory:c.serviceHistory});m++;}catch(e){L('❌ '+e.message,'err');}}
+  L(`✅ แก้ customers ${m} คน`,'ok');
+  L('<br>🎉 เสร็จสมบูรณ์! รีเฟรช Dashboard เพื่อดู Analytics ที่รวมแล้ว','ok');
+  btn.textContent='✅ เสร็จแล้ว';
 };
 </script></body></html>
