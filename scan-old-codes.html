@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8"><title>สแกน Code เก่าใน Transactions</title>
+<style>body{font-family:system-ui;max-width:960px;margin:30px auto;padding:20px;background:#1a1a1a;color:#eee;}
+button{background:#4a9eff;color:#fff;border:none;padding:12px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;}
+table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px;background:#000;border-radius:10px;overflow:hidden;}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #333;}
+th{background:#222;color:#C9A84C;}
+td.code{color:#C9A84C;font-weight:700;} td.num{text-align:right;}
+h1{font-size:20px;} .info{color:#888;margin-top:10px;}</style>
+</head><body>
+<h1>🔍 สแกน Service Code/ชื่อ ที่ใช้จริงใน Transactions</h1>
+<p class="info">ดูว่าข้อมูลเก่ามี code + ชื่อ อะไรบ้าง เพื่อวางแผน migrate</p>
+<button onclick="scan()">🔍 สแกน Transactions ทั้งหมด</button>
+<div id="result"></div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import{getFirestore,collection,getDocs}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+const FB={apiKey:'AIzaSyDSuBAXVbzaMwNJEVQYxYDF8Q0zPWYxUhQ',authDomain:'carcare-pos-559ef.firebaseapp.com',projectId:'carcare-pos-559ef',storageBucket:'carcare-pos-559ef.appspot.com',appId:'1:562909364593:web:549e45b521adb45247f6d0'};
+const app=initializeApp(FB);const db=getFirestore(app);
+
+window.scan=async function(){
+  document.getElementById('result').innerHTML='<p class="info">กำลังสแกน...</p>';
+  const snap=await getDocs(collection(db,'transactions'));
+  const txns=snap.docs.map(d=>d.data());
+
+  // Count by code+name combo from itemDetails
+  const combo={};
+  let noDetail=0;
+  txns.forEach(t=>{
+    if(t.itemDetails&&Array.isArray(t.itemDetails)&&t.itemDetails.length){
+      t.itemDetails.forEach(it=>{
+        const key=(it.code||'(ไม่มี)')+'|||'+(it.name||'');
+        if(!combo[key])combo[key]={code:it.code||'(ไม่มี)',name:it.name||'',count:0};
+        combo[key].count++;
+      });
+    } else {
+      noDetail++;
+      // try items string
+      if(t.items){
+        const key='(string)|||'+t.items;
+        if(!combo[key])combo[key]={code:'(string)',name:t.items,count:0};
+        combo[key].count++;
+      }
+    }
+  });
+
+  const rows=Object.values(combo).sort((a,b)=>b.count-a.count);
+  let html=`<p class="info">รวม ${txns.length} transactions · ${rows.length} code/ชื่อ ที่ต่างกัน · ${noDetail} บิลไม่มี itemDetails</p>`;
+  html+='<table><thead><tr><th>Code</th><th>ชื่อบริการ (ตามที่บันทึกไว้)</th><th style="text-align:right;">จำนวนครั้ง</th></tr></thead><tbody>';
+  rows.forEach(r=>{html+=`<tr><td class="code">${r.code}</td><td>${r.name}</td><td class="num">${r.count}</td></tr>`;});
+  html+='</tbody></table>';
+  document.getElementById('result').innerHTML=html;
+};
+</script></body></html>
