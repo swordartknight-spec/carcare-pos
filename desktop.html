@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v11</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v12</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -674,7 +674,7 @@ function rCustomers(){
   G('cust-list').innerHTML=list.map((c,i)=>{
     const cid='cexp-'+i;
     return `<div>
-      <div class="cust-row" onclick="toggleCustExpand('${cid}','${(c.name||'').replace(/'/g,"\'")}')">
+      <div class="cust-row" onclick="toggleCustExpand('${cid}','${(c.name||'').replace(/'/g,"\'")}','${c._id}')">
         <div><div style="font-weight:700;">${c.name||''}</div><div style="font-size:11px;color:var(--tx3);">${c.car||''} · ${c.plate||''} · ${c.size||''}</div></div>
         <div style="font-weight:700;">${(c.points||0).toLocaleString()} pts</div>
         <div>${c.visits||0}</div>
@@ -690,7 +690,7 @@ function rCustomers(){
   }).join('')||'<div class="empty">ไม่พบสมาชิก</div>';
 }
 
-window.toggleCustExpand=function(cid, custName, custId){
+window.toggleCustExpand=function(cid, custName, custId_param){
   const panel=G(cid);
   const arrow=G(cid+'-arrow');
   const body=G(cid+'-body');
@@ -706,9 +706,8 @@ window.toggleCustExpand=function(cid, custName, custId){
       try{const pa=a.date.split('/'),pb=b.date.split('/');
         return new Date(parseInt(pb[2]),parseInt(pb[1])-1,parseInt(pb[0]))- new Date(parseInt(pa[2]),parseInt(pa[1])-1,parseInt(pa[0]));}catch{return 0;}
     });
-    // Store custId for editing
-    const custObj=custs.find(c=>c.name===custName);
-    const custId=custObj?custObj._id:'';
+    // Use the customer ID passed directly (not find-by-name which breaks for duplicate "-" names)
+    const custId=custId_param||'';
     if(hist.length===0){
       body.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 6px;">
         <span style="color:var(--tx3);font-size:13px;">ยังไม่มีประวัติการใช้บริการ</span>
