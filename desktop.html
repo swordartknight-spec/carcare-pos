@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v12</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v16</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -745,13 +745,43 @@ function rStock(){
 }
 
 // ── CERAMIC ──
+function parseThDate(d){
+  if(!d)return null;
+  const p=(''+d).split('/');if(p.length!==3)return null;
+  let y=parseInt(p[2]);if(y>2400)y-=543;
+  return new Date(y,parseInt(p[1])-1,parseInt(p[0]));
+}
 function rCeramic(){
   const n=new Date();
-  const due=custs.filter(c=>c.lastCeramic&&(n-new Date(c.lastCeramic))/(1000*60*60*24*30)>=5).sort((a,b)=>new Date(a.lastCeramic)-new Date(b.lastCeramic));
+  // Ceramic service codes: P05, P07, S11 (เคลือบแก้วเซรามิก)
+  const ceramicCodes=['P05','P07','S11'];
+  // Find last ceramic transaction per customer
+  const lastCeramicByCust={};
+  txns.filter(t=>filterBranch(t)&&t.customer&&t.customer!=='Walk-in').forEach(t=>{
+    let hasCeramic=false;
+    if(t.itemDetails&&Array.isArray(t.itemDetails)){
+      hasCeramic=t.itemDetails.some(it=>ceramicCodes.includes((it.code||'').toUpperCase())||(it.name||'').includes('เซรามิก')||(it.name||'').includes('เคลือบแก้ว'));
+    }
+    if(!hasCeramic&&t.items)hasCeramic=t.items.includes('เซรามิก')||t.items.includes('เคลือบแก้ว');
+    if(!hasCeramic)return;
+    const dt=parseThDate(t.date);if(!dt)return;
+    if(!lastCeramicByCust[t.customer]||dt>lastCeramicByCust[t.customer].date){
+      lastCeramicByCust[t.customer]={date:dt,plate:t.plate};
+    }
+  });
+  // Build due list (>=5 months)
+  const due=[];
+  Object.entries(lastCeramicByCust).forEach(([custName,info])=>{
+    const months=(n-info.date)/(1000*60*60*24*30);
+    if(months>=5){
+      const c=custs.find(x=>x.name===custName)||{};
+      due.push({name:custName,car:c.car||'',plate:info.plate||c.plate||'',phone:c.phone||'',lastDate:info.date,months:Math.round(months)});
+    }
+  });
+  due.sort((a,b)=>a.lastDate-b.lastDate);
   G('ceramic-count').textContent=due.length+' คน';
-  G('ceramic-table').innerHTML=due.map(c=>{const m=Math.round((n-new Date(c.lastCeramic))/(1000*60*60*24*30));return`<tr><td><b>${c.name||''}</b></td><td>${c.car||''} · ${c.plate||''}</td><td>${c.phone||'—'}</td><td>${new Date(c.lastCeramic).toLocaleDateString('th-TH')}</td><td><span style="color:${m>=8?'var(--err)':'var(--amb)'};font-weight:700;">${m} เดือน</span></td><td>${c.phone?`<a href="tel:${c.phone.replace(/[-\s]/g,'')}" style="color:var(--inf);text-decoration:none;font-weight:700;">📞 โทร</a>`:'—'}</td></tr>`;}).join('')||'<tr><td colspan="6" class="empty">✅ ไม่มีลูกค้าที่ต้อง Maintain</td></tr>';
+  G('ceramic-table').innerHTML=due.map(c=>`<tr><td><b>${c.name}</b></td><td>${c.car} · ${c.plate}</td><td>${c.phone||'—'}</td><td>${c.lastDate.toLocaleDateString('th-TH')}</td><td><span style="color:${c.months>=8?'var(--err)':'#d68910'};font-weight:700;">${c.months} เดือน</span></td><td>${c.phone?`<a href="tel:${c.phone.replace(/[-\s]/g,'')}" style="color:var(--inf);text-decoration:none;font-weight:700;">📞 โทร</a>`:'—'}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">✅ ไม่มีลูกค้าที่ต้อง Maintain</td></tr>';
 }
-
 // ── EXPOSE TO GLOBAL (for onclick handlers) ──
 // ── ANALYTICS ──
 let chartSvcCode=null;
@@ -1195,9 +1225,15 @@ const SIZES=['S','M','L','XL','XXL'];
 
 function rPricing(){
   const con=G('pricing-cats');
-  // Dedupe services
+  // Dedupe + filter hidden
   const seen=new Set();const uniq=[];
-  services.forEach(s=>{const k=(s.code||'')+'|'+(s.name||'');if(!seen.has(k)){seen.add(k);uniq.push(s);}});
+  services.filter(s=>!s.hidden).forEach(s=>{const k=(s.code||'')+'|'+(s.name||'');if(!seen.has(k)){seen.add(k);uniq.push(s);}});
+  // Sort by sortKey (Excel order), fallback to code
+  uniq.sort((a,b)=>{
+    const sa=(a.sortKey!==undefined?a.sortKey:9999), sb=(b.sortKey!==undefined?b.sortKey:9999);
+    if(sa!==sb)return sa-sb;
+    return (a.code||'').localeCompare(b.code||'',undefined,{numeric:true});
+  });
 
   con.innerHTML=PRICE_CATS.map(cat=>{
     const items=uniq.filter(s=>s.cat===cat);
@@ -1345,11 +1381,15 @@ window.saveEditCust=async function(){
     } else {
       // Add new customer (from backfill top button or row)
       const ref=await addDoc(collection(db,'customers'),{...data,points:0,visits:0,redeemed:0,coupons:[],serviceHistory:[]});
-      const newC={...data,_id:ref.id,points:0,visits:0};
-      custs.push(newC);
-      // If opened from a specific row, auto-fill that row with new customer
+      // Do NOT push to custs — onSnapshot will refresh it automatically (pushing causes duplicates)
+      // If opened from a specific row, fill that row directly from form data
       if(_bfNewCustRow&&document.getElementById(_bfNewCustRow+'-cust-search')){
-        bfPickCust(_bfNewCustRow,ref.id);
+        const rid=_bfNewCustRow;
+        document.getElementById(rid+'-plate').value=data.plate||'';
+        document.getElementById(rid+'-cust').value=data.name||'';
+        document.getElementById(rid+'-custid').value=ref.id;
+        document.getElementById(rid+'-cust-search').value=(data.plate||'')+' — '+(data.name||'');
+        if(data.size){document.getElementById(rid+'-size').value=data.size;if(bfData[rid]){bfData[rid].size=data.size;bfRenderSvc(rid);}}
       }
       showToast('✅ เพิ่มลูกค้าใหม่แล้ว');
     }
