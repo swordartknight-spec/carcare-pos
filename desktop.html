@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v9</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v10</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -986,6 +986,7 @@ function bfUniqueCusts(){
 window.bfCustLiveSearch=function(id){
   const q=(document.getElementById(id+'-cust-search').value||'').trim().toLowerCase();
   const drop=document.getElementById(id+'-cust-drop');
+  const inp=document.getElementById(id+'-cust-search');
   let list=bfUniqueCusts();
   if(q.length>=1){
     list=list.filter(c=>(c.plate||'').toLowerCase().includes(q)||(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q));
@@ -996,6 +997,12 @@ window.bfCustLiveSearch=function(id){
     <b style="color:var(--gold);">${c.plate||'(ไม่มีทะเบียน)'}</b> — ${c.name||''} <span style="color:var(--tx3);">${c.size?'('+c.size+')':''}</span></div>`).join('');
   if(list.length===0&&q)html+='<div style="padding:8px 12px;font-size:12px;color:var(--tx3);">ไม่พบ — เลือก Walk-in หรือ + เพิ่มลูกค้าใหม่</div>';
   drop.innerHTML=html;
+  // Position as fixed to escape table overflow clipping
+  const r=inp.getBoundingClientRect();
+  drop.style.position='fixed';
+  drop.style.top=(r.bottom+2)+'px';
+  drop.style.left=r.left+'px';
+  drop.style.width=r.width+'px';
   drop.style.display='block';
 };
 
