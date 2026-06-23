@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v16</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v17</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -530,7 +530,7 @@ input:focus,select:focus{border-color:var(--gold);}
       <div class="table-card">
         <div class="table-head"><span style="font-weight:700;">รายได้แยก Service Code — ใช้วางแผนสั่งน้ำยา</span></div>
         <table>
-          <thead><tr><th>Code</th><th>ชื่อบริการ</th><th>จำนวนครั้ง</th><th style="text-align:right;">รายได้รวม</th><th style="text-align:right;">เฉลี่ย/ครั้ง</th><th>สัดส่วน</th></tr></thead>
+          <thead><tr><th>Code</th><th>ชื่อบริการ</th><th>จำนวนครั้ง</th><th style="text-align:right;">รายได้รวม</th><th style="text-align:right;">เฉลี่ย/ครั้ง</th><th>สัดส่วน</th><th>สถานะ</th></tr></thead>
           <tbody id="an-svc-table"></tbody>
         </table>
       </div>
@@ -913,9 +913,17 @@ function rAnalytics(){
       <span style="font-weight:700;font-size:13px;">฿${s.revenue.toLocaleString()}</span>
     </div>`).join('');
 
+  // Build set of codes that exist in services (pricing page)
+  const priceCodes=new Set(services.filter(s=>!s.hidden).map(s=>(s.code||'').trim().toUpperCase()));
+
   // Table
   G('an-svc-table').innerHTML=svcRows.map(s=>{
     const pct=Math.round(s.revenue/totalRev*100);
+    const code=(s.code||'').trim().toUpperCase();
+    const inPrice=code&&code!=='?'&&code!=='-'&&priceCodes.has(code);
+    const status=inPrice
+      ?'<span style="background:#e8f5e9;color:#2e7d32;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;">✓ มีในราคา</span>'
+      :'<span style="background:#fff3e0;color:#e65100;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;">⚠️ ไม่มี/ต้อง migrate</span>';
     return`<tr>
       <td style="font-weight:700;color:var(--gold);">${s.code||'?'}</td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.name}</td>
@@ -930,8 +938,9 @@ function rAnalytics(){
           <span style="font-size:11px;color:var(--tx3);">${pct}%</span>
         </div>
       </td>
+      <td>${status}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="6" class="empty">ไม่มีข้อมูล</td></tr>';
+  }).join('')||'<tr><td colspan="7" class="empty">ไม่มีข้อมูล</td></tr>';
 }
 
 // ── BACKFILL ──

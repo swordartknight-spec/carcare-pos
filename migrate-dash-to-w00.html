@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8"><title>Migrate code "-" → W00</title>
+<style>body{font-family:system-ui;max-width:900px;margin:30px auto;padding:20px;background:#1a1a1a;color:#eee;}
+button{background:#C9A84C;color:#000;border:none;padding:12px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin:4px;}
+button.scan{background:#4a9eff;color:#fff;} button.go{background:#5cb85c;color:#fff;}
+button:disabled{opacity:.4;cursor:not-allowed;}
+#log{margin-top:20px;font-size:13px;line-height:1.7;max-height:480px;overflow-y:auto;background:#000;padding:16px;border-radius:10px;}
+.ok{color:#6cd86c;} .err{color:#ff6b6b;} .info{color:#888;} .warn-txt{color:#ffc107;}
+h1{font-size:20px;}
+.warn{background:#1e3a1e;border:1px solid #6cd86c;padding:14px;border-radius:10px;margin:16px 0;font-size:13px;}</style>
+</head><body>
+<h1>🔄 Migrate code "-" → "W00"</h1>
+<div class="warn">เปลี่ยนเฉพาะรายการที่ code เป็น <b>"-"</b> (หรือว่าง) และชื่อเกี่ยวกับล้างรถ → เป็น <b>W00</b><br>
+แก้ทั้ง transactions.itemDetails และ customers.serviceHistory<br>
+✅ สแกนดูก่อน ค่อยกด Migrate</div>
+<button class="scan" id="scanBtn" onclick="scan()">🔍 สแกนก่อน</button>
+<button class="go" id="goBtn" onclick="doMigrate()" disabled>🔄 Migrate "-" → W00</button>
+<div id="log"></div>
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import{getFirestore,collection,getDocs,updateDoc,doc}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+const FB={apiKey:'AIzaSyDSuBAXVbzaMwNJEVQYxYDF8Q0zPWYxUhQ',authDomain:'carcare-pos-559ef.firebaseapp.com',projectId:'carcare-pos-559ef',storageBucket:'carcare-pos-559ef.appspot.com',appId:'1:562909364593:web:549e45b521adb45247f6d0'};
+const app=initializeApp(FB);const db=getFirestore(app);
+const L=(m,c='info')=>{const d=document.getElementById('log');d.innerHTML+=`<div class="${c}">${m}</div>`;d.scrollTop=d.scrollHeight;};
+
+const W00_NAME='ล้างรถ + ดูดฝุ่น';
+function isDashWash(it){
+  const code=(it.code||'').trim();
+  if(code!=='-'&&code!==''&&code!=='(ไม่มี)')return false;
+  const name=(it.name||'');
+  return name.includes('ล้างสี')||name.includes('ดูดฝุ่น')||name.includes('ล้างรถ');
+}
+
+let plan={txns:[],custs:[]};
+
+window.scan=async function(){
+  document.getElementById('log').innerHTML='';
+  plan={txns:[],custs:[]};
+  L('🔍 กำลังสแกน...');
+
+  const tSnap=await getDocs(collection(db,'transactions'));
+  let tCount=0;
+  tSnap.docs.forEach(d=>{
+    const t=d.data();
+    if(!t.itemDetails||!Array.isArray(t.itemDetails))return;
+    let changed=false;
+    const ni=t.itemDetails.map(it=>{
+      if(isDashWash(it)){changed=true;return {...it,code:'W00',name:W00_NAME};}
+      return it;
+    });
+    if(changed){plan.txns.push({id:d.id,itemDetails:ni});tCount++;}
+  });
+  L(`<b>📄 Transactions: ${tSnap.size} บิล → จะแก้ ${tCount} บิล</b>`,tCount>0?'warn-txt':'ok');
+
+  const cSnap=await getDocs(collection(db,'customers'));
+  let cCount=0;
+  cSnap.docs.forEach(d=>{
+    const c=d.data();
+    if(!c.serviceHistory||!Array.isArray(c.serviceHistory))return;
+    let changed=false;
+    const nh=c.serviceHistory.map(it=>{
+      if(isDashWash(it)){changed=true;return {...it,code:'W00',name:W00_NAME};}
+      return it;
+    });
+    if(changed){plan.custs.push({id:d.id,serviceHistory:nh});cCount++;}
+  });
+  L(`<b>👥 Customers: ${cSnap.size} คน → จะแก้ประวัติ ${cCount} คน</b>`,cCount>0?'warn-txt':'ok');
+
+  L(`<br>📊 รวม: ${tCount} บิล + ${cCount} ลูกค้า`,'warn-txt');
+  if(tCount+cCount>0)document.getElementById('goBtn').disabled=false;
+  else L('✅ ไม่มีอะไรต้องแก้','ok');
+};
+
+window.doMigrate=async function(){
+  if(!confirm(`Migrate ${plan.txns.length} บิล + ${plan.custs.length} ลูกค้า?`))return;
+  const btn=document.getElementById('goBtn');btn.disabled=true;btn.textContent='กำลังแก้...';
+  document.getElementById('scanBtn').disabled=true;
+  let n=0;
+  L('<br>🔄 แก้ transactions...','warn-txt');
+  for(const t of plan.txns){try{await updateDoc(doc(db,'transactions',t.id),{itemDetails:t.itemDetails});n++;if(n%20===0)L('  '+n+'...');}catch(e){L('❌'+e.message,'err');}}
+  L(`✅ แก้ ${n} บิล`,'ok');
+  let m=0;
+  L('🔄 แก้ customers...','warn-txt');
+  for(const c of plan.custs){try{await updateDoc(doc(db,'customers',c.id),{serviceHistory:c.serviceHistory});m++;}catch(e){L('❌'+e.message,'err');}}
+  L(`✅ แก้ ${m} คน`,'ok');
+  L('<br>🎉 เสร็จ! รีเฟรช Dashboard','ok');
+  btn.textContent='✅ เสร็จแล้ว';
+};
+</script></body></html>
