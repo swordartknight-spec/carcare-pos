@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v17</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v18</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -583,10 +583,9 @@ function renderItems(t){
 
 // ── TODAY ──
 function rToday(){
-  const td=now.toLocaleDateString('th-TH');
-  const today=txns.filter(t=>t.date===td&&filterBranch(t));
+  const today=txns.filter(t=>sameDay(t.date,now)&&filterBranch(t));
   const tot=today.reduce((a,t)=>a+(t.total||0),0);
-  const exp=expenses.filter(e=>e.date===td).reduce((a,e)=>a+(e.amount||0),0);
+  const exp=expenses.filter(e=>sameDay(e.date,now)).reduce((a,e)=>a+(e.amount||0),0);
   const n=today.length;
   G('t-total').textContent='฿'+tot.toLocaleString();
   G('t-net').textContent='฿'+(tot-exp).toLocaleString();
@@ -607,7 +606,7 @@ function rToday(){
   const uniqueTodayCusts=[...new Set(todayNamed.map(t=>t.customer))];
   let returningToday=0;
   uniqueTodayCusts.forEach(cust=>{
-    const hadPriorVisit=txns.some(t=>filterBranch(t)&&t.customer===cust&&t.date!==td);
+    const hadPriorVisit=txns.some(t=>filterBranch(t)&&t.customer===cust&&!sameDay(t.date,now));
     if(hadPriorVisit)returningToday++;
   });
   const dailyRet=uniqueTodayCusts.length>0?Math.round(returningToday/uniqueTodayCusts.length*100):0;
@@ -620,7 +619,7 @@ function rToday(){
   G('today-count').textContent=n+' รายการ';
   // 7-day chart
   const days=[],vals=[];
-  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toLocaleDateString('th-TH',{day:'numeric',month:'short'}));vals.push(txns.filter(t=>t.date===d.toLocaleDateString('th-TH')&&filterBranch(t)).reduce((a,t)=>a+(t.total||0),0));}
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toLocaleDateString('th-TH',{day:'numeric',month:'short'}));vals.push(txns.filter(t=>sameDay(t.date,d)&&filterBranch(t)).reduce((a,t)=>a+(t.total||0),0));}
   if(chart7day)chart7day.destroy();
   chart7day=new Chart(G('chart-7day'),{type:'bar',data:{labels:days,datasets:[{label:'ยอดขาย',data:vals,backgroundColor:'rgba(201,168,76,.7)',borderColor:'#C9A84C',borderWidth:2,borderRadius:6}]},options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'฿'+v.toLocaleString()}}},responsive:true}});
   // Pay pie
@@ -750,6 +749,15 @@ function parseThDate(d){
   const p=(''+d).split('/');if(p.length!==3)return null;
   let y=parseInt(p[2]);if(y>2400)y-=543;
   return new Date(y,parseInt(p[1])-1,parseInt(p[0]));
+}
+// Format a JS Date as DD/MM/YYYY in CE (matches normalized transaction dates)
+function fmtCE(d){
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+}
+// Compare two date strings by parsing (handles BE/CE and format diffs)
+function sameDay(dateStr,jsDate){
+  const p=parseThDate(dateStr);if(!p)return false;
+  return p.getDate()===jsDate.getDate()&&p.getMonth()===jsDate.getMonth()&&p.getFullYear()===jsDate.getFullYear();
 }
 function rCeramic(){
   const n=new Date();
