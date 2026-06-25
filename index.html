@@ -361,10 +361,10 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <div id="pin-login" style="position:fixed;inset:0;background:var(--blk);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
   <div style="font-size:36px;margin-bottom:8px;">⚙</div>
   <div style="font-size:20px;font-weight:700;color:var(--gold);margin-bottom:4px;">CarCare POS</div>
-  <div style="font-size:12px;color:#aaa;margin-bottom:24px;">ใส่ PIN เพื่อเข้าสู่ระบบ</div>
+  <div style="font-size:12px;color:#aaa;margin-bottom:24px;">เลือกสาขา แล้วใส่ PIN</div>
 
-  <!-- Branch selector (optional — auto-set from PIN if staff has branch) -->
-  <div id="pin-branch-wrap" style="display:none;grid-template-columns:1fr 1fr;gap:10px;width:240px;margin-bottom:24px;">
+  <!-- Branch selector -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:240px;margin-bottom:24px;">
     <button id="pin-br-HO" onclick="pinSelectBranch('HO')" style="padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;border:2px solid #333;background:#2a2a2a;color:#666;transition:all .15s;">🏢 HO</button>
     <button id="pin-br-MK" onclick="pinSelectBranch('MK')" style="padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;border:2px solid #333;background:#2a2a2a;color:#666;transition:all .15s;">🚗 MK</button>
   </div>
@@ -391,7 +391,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9v</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9x</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -805,12 +805,9 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div class="fr"><label class="lbl">เบอร์โทร</label><input id="cp" type="text" placeholder="08x-xxx-xxxx"/></div>
   <div class="fr"><label class="lbl">Line User ID <span style="font-size:9px;color:var(--tx3);font-weight:400;">(Uxxxxxxxx — ดูวิธีรับ ID ด้านล่าง)</span></label><input id="c-line" type="text" placeholder="Uxxxxxxxx"/></div>
   <div class="fr2">
-    <div style="position:relative;"><label class="lbl">ทะเบียน</label><input id="cpl" type="text" placeholder="กข 1234" autocomplete="off" oninput="ncPlateSearch()"/>
-      <div id="nc-plate-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--sur,#fff);border:1px solid var(--bdr,#ddd);border-radius:8px;z-index:60;box-shadow:0 4px 16px rgba(0,0,0,.15);max-height:200px;overflow-y:auto;margin-top:2px;"></div>
-    </div>
+    <div><label class="lbl">ทะเบียน</label><input id="cpl" type="text" placeholder="กข 1234"/></div>
     <div><label class="lbl">รุ่นรถ</label><input id="cc2" type="text" placeholder="Toyota Camry"/></div>
   </div>
-  <div id="nc-dup-warn" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:8px 12px;font-size:12px;color:#856404;margin-bottom:10px;"></div>
   <div class="fr"><label class="lbl">ขนาดรถ</label>
     <select id="csz"><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select>
   </div>
@@ -843,7 +840,6 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div style="display:flex;gap:8px;margin-bottom:12px;">
     <input id="new-staff-name" type="text" placeholder="ชื่อพนักงาน..." style="flex:1;"/>
     <input id="new-staff-pin" type="number" placeholder="PIN 4 หลัก" style="width:100px;" maxlength="4"/>
-    <select id="new-staff-branch" style="width:90px;"><option value="">ทุกสาขา</option><option value="HO">HO</option><option value="MK">MK</option></select>
     <button class="btn btn-g btn-s" onclick="addStaff()">เพิ่ม</button>
   </div>
   <div id="staff-list-manage"></div>
@@ -1129,6 +1125,7 @@ import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app
 import{getFirestore,collection,addDoc,onSnapshot,doc,updateDoc,deleteDoc,getDocs,query,orderBy,limit,serverTimestamp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 
 // ══ DEFAULT SERVICES ══
+function fmtCE(d){return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();}
 const DEFAULT_SVCS=[
   {cat:'ล้างรถ',name:'ล้างสี & ดูดฝุ่น',code:'-',S:200,M:220,L:240,XL:270,XXL:320,SC:0,SCo:0,cpnWash:0,cpnMonth:0},
   {cat:'ล้างรถ',name:'Rainy Season Pass',code:'W02',S:800,M:880,L:960,XL:1080,XXL:0,SC:60,SCo:0,cpnWash:0,cpnMonth:1},
@@ -1183,6 +1180,8 @@ function showToast(msg,duration=2000){
 function setDot(s,l){G('dot').className='dot '+s;G('sl').textContent=l;}
 function fmtDate(d){return d?new Date(d).toLocaleDateString('th-TH'):'—';}
 function todayTH(){return new Date().toLocaleDateString('th-TH');}
+function parseThDate(d){if(!d)return null;const p=(''+d).split('/');if(p.length!==3)return null;let y=parseInt(p[2]);if(y>2400)y-=543;return new Date(y,parseInt(p[1])-1,parseInt(p[0]));}
+function sameDay(dateStr,jsDate){const p=parseThDate(dateStr);if(!p)return false;return p.getDate()===jsDate.getDate()&&p.getMonth()===jsDate.getMonth()&&p.getFullYear()===jsDate.getFullYear();}
 function isoToday(){return new Date().toISOString().slice(0,10);}
 
 function LS(k,v){if(v===undefined)try{return JSON.parse(localStorage.getItem(k));}catch{return null;}else localStorage.setItem(k,JSON.stringify(v));}
@@ -1268,7 +1267,9 @@ function subscribe(){
   onSnapshot(collection(db,'stock'),s=>{stock=s.docs.map(d=>({...d.data(),_id:d.id}));rSt();});
   onSnapshot(query(collection(db,'transactions'),orderBy('createdAt','desc'),limit(300)),s=>{txns=s.docs.map(d=>({...d.data(),_id:d.id}));rHist();rToday();rStaffInc();});
   onSnapshot(collection(db,'services'),s=>{
-    if(s.empty)seedSvcs();else{svcs=s.docs.map(d=>({...d.data(),_id:d.id}));rSvcs();rPL();}
+    // Auto-seed DISABLED — services are managed via reset-services.html / pricing page.
+    // (Auto-seeding default services caused duplicates after reset.)
+    svcs=s.docs.map(d=>({...d.data(),_id:d.id}));rSvcs();rPL();
   });
   onSnapshot(query(collection(db,'expenses'),orderBy('createdAt','desc'),limit(100)),s=>{expenses=s.docs.map(d=>({...d.data(),_id:d.id}));rExpenses();});
   onSnapshot(collection(db,'staff'),s=>{
@@ -1299,11 +1300,10 @@ window.addStaff=async function(){
   const n=G('new-staff-name').value.trim();if(!n){alert('ระบุชื่อพนักงาน');return;}
   const pin=(G('new-staff-pin').value||'').trim();
   if(pin&&(pin.length!==4||!/^\d{4}$/.test(pin))){alert('PIN ต้องเป็นตัวเลข 4 หลัก');return;}
-  const branch=G('new-staff-branch')?G('new-staff-branch').value:'';
-  const data={name:n,pin:pin||'',branch:branch,createdAt:serverTimestamp()};
+  const data={name:n,pin:pin||'',createdAt:serverTimestamp()};
   if(db&&!LM)await addDoc(collection(db,'staff'),data);
   else{staffList.push({...data,_id:'l'+Date.now()});LS('stf',staffList);initStaffDropdown();}
-  G('new-staff-name').value='';G('new-staff-pin').value='';if(G('new-staff-branch'))G('new-staff-branch').value='';rStaffManage();
+  G('new-staff-name').value='';G('new-staff-pin').value='';rStaffManage();
 };
 
 // rStaffManage defined later
@@ -1388,6 +1388,11 @@ window.exportStaffInc=function(month,year){
 // ══ SERVICES ══
 function rSvcs(){
   let list=svcs.filter(s=>!s.hidden);if(CC!=='all')list=list.filter(s=>s.cat===CC);
+  list=list.slice().sort((a,b)=>{
+    const sa=(a.sortKey!==undefined?a.sortKey:9999),sb=(b.sortKey!==undefined?b.sortKey:9999);
+    if(sa!==sb)return sa-sb;
+    return (a.code||'').localeCompare(b.code||'',undefined,{numeric:true});
+  });
   const filtered=list.filter(s=>(s[CZ]||0)>0);
   if(!filtered.length){G('sg').innerHTML='<div class="empty" style="grid-column:1/-1;">ไม่มีบริการ</div>';return;}
 
@@ -1608,7 +1613,7 @@ window.scrollToCart=function(){G('cart-sec')?.scrollIntoView({behavior:'smooth'}
 window.cSearch=function(){
   const q=G('cq').value.toLowerCase().trim(),dd=G('cdd');
   if(!q){dd.style.display='none';return;}
-  const r=custs.filter(c=>!c.hidden).filter(c=>c.name.toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.plate||'').toLowerCase().includes(q));
+  const r=custs.filter(c=>c.name.toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.plate||'').toLowerCase().includes(q));
   dd.style.display=r.length?'block':'none';
   dd.innerHTML=r.map(c=>`<div class="co" onclick="selCust('${c._id||c.id}')">
     <div><div style="font-weight:700;font-size:13px;">${c.name}${c.lineUserId?'<span style="background:#00b900;color:#fff;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:4px;">LINE</span>':''}</div>
@@ -1700,7 +1705,7 @@ window.checkout=async function(){
     itemDetails:svcEntries,total:tot,pts:selC?pts:0,
     csaleTotal,copTotal,discount:disc,cpnDiscount:cpnDisc,paperDiscount:paperDisc||0,
     couponUsed:usedCoupon?usedCoupon.type:'none',
-    date:now.toLocaleDateString('th-TH'),
+    date:fmtCE(now),
     time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
     washDuration:window._checkoutSlotOpenedAt?Math.round((Date.now()-new Date(window._checkoutSlotOpenedAt).getTime())/60000):null,
     createdAt:serverTimestamp()
@@ -1844,7 +1849,7 @@ window.addExpense=async function(){
   const name=G('exp-name').value.trim();const amount=parseInt(G('exp-amount').value);
   if(!name||!amount){alert('กรุณาระบุรายการและจำนวนเงิน');return;}
   const now=new Date();
-  const data={name,amount,cat:G('exp-cat').value,note:G('exp-note').value,date:now.toLocaleDateString('th-TH'),createdAt:serverTimestamp()};
+  const data={name,amount,cat:G('exp-cat').value,note:G('exp-note').value,date:fmtCE(now),createdAt:serverTimestamp()};
   if(db&&!LM)await addDoc(collection(db,'expenses'),data);
   else{expenses.unshift({...data,_id:'l'+Date.now(),createdAt:now});LS('exp',expenses);rExpenses();}
   hs('sh-exp');['exp-name','exp-amount','exp-note'].forEach(i=>G(i).value='');
@@ -1863,7 +1868,7 @@ function rExpenses(){
   </div>`).join(''):'<div style="font-size:12px;color:var(--tx3);">ยังไม่มีรายจ่าย</div>';
   G('exp-total').textContent='-฿'+total.toLocaleString();
   // Net total
-  const todaySales=txns.filter(t=>t.date===td).reduce((a,t)=>a+(t.total||0),0);
+  const todaySales=txns.filter(t=>sameDay(t.date,new Date())).reduce((a,t)=>a+(t.total||0),0);
   G('net-total').textContent='฿'+(todaySales-total).toLocaleString();
 }
 
@@ -1875,7 +1880,7 @@ window.delExp=async function(id){
 // ══ TODAY ══
 function rToday(){
   const td=todayTH();
-  const today=txns.filter(t=>t.date===td);
+  const today=txns.filter(t=>sameDay(t.date,new Date()));
   const tot=today.reduce((a,t)=>a+(t.total||0),0);
   const n=today.length;
   G('td-total').textContent='฿'+tot.toLocaleString();
@@ -1925,7 +1930,7 @@ function rToday(){
 // ══ LOYALTY ══
 function rLoy(){
   const q=(G('lq')||{value:''}).value.toLowerCase();
-  const list=custs.filter(c=>!c.hidden).filter(c=>!q||c.name.toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.plate||'').toLowerCase().includes(q));
+  const list=custs.filter(c=>!q||c.name.toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.plate||'').toLowerCase().includes(q));
   G('lm').textContent=custs.length;G('lp').textContent=custs.reduce((a,c)=>a+(c.points||0),0).toLocaleString();G('lg').textContent=custs.filter(c=>(c.points||0)>=1000).length;
   const now=new Date();
   rCeramicAlerts();
@@ -1989,36 +1994,6 @@ window.delCustDetail=async function(){
   else{custs=custs.filter(c=>(c._id||c.id)!=viewCustId);LS('cu',custs);rLoy();}
   hs('sh-cust');
 };
-// Live plate search in add-member form — detect existing customers
-window.ncPlateSearch=function(){
-  const val=(G('cpl').value||'').replace(/\s+/g,'').toUpperCase();
-  const drop=G('nc-plate-drop');
-  const warn=G('nc-dup-warn');
-  if(val.length<2){drop.style.display='none';warn.style.display='none';return;}
-  const matches=custs.filter(c=>!c.hidden).filter(c=>(c.plate||'').replace(/\s+/g,'').toUpperCase().includes(val));
-  if(matches.length===0){drop.style.display='none';warn.style.display='none';return;}
-  // Exact match → strong warning
-  const exact=matches.find(c=>(c.plate||'').replace(/\s+/g,'').toUpperCase()===val);
-  if(exact){
-    warn.style.display='block';
-    warn.innerHTML='⚠️ ทะเบียนนี้มีในระบบแล้ว: <b>'+(exact.name||'')+'</b><br><span style="font-size:11px;">กด "ใช้ลูกค้านี้" เพื่อเปิดบิลแทนการเพิ่มซ้ำ</span>';
-  } else { warn.style.display='none'; }
-  drop.style.display='block';
-  drop.innerHTML=matches.slice(0,6).map(c=>`
-    <div onclick="ncUseCust('${c._id}')" style="padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--bdr,#eee);font-size:13px;">
-      <b style="color:var(--gold,#C9A84C);">${c.plate||''}</b> — ${c.name||''} <span style="color:var(--tx3,#999);font-size:11px;">${c.car||''} (${c.size||''})</span>
-    </div>`).join('')+`<div style="padding:8px 12px;font-size:11px;color:var(--tx3,#999);border-top:1px solid var(--bdr,#eee);">หรือกรอกต่อเพื่อเพิ่มลูกค้าใหม่</div>`;
-};
-
-window.ncUseCust=function(id){
-  // Close add form, select existing customer onto current bill
-  G('nc-plate-drop').style.display='none';
-  G('nc-dup-warn').style.display='none';
-  hs('sh-nc');
-  ['cf','cl2','cp','cpl','cc2','c-line'].forEach(i=>G(i).value='');
-  selCust(id);
-};
-
 window.addCust=async function(){
   const fn=G('cf').value.trim();if(!fn){alert('กรุณาระบุชื่อ');return;}
   const manualLineId=(G('c-line').value||'').trim();
@@ -2058,7 +2033,7 @@ window.addCust=async function(){
     selCust(newId);
     if(data.size)CZ=data.size;
   }
-  hs('sh-nc');['cf','cl2','cp','cpl','cc2','c-line'].forEach(i=>G(i).value='');const _d=G('nc-plate-drop');if(_d)_d.style.display='none';const _w=G('nc-dup-warn');if(_w)_w.style.display='none';
+  hs('sh-nc');['cf','cl2','cp','cpl','cc2','c-line'].forEach(i=>G(i).value='');
 };
 
 // ══ STOCK ══
@@ -3001,7 +2976,6 @@ window.rStaffManage=function(){
           ${s.pin
             ?'<span style="color:var(--ok);font-weight:700;">PIN ●●●● ✅</span>'
             :'<span style="color:var(--err);">ยังไม่มี PIN</span>'}
-          ${s.branch?'<span style="margin-left:8px;background:var(--inf-bg);color:var(--inf);padding:1px 7px;border-radius:99px;font-weight:700;">'+s.branch+'</span>':'<span style="margin-left:8px;color:var(--tx3);">ทุกสาขา</span>'}
         </div>
       </div>
       <div style="display:flex;gap:6px;">
@@ -3053,7 +3027,7 @@ window.cSearch=function(){
 // ══ DAILY CLOSING REPORT ══
 window.showClosingReport=function(){
   const td=new Date().toLocaleDateString('th-TH');
-  let today=txns.filter(t=>t.date===td);
+  let today=txns.filter(t=>sameDay(t.date,new Date()));
   if(currentBranch)today=today.filter(t=>!t.branch||t.branch===currentBranch);
   const tot=today.reduce((a,t)=>a+(t.total||0),0);
   const cash=today.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0);
@@ -3098,7 +3072,7 @@ window.showClosingReport=function(){
 
 window.shareClosingReport=async function(){
   const td=new Date().toLocaleDateString('th-TH');
-  let today=txns.filter(t=>t.date===td);
+  let today=txns.filter(t=>sameDay(t.date,new Date()));
   if(currentBranch)today=today.filter(t=>!t.branch||t.branch===currentBranch);
   const tot=today.reduce((a,t)=>a+(t.total||0),0);
   const cash=today.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0);
@@ -3252,6 +3226,13 @@ function updateLoginDisplay(){
 
 window.loginPinPress=function(k){
   const errEl=G('pin-error');
+  if(!currentBranch){
+    if(errEl)errEl.textContent='กรุณาเลือกสาขาก่อน';
+    // Shake branch buttons
+    ['HO','MK'].forEach(br=>{const el=G('pin-br-'+br);if(el){el.style.border='2px solid #f87171';}});
+    setTimeout(()=>['HO','MK'].forEach(br=>{const el=G('pin-br-'+br);if(el)el.style.border='2px solid #333';}),800);
+    return;
+  }
   if(k==='del'){loginPinBuffer=loginPinBuffer.slice(0,-1);}
   else if(k==='clear'){loginPinBuffer='';}
   else if(loginPinBuffer.length<4){loginPinBuffer+=k;}
@@ -3262,22 +3243,8 @@ window.loginPinPress=function(k){
     // Check against staff list
     const matched=staffList.find(s=>s.pin===loginPinBuffer);
     if(matched){
-      // If staff has no branch defined and none selected, prompt to pick branch
-      if((!matched.branch||(matched.branch!=='HO'&&matched.branch!=='MK'))&&!currentBranch){
-        if(errEl)errEl.textContent='พนักงานนี้ยังไม่ได้ตั้งสาขา — กรุณาเลือกสาขา';
-        G('pin-branch-wrap').style.display='grid';
-        loginPinBuffer='';updateLoginDisplay();
-        return;
-      }
       loggedInStaff=matched.name;
       localStorage.setItem('loggedStaff',matched.name);
-      // Auto-set branch from staff record if defined
-      if(matched.branch&&(matched.branch==='HO'||matched.branch==='MK')){
-        selectBranch(matched.branch);
-      } else if(!currentBranch){
-        // No branch on staff & none selected → default HO
-        selectBranch('HO');
-      }
       // Auto-set staff selector
       const sel=G('staff-sel');
       if(sel){sel.value=matched.name;updateStaffDisplay();}
