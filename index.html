@@ -391,7 +391,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9x</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9y</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1166,6 +1166,7 @@ let db=null,LM=false;
 let currentBranch=localStorage.getItem('branch')||'';
 let custs=[],stock=[],txns=[],svcs=[],expenses=[],staffList=[];
 let cart=[],selC=null,rsId=null,txnN=1000;
+let FAVS=JSON.parse(localStorage.getItem('svc_favs')||'[]');
 let CZ='S',CC='ล้างรถ',PLCat='all';
 let selPayMethod='เงินสด',usedCoupon=null,appliedPaperCpn=null;
 let viewCustId=null,lastTxnData=null;
@@ -1386,6 +1387,13 @@ window.exportStaffInc=function(month,year){
 };
 
 // ══ SERVICES ══
+window.toggleFav=function(key){
+  const i=FAVS.indexOf(key);
+  if(i>=0)FAVS.splice(i,1);else FAVS.push(key);
+  localStorage.setItem('svc_favs',JSON.stringify(FAVS));
+  rSvcs();
+};
+
 function rSvcs(){
   let list=svcs.filter(s=>!s.hidden);if(CC!=='all')list=list.filter(s=>s.cat===CC);
   list=list.slice().sort((a,b)=>{
@@ -1402,8 +1410,11 @@ function rSvcs(){
     const p=s[CZ]||0;
     const hasCpn=(s.cpnWash||0)+(s.cpnMonth||0)>0;
     const cpnTxt=hasCpn?`<div class="sq-cpn">${s.cpnWash?s.cpnWash+'✕ฟรี':''}${s.cpnMonth?s.cpnMonth+'เดือน':''}</div>`:'';
+    const svcKey=s.code||s._id||s.name;
+    const isFav=FAVS.includes(svcKey);
     const d=JSON.stringify({id:(s._id||s.code)+'_'+CZ,name:s.name,cat:s.cat,price:p,size:CZ,code:s.code,SC:s.SC||0,SCo:s.SCo||0,CS_S:s.CS_S||0,CS_M:s.CS_M||0,CS_L:s.CS_L||0,CS_XL:s.CS_XL||0,CS_XXL:s.CS_XXL||0,CO_S:s.CO_S||0,CO_M:s.CO_M||0,CO_L:s.CO_L||0,CO_XL:s.CO_XL||0,CO_XXL:s.CO_XXL||0,cpnWash:s.cpnWash||0,cpnMonth:s.cpnMonth||0,svcRef:s._id||s.code});
     return`<div class="sq-card" onclick='addCart(${d.replace(/'/g,"&apos;")})'>
+      <div class="sq-fav" onclick='event.stopPropagation();toggleFav("${svcKey.replace(/"/g,"&quot;")}")' style="position:absolute;top:4px;right:6px;font-size:16px;cursor:pointer;z-index:2;line-height:1;">${isFav?'⭐':'☆'}</div>
       ${hasCpn?'<div class="sq-cpn-tag">🎫</div>':''}
       <div class="sq-name">${s.name}</div>
       <div class="sq-code">${s.code}·${CZ}</div>
@@ -1412,11 +1423,31 @@ function rSvcs(){
     </div>`;
   }
 
+  // Favorites section at top
+  const favItems=filtered.filter(s=>FAVS.includes(s.code||s._id||s.name));
+
   if(CC!=='all'){
-    G('sg').innerHTML=filtered.map(makeCard).join('');
+    let html='';
+    if(favItems.length){
+      html+=`<div style="grid-column:1/-1;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+        <span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:#fff3cd;color:#856404;">⭐ รายการโปรด</span>
+        <div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
+      html+=favItems.map(makeCard).join('');
+      html+=`<div style="grid-column:1/-1;margin-top:12px;"></div>`;
+    }
+    html+=filtered.map(makeCard).join('');
+    G('sg').innerHTML=html;
+    return;
   } else {
     const catOrder=['ล้างรถ','เคลือบสี','ภายใน','บริการอื่น','ใบปัดน้ำฝน'];
     let html='';
+    // Favorites first
+    if(favItems.length){
+      html+=`<div style="grid-column:1/-1;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+        <span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:#fff3cd;color:#856404;">⭐ รายการโปรด</span>
+        <div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
+      html+=favItems.map(makeCard).join('');
+    }
     for(const cat of catOrder){
       const items=filtered.filter(s=>s.cat===cat);
       if(!items.length) continue;
