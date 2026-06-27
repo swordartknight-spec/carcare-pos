@@ -1,14 +1,14 @@
 {
-  "name": "CarCare POS",
-  "short_name": "CarCare",
-  "description": "Car Care Point of Sale with Loyalty & Stock",
-  "start_url": "./index.html",
+  "name": "Bike Services POS",
+  "short_name": "Bike POS",
+  "description": "Shell Station Bike Services Management",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a1a",
-  "theme_color": "#C9A84C",
-  "orientation": "portrait-primary",
+  "background_color": "#1C2B4A",
+  "theme_color": "#E8B400",
+  "orientation": "portrait",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
