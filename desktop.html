@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v19</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v20</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -1152,7 +1152,9 @@ window.bfAddSvc=function(id){
   const sel=document.getElementById(id+'-svc');
   if(!sel.value){return;}
   const opt=sel.options[sel.selectedIndex];
-  const size=bfData[id].size||'M';
+  // Read size directly from the dropdown (not stale bfData) so XXL etc. is respected
+  const size=document.getElementById(id+'-size').value||'M';
+  bfData[id].size=size;
   const price=parseFloat(opt.getAttribute('data-'+size.toLowerCase())||opt.getAttribute('data-m')||0);
   bfData[id].services.push({
     code:opt.getAttribute('data-code')||'',
