@@ -129,7 +129,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v20</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v21</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -333,13 +333,24 @@ input:focus,select:focus{border-color:var(--gold);}
 
     <!-- CERAMIC DUE -->
     <div class="screen" id="sc-ceramic">
+      <div class="stat-grid" style="margin-bottom:16px;grid-template-columns:repeat(4,1fr);">
+        <div class="stat-card gold"><div class="stat-lbl">ทำเซรามิกทั้งหมด</div><div class="stat-val" id="cer-total" style="font-size:24px;">0</div><div class="stat-sub">ลูกค้า</div></div>
+        <div class="stat-card blue"><div class="stat-lbl">ครบกำหนดเช็ค 7 วัน</div><div class="stat-val" id="cer-7d" style="font-size:24px;">0</div><div class="stat-sub">โทรถามคุณภาพงาน</div></div>
+        <div class="stat-card purple"><div class="stat-lbl">ถึงเวลา Maintain 6 เดือน</div><div class="stat-val" id="cer-6m" style="font-size:24px;">0</div><div class="stat-sub">โทรชวนกลับมา</div></div>
+        <div class="stat-card green"><div class="stat-lbl">กลับมาใช้บริการ</div><div class="stat-val" id="cer-return" style="font-size:24px;">0</div><div class="stat-sub">หลังทำเซรามิก</div></div>
+      </div>
+      <div class="filter-row" style="margin-bottom:12px;">
+        <button class="btn" onclick="setCerFilter('all',this)">ทั้งหมด</button>
+        <button class="btn" onclick="setCerFilter('7d',this)">⏰ ครบ 7 วัน</button>
+        <button class="btn" onclick="setCerFilter('6m',this)">🔔 ถึง Maintain</button>
+      </div>
       <div class="table-card">
         <div class="table-head">
-          <span style="font-weight:700;">🛡 ลูกค้าที่ถึงเวลา Ceramic Maintain (5+ เดือน)</span>
+          <span style="font-weight:700;">🛡 ติดตามลูกค้าเซรามิก</span>
           <span id="ceramic-count" style="color:var(--tx3);font-size:12px;"></span>
         </div>
         <table>
-          <thead><tr><th>ชื่อ</th><th>รถ / ทะเบียน</th><th>เบอร์โทร</th><th>Ceramic ล่าสุด</th><th>นานเท่าไหร่</th><th>โทร</th></tr></thead>
+          <thead><tr><th>ชื่อ / ทะเบียน</th><th>เบอร์โทร</th><th>ทำล่าสุด</th><th>ผ่านมา</th><th>เช็ค 7 วัน</th><th>Maintain 6 ด.</th><th>กลับมา?</th><th>โทร</th></tr></thead>
           <tbody id="ceramic-table"></tbody>
         </table>
       </div>
@@ -796,13 +807,20 @@ function sameDay(dateStr,jsDate){
   const p=parseThDate(dateStr);if(!p)return false;
   return p.getDate()===jsDate.getDate()&&p.getMonth()===jsDate.getMonth()&&p.getFullYear()===jsDate.getFullYear();
 }
+let _cerFilter='all';
+window.setCerFilter=function(f,el){
+  _cerFilter=f;
+  document.querySelectorAll('#sc-ceramic .filter-row .btn').forEach(b=>b.style.cssText='');
+  if(el){el.style.background='var(--gold)';el.style.color='var(--blk)';}
+  rCeramic();
+};
+
 function rCeramic(){
   const n=new Date();
-  // Ceramic service codes: P05, P07, S11 (เคลือบแก้วเซรามิก)
   const ceramicCodes=['P05','P07','S11'];
   // Find last ceramic transaction per customer
   const lastCeramicByCust={};
-  txns.filter(t=>filterBranch(t)&&t.customer&&t.customer!=='Walk-in').forEach(t=>{
+  txns.filter(t=>filterBranch(t)&&t.customer&&t.customer!=='Walk-in'&&t.customer!=='ลูกค้า').forEach(t=>{
     let hasCeramic=false;
     if(t.itemDetails&&Array.isArray(t.itemDetails)){
       hasCeramic=t.itemDetails.some(it=>ceramicCodes.includes((it.code||'').toUpperCase())||(it.name||'').includes('เซรามิก')||(it.name||'').includes('เคลือบแก้ว'));
@@ -814,18 +832,59 @@ function rCeramic(){
       lastCeramicByCust[t.customer]={date:dt,plate:t.plate};
     }
   });
-  // Build due list (>=5 months)
-  const due=[];
+
+  // Build list with follow-up status
+  const rows=[];
   Object.entries(lastCeramicByCust).forEach(([custName,info])=>{
-    const months=(n-info.date)/(1000*60*60*24*30);
-    if(months>=5){
-      const c=custs.find(x=>x.name===custName)||{};
-      due.push({name:custName,car:c.car||'',plate:info.plate||c.plate||'',phone:c.phone||'',lastDate:info.date,months:Math.round(months)});
-    }
+    const days=Math.floor((n-info.date)/(1000*60*60*24));
+    const months=days/30;
+    const c=custs.find(x=>x.name===custName)||{};
+    // Did customer return for ANY service after the ceramic date?
+    const returned=txns.some(t=>filterBranch(t)&&t.customer===custName&&(()=>{const d=parseThDate(t.date);return d&&d>info.date;})());
+    rows.push({
+      name:custName, car:c.car||'', plate:info.plate||c.plate||'', phone:c.phone||'',
+      lastDate:info.date, days, months:Math.round(months), returned
+    });
   });
-  due.sort((a,b)=>a.lastDate-b.lastDate);
-  G('ceramic-count').textContent=due.length+' คน';
-  G('ceramic-table').innerHTML=due.map(c=>`<tr><td><b>${c.name}</b></td><td>${c.car} · ${c.plate}</td><td>${c.phone||'—'}</td><td>${c.lastDate.toLocaleDateString('th-TH')}</td><td><span style="color:${c.months>=8?'var(--err)':'#d68910'};font-weight:700;">${c.months} เดือน</span></td><td>${c.phone?`<a href="tel:${c.phone.replace(/[-\s]/g,'')}" style="color:var(--inf);text-decoration:none;font-weight:700;">📞 โทร</a>`:'—'}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">✅ ไม่มีลูกค้าที่ต้อง Maintain</td></tr>';
+  rows.sort((a,b)=>a.lastDate-b.lastDate);
+
+  // Counts
+  const total=rows.length;
+  const due7=rows.filter(r=>r.days>=7).length;
+  const due6m=rows.filter(r=>r.months>=6).length;
+  const returnedCount=rows.filter(r=>r.returned).length;
+  G('cer-total').textContent=total;
+  G('cer-7d').textContent=due7;
+  G('cer-6m').textContent=due6m;
+  G('cer-return').textContent=returnedCount;
+
+  // Apply filter
+  let shown=rows;
+  if(_cerFilter==='7d')shown=rows.filter(r=>r.days>=7);
+  else if(_cerFilter==='6m')shown=rows.filter(r=>r.months>=6);
+
+  G('ceramic-count').textContent=shown.length+' คน';
+  G('ceramic-table').innerHTML=shown.map(r=>{
+    const chk7=r.days>=7
+      ?'<span style="background:#e3f2fd;color:#1565c0;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;">⏰ ครบกำหนด</span>'
+      :'<span style="color:var(--tx3);font-size:11px;">อีก '+(7-r.days)+' วัน</span>';
+    const chk6m=r.months>=6
+      ?'<span style="background:#f3e5f5;color:#7b1fa2;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;">🔔 ถึงเวลา</span>'
+      :'<span style="color:var(--tx3);font-size:11px;">อีก '+Math.max(0,6-r.months)+' ด.</span>';
+    const ret=r.returned
+      ?'<span style="color:var(--ok);font-weight:700;">✓ กลับมา</span>'
+      :'<span style="color:var(--err);">✗ ยังไม่กลับ</span>';
+    return`<tr>
+      <td><b>${r.name}</b><br><span style="color:var(--tx3);font-size:11px;">${r.plate}${r.car?' · '+r.car:''}</span></td>
+      <td>${r.phone||'—'}</td>
+      <td style="color:var(--tx3);">${r.lastDate.toLocaleDateString('th-TH')}</td>
+      <td style="font-weight:700;color:${r.months>=8?'var(--err)':r.months>=6?'#d68910':'var(--tx2)'};">${r.days} วัน<br><span style="font-size:10px;font-weight:400;">(${r.months} ด.)</span></td>
+      <td>${chk7}</td>
+      <td>${chk6m}</td>
+      <td>${ret}</td>
+      <td>${r.phone?`<a href="tel:${r.phone.replace(/[-\s]/g,'')}" style="color:var(--inf);text-decoration:none;font-weight:700;">📞</a>`:'—'}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="8" class="empty">ไม่มีลูกค้าทำเซรามิก</td></tr>';
 }
 // ── EXPOSE TO GLOBAL (for onclick handlers) ──
 // ── ANALYTICS ──
