@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>CarCare POS — Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -95,7 +96,7 @@ input:focus,select:focus{border-color:var(--gold);}
 .prog-fill{height:100%;border-radius:99px;background:var(--gold);}
 
 /* CUSTOMER */
-.cust-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 30px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bdr);font-size:13px;}
+.cust-row{display:grid;grid-template-columns:2fr 0.8fr 0.7fr 1.1fr 1fr 0.9fr 1.2fr 30px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bdr);font-size:13px;}
 .cust-row:hover{background:#fafaf8;}
 .cust-row:last-child{border-bottom:none;}
 
@@ -129,7 +130,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v21</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v24</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -146,6 +147,7 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="sb-item" onclick="nav('ceramic',this)"><span class="sb-icon">🛡</span>Ceramic Due</div>
     <div class="sb-item" onclick="nav('analytics',this)"><span class="sb-icon">📈</span>Analytics</div>
     <div class="sb-item" onclick="nav('backfill',this)"><span class="sb-icon">📝</span>เพิ่มข้อมูลย้อนหลัง</div>
+    <div class="sb-item" onclick="nav('crosscheck',this)"><span class="sb-icon">🔍</span>Cross-check Excel</div>
     <div class="sb-item" onclick="nav('pricing',this)"><span class="sb-icon">🏷️</span>จัดการราคา</div>
   </nav>
   <div class="sb-footer">
@@ -302,10 +304,11 @@ input:focus,select:focus{border-color:var(--gold);}
         <span id="c-count" style="color:var(--tx3);font-size:12px;"></span>
       </div>
       <div class="table-card">
-        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 30px;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--bdr);">
+        <div style="display:grid;grid-template-columns:2fr 0.8fr 0.7fr 1.1fr 1fr 0.9fr 1.2fr 30px;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--bdr);">
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">ชื่อ / รถ</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">Points</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">Visits</span>
+          <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">มาล่าสุด</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">Tier</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">LINE</span>
           <span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;">เบอร์โทร</span>
@@ -353,6 +356,31 @@ input:focus,select:focus{border-color:var(--gold);}
           <thead><tr><th>ชื่อ / ทะเบียน</th><th>เบอร์โทร</th><th>ทำล่าสุด</th><th>ผ่านมา</th><th>เช็ค 7 วัน</th><th>Maintain 6 ด.</th><th>กลับมา?</th><th>โทร</th></tr></thead>
           <tbody id="ceramic-table"></tbody>
         </table>
+      </div>
+    </div>
+
+  <!-- CROSS-CHECK EXCEL -->
+    <div class="screen" id="sc-crosscheck">
+      <div class="table-card" style="margin-bottom:16px;">
+        <div class="table-head"><span style="font-weight:700;">🔍 Cross-check Excel ↔ POS</span></div>
+        <div style="padding:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+          <div><div class="field-label">วันที่ (ตาม Excel)</div><input type="date" class="field-input" id="cc-date"/></div>
+          <div><div class="field-label">สาขา</div><select class="field-input" id="cc-branch"><option value="HO">HO</option><option value="MK">MK</option></select></div>
+          <div><div class="field-label">ไฟล์ Excel (รายงานสรุปบัญชี V.04)</div><input type="file" class="field-input" id="cc-file" accept=".xlsx,.xls" style="padding:7px;"/></div>
+          <button class="btn btn-g" onclick="ccCompare()">🔍 เทียบข้อมูล</button>
+        </div>
+        <div id="cc-summary" style="padding:0 16px 16px;display:none;"></div>
+      </div>
+      <div class="table-card" id="cc-result-card" style="display:none;">
+        <div class="table-head">
+          <span style="font-weight:700;">ผลการเทียบ</span>
+          <button class="btn btn-g" id="cc-add-btn" onclick="ccAddMissing()" style="display:none;">➕ เพิ่มบิลที่ขาดเข้า POS</button>
+        </div>
+        <table>
+          <thead><tr><th>เลขจอฟ</th><th>ขนาด</th><th>บริการ (code)</th><th style="text-align:right;">รวม</th><th>ชำระ</th><th>พนักงาน</th><th>สถานะ</th></tr></thead>
+          <tbody id="cc-table"></tbody>
+        </table>
+        <div id="cc-pos-extra" style="padding:12px 16px;font-size:12px;color:var(--tx3);"></div>
       </div>
     </div>
 
@@ -678,12 +706,21 @@ function rToday(){
 }
 
 // ── HISTORY ──
+function setHistoryDefaultRange(){
+  // Only set default once (don't override if user already picked dates this session)
+  if(G('h-from').value||G('h-to').value)return;
+  const now=new Date();
+  const from=new Date();from.setDate(from.getDate()-6); // 7 days incl today
+  const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  G('h-from').value=iso(from);
+  G('h-to').value=iso(now);
+}
 function rHistory(){
   const from=G('h-from').value,to=G('h-to').value,q=(G('h-search').value||'').toLowerCase();
   let f=txns.filter(t=>{
     if(!filterBranch(t))return false;
     if(q&&!t.customer?.toLowerCase().includes(q)&&!t.plate?.toLowerCase().includes(q)&&!(t.id||'').toLowerCase().includes(q))return false;
-    if(from||to){try{const p=(t.date||'').split('/');const d=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));if(from&&d<new Date(from))return false;if(to&&d>new Date(to+' 23:59'))return false;}catch{return false;}}
+    if(from||to){const d=parseThDate(t.date);if(!d)return false;if(from&&d<new Date(from))return false;if(to&&d>new Date(to+' 23:59'))return false;}
     return true;
   });
   const tot=f.reduce((a,t)=>a+(t.total||0),0);
@@ -718,6 +755,22 @@ function rCustomers(){
   const _rr=_tc>0?Math.round(_rc/_tc*100):0;
   const retEl=G('c-retention-badge');
   if(retEl)retEl.innerHTML='Retention Rate: <b style="color:var(--ok);">'+_rr+'%</b> <span style="color:var(--tx3);font-size:11px;">('+_rc+' จาก '+_tc+' กลับมาซ้ำ)</span>';
+  // Last visit per customer (from transactions)
+  const nowD=new Date();
+  const lastVisitMap={};
+  txns.forEach(t=>{
+    if(!t.customer)return;
+    const d=parseThDate(t.date);if(!d)return;
+    if(!lastVisitMap[t.customer]||d>lastVisitMap[t.customer])lastVisitMap[t.customer]=d;
+  });
+  function lastVisitCell(name){
+    const d=lastVisitMap[name];
+    if(!d)return '<span style="color:var(--tx3);font-size:11px;">—</span>';
+    const days=Math.floor((nowD-d)/(1000*60*60*24));
+    const col=days<=30?'var(--ok)':days<=60?'#d68910':'var(--err)';
+    const lbl=days===0?'วันนี้':days===1?'เมื่อวาน':days+' วันก่อน';
+    return '<span style="color:'+col+';font-weight:600;font-size:12px;">'+lbl+'</span>';
+  }
   G('cust-list').innerHTML=list.map((c,i)=>{
     const cid='cexp-'+i;
     return `<div>
@@ -725,6 +778,7 @@ function rCustomers(){
         <div><div style="font-weight:700;">${c.name||''}</div><div style="font-size:11px;color:var(--tx3);">${c.car||''} · ${c.plate||''} · ${c.size||''}</div></div>
         <div style="font-weight:700;">${(c.points||0).toLocaleString()} pts</div>
         <div>${c.visits||0}</div>
+        <div>${lastVisitCell(c.name)}</div>
         <div>${tier(c.points||0)}</div>
         <div>${c.lineUserId?'<span style="background:#00b900;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;">LINE ✓</span>':'<span style="color:var(--tx3);font-size:11px;">ไม่มี</span>'}</div>
         <div style="font-size:12px;color:var(--tx2);">${c.phone?'<a href="tel:'+c.phone.replace(/[-\s]/g,'')+'" style="color:var(--inf);text-decoration:none;font-weight:600;" onclick="event.stopPropagation()">📞 '+c.phone+'</a>':'<span style="color:var(--tx3);">—</span>'}</div>
@@ -1569,6 +1623,134 @@ window.exportData=function(){const f=txns.filter(filterBranch);let c='﻿';c+=`R
 window.rHistory=rHistory;
 window.rStaff=rStaff;
 window.rCustomers=rCustomers;
+// ── CROSS-CHECK EXCEL ──
+let ccMissing=[];
+
+window.ccCompare=async function(){
+  const dateVal=G('cc-date').value;
+  const branch=G('cc-branch').value;
+  const file=G('cc-file').files[0];
+  if(!dateVal){alert('เลือกวันที่ก่อน');return;}
+  if(!file){alert('เลือกไฟล์ Excel ก่อน');return;}
+
+  // Parse Excel
+  const buf=await file.arrayBuffer();
+  const wb=XLSX.read(buf,{type:'array'});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+
+  // Find bill rows: a row where some cell in first 3 cols is a 4-6 digit job number
+  // V.04 layout: ลำดับ|เลขจอฟ|ขนาด|P|I|S|W/O|ส่วนเพิ่ม/ลด|ส่วนลด|รวม|คอมเชียร์|ชื่อ|คอมปฏิบัติ|ชื่อ|วิธีชำระ|หมายเหตุ
+  const bills=[];
+  rows.forEach(r=>{
+    const jobNo=parseInt(r[1]);
+    if(!jobNo||jobNo<1000||jobNo>999999)return;
+    const size=(''+(r[2]||'')).trim().toUpperCase();
+    if(!['S','M','L','XL','XXL'].includes(size))return;
+    // Collect service codes from P/I/S/WO columns (index 3-6)
+    const codes=[];
+    for(let ci=3;ci<=6;ci++){
+      const v=(''+(r[ci]||'')).trim().toUpperCase();
+      if(v&&v!=='-'&&/^[A-Z]+\d/.test(v))codes.push(v);
+    }
+    const total=parseFloat((''+(r[9]||'0')).replace(/,/g,''))||0;
+    const csale=parseFloat((''+(r[10]||'0')).replace(/,/g,''))||0;
+    const csaleName=(''+(r[11]||'')).trim();
+    const cop=parseFloat((''+(r[12]||'0')).replace(/,/g,''))||0;
+    const copName=(''+(r[13]||'')).trim();
+    let pay=(''+(r[14]||'')).trim();
+    if(!['เงินสด','โอน','QR','บัตร'].includes(pay))pay=pay.includes('โอน')?'โอน':pay.includes('สด')?'เงินสด':pay||'เงินสด';
+    const note=(''+(r[15]||'')).trim();
+    bills.push({jobNo,size,codes,total,csale,csaleName,cop,copName,pay,note});
+  });
+
+  if(bills.length===0){alert('อ่านบิลจาก Excel ไม่ได้ — เช็คว่าเป็นฟอร์ม V.04 (เลขจอฟที่คอลัมน์ B)');return;}
+
+  // POS transactions same date + branch
+  const dp=dateVal.split('-');
+  const target=new Date(parseInt(dp[0]),parseInt(dp[1])-1,parseInt(dp[2]));
+  const posTxns=txns.filter(t=>{
+    if(branch&&t.branch&&t.branch!==branch)return false;
+    return sameDay(t.date,target);
+  });
+
+  // Greedy match: same total (+ same payment preferred)
+  const usedPos=new Set();
+  ccMissing=[];
+  const results=bills.map(b=>{
+    // Try total+payment first, then total only
+    let m=posTxns.find(t=>!usedPos.has(t._id)&&(t.total||0)===b.total&&(t.payment||'')===b.pay);
+    if(!m)m=posTxns.find(t=>!usedPos.has(t._id)&&(t.total||0)===b.total);
+    if(m){usedPos.add(m._id);return{...b,matched:true,posId:m.id||m._id.slice(0,6)};}
+    ccMissing.push(b);
+    return{...b,matched:false};
+  });
+  const extraPos=posTxns.filter(t=>!usedPos.has(t._id));
+
+  // Render
+  G('cc-summary').style.display='block';
+  G('cc-summary').innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;">
+    <span>📄 Excel: <b>${bills.length}</b> บิล · ฿${bills.reduce((a,b)=>a+b.total,0).toLocaleString()}</span>
+    <span>💻 POS: <b>${posTxns.length}</b> บิล · ฿${posTxns.reduce((a,t)=>a+(t.total||0),0).toLocaleString()}</span>
+    <span style="color:${ccMissing.length?'var(--err)':'var(--ok)'};font-weight:700;">${ccMissing.length?'⚠️ ขาด '+ccMissing.length+' บิล':'✅ ครบทุกบิล'}</span>
+    ${extraPos.length?'<span style="color:var(--inf);">ℹ️ POS มีเกิน '+extraPos.length+' บิล</span>':''}
+  </div>`;
+
+  G('cc-result-card').style.display='block';
+  G('cc-table').innerHTML=results.map(b=>`<tr style="${b.matched?'':'background:#fff8f0;'}">
+    <td style="font-weight:700;color:var(--gold);">${b.jobNo}</td>
+    <td>${b.size}</td>
+    <td>${b.codes.join(', ')||'<span style="color:var(--tx3);">—</span>'}${b.note?'<br><span style="font-size:10px;color:var(--tx3);">'+b.note+'</span>':''}</td>
+    <td style="text-align:right;font-weight:700;">฿${b.total.toLocaleString()}</td>
+    <td>${b.pay}</td>
+    <td style="font-size:12px;">${b.copName||'—'}</td>
+    <td>${b.matched
+      ?'<span style="background:#e8f5e9;color:#2e7d32;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;">✓ มีใน POS ('+b.posId+')</span>'
+      :'<span style="background:#fff3e0;color:#e65100;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;">⚠️ ขาด — จะเพิ่ม</span>'}</td>
+  </tr>`).join('');
+  G('cc-pos-extra').innerHTML=extraPos.length?'ℹ️ บิลใน POS ที่ไม่มีใน Excel: '+extraPos.map(t=>(t.id||'')+' ฿'+(t.total||0).toLocaleString()).join(' · '):'';
+  G('cc-add-btn').style.display=ccMissing.length?'inline-flex':'none';
+};
+
+window.ccAddMissing=async function(){
+  if(!ccMissing.length)return;
+  const dateVal=G('cc-date').value;
+  const branch=G('cc-branch').value;
+  const dp=dateVal.split('-');
+  const dateCE=dp[2]+'/'+dp[1]+'/'+dp[0];
+  if(!confirm(`เพิ่ม ${ccMissing.length} บิลที่ขาด เข้า POS?\nวันที่ ${dateCE} สาขา ${branch}`))return;
+  const btn=G('cc-add-btn');btn.disabled=true;btn.textContent='กำลังเพิ่ม...';
+  let ok=0;
+  for(const b of ccMissing){
+    // Build itemDetails from codes using services collection prices
+    const itemDetails=[];
+    b.codes.forEach(code=>{
+      const svc=services.find(s=>(s.code||'').toUpperCase()===code);
+      if(svc){itemDetails.push({name:svc.name,code:svc.code,size:b.size,price:svc[b.size]||0});}
+      else{itemDetails.push({name:code,code:code,size:b.size,price:0});}
+    });
+    // If no codes parsed, single generic item at total
+    if(itemDetails.length===0)itemDetails.push({name:b.note||'บริการ (จาก Excel)',code:'-',size:b.size,price:b.total});
+    const tdata={
+      id:'#'+b.jobNo,
+      date:dateCE, time:'00:00',
+      plate:'—', customer:'ลูกค้า',
+      items:itemDetails.map(i=>i.name).join(' + '),
+      itemDetails,
+      staff:b.copName||'—',
+      payment:b.pay,
+      total:b.total,
+      csaleTotal:b.csale||0, copTotal:b.cop||0,
+      branch, backfill:true, source:'excel-crosscheck',
+      createdAt:serverTimestamp()
+    };
+    try{await addDoc(collection(db,'transactions'),tdata);ok++;}catch(e){console.error(e);}
+  }
+  btn.textContent='✅ เพิ่มแล้ว '+ok+' บิล';
+  showToast('✅ เพิ่ม '+ok+' บิลเข้า POS แล้ว');
+  setTimeout(()=>{btn.disabled=false;btn.textContent='➕ เพิ่มบิลที่ขาดเข้า POS';ccCompare();},1500);
+};
+
 window.nav=function(id,el){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active'));
@@ -1577,7 +1759,7 @@ window.nav=function(id,el){
   const titles={today:'Today — Overview',history:'Transaction History',staff:'Staff Incentive',customers:'Customer List',stock:'Stock Levels',ceramic:'Ceramic Maintenance Due',analytics:'Analytics & Insights',backfill:'เพิ่มข้อมูลย้อนหลัง',pricing:'จัดการราคาบริการ'};
   G('page-title').textContent=titles[id]||id;
   G('export-btn').style.display=id==='history'?'inline-flex':'none';
-  if(id==='history')rHistory();
+  if(id==='history'){setHistoryDefaultRange();rHistory();}
   if(id==='staff')rStaff();
   if(id==='customers')rCustomers();
   if(id==='ceramic')rCeramic();
