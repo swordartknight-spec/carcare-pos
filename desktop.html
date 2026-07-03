@@ -130,7 +130,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v25</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v26</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -1633,9 +1633,32 @@ window.ccLoadSheets=async function(){
   if(!file){G('cc-sheet-wrap').style.display='none';ccWb=null;return;}
   const buf=await file.arrayBuffer();
   ccWb=XLSX.read(buf,{type:'array'});
+  // Count bills per sheet so user can see which tabs have data
+  function countBills(name){
+    try{
+      const rows=XLSX.utils.sheet_to_json(ccWb.Sheets[name],{header:1,defval:'',range:'A1:P70'});
+      let n=0;
+      rows.forEach(r=>{
+        const jobNo=parseInt(r[1]);
+        const size=(''+(r[2]||'')).trim().toUpperCase();
+        const total=parseFloat((''+(r[9]||'0')).replace(/,/g,''))||0;
+        if(jobNo>=1000&&['S','M','L','XL','XXL'].includes(size)&&total>0)n++;
+      });
+      return n;
+    }catch(e){return 0;}
+  }
   const sel=G('cc-sheet');
-  sel.innerHTML=ccWb.SheetNames.map(n=>`<option value="${n}">${n}</option>`).join('');
-  G('cc-sheet-wrap').style.display=ccWb.SheetNames.length>1?'block':'none';
+  const opts=ccWb.SheetNames.map(n=>{
+    const c=countBills(n);
+    return {name:n,count:c};
+  });
+  sel.innerHTML=opts.map(o=>`<option value="${o.name}">${o.name}${o.count>0?' ✓ '+o.count+' บิล':''}</option>`).join('');
+  // Auto-select first sheet that has data
+  const firstWithData=opts.find(o=>o.count>0);
+  if(firstWithData)sel.value=firstWithData.name;
+  G('cc-sheet-wrap').style.display='block';
+  const totalBills=opts.reduce((a,o)=>a+o.count,0);
+  if(totalBills===0)alert('⚠️ ไฟล์นี้ไม่มีข้อมูลบิลเลย (ทุก sheet ว่าง)\nเช็คว่า export ถูกไฟล์/ถูกเดือนหรือไม่');
 };
 
 window.ccCompare=async function(){
@@ -1674,7 +1697,7 @@ window.ccCompare=async function(){
     bills.push({jobNo,size,codes,total,csale,csaleName,cop,copName,pay,note});
   });
 
-  if(bills.length===0){alert('อ่านบิลจาก Excel ไม่ได้ — เช็คว่าเป็นฟอร์ม V.04 (เลขจอฟที่คอลัมน์ B)');return;}
+  if(bills.length===0){alert('Sheet "'+sheetName+'" ไม่มีข้อมูลบิล (ทุกแถวว่าง)\nลองเลือก sheet อื่นจาก dropdown — sheet ที่มีข้อมูลจะมี ✓ บอกจำนวนบิล');return;}
 
   // POS transactions same date + branch
   const dp=dateVal.split('-');
