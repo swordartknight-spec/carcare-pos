@@ -130,7 +130,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="sidebar">
   <div class="sb-logo">
-    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v24</span></h1>
+    <h1>⚙ CarCare POS <span style="font-size:11px;color:#666;font-weight:400;margin-left:4px;">d-v25</span></h1>
     <p><span class="dot"></span><span id="sync-status">Connecting...</span></p>
   </div>
   <div class="sb-branch">
@@ -366,7 +366,8 @@ input:focus,select:focus{border-color:var(--gold);}
         <div style="padding:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
           <div><div class="field-label">วันที่ (ตาม Excel)</div><input type="date" class="field-input" id="cc-date"/></div>
           <div><div class="field-label">สาขา</div><select class="field-input" id="cc-branch"><option value="HO">HO</option><option value="MK">MK</option></select></div>
-          <div><div class="field-label">ไฟล์ Excel (รายงานสรุปบัญชี V.04)</div><input type="file" class="field-input" id="cc-file" accept=".xlsx,.xls" style="padding:7px;"/></div>
+          <div><div class="field-label">ไฟล์ Excel (ดาวน์โหลดจาก Google Sheet เป็น .xlsx)</div><input type="file" class="field-input" id="cc-file" accept=".xlsx,.xls" style="padding:7px;" onchange="ccLoadSheets()"/></div>
+          <div id="cc-sheet-wrap" style="display:none;"><div class="field-label">Sheet (แท็บวัน)</div><select class="field-input" id="cc-sheet"></select></div>
           <button class="btn btn-g" onclick="ccCompare()">🔍 เทียบข้อมูล</button>
         </div>
         <div id="cc-summary" style="padding:0 16px 16px;display:none;"></div>
@@ -1625,18 +1626,27 @@ window.rStaff=rStaff;
 window.rCustomers=rCustomers;
 // ── CROSS-CHECK EXCEL ──
 let ccMissing=[];
+let ccWb=null;
+
+window.ccLoadSheets=async function(){
+  const file=G('cc-file').files[0];
+  if(!file){G('cc-sheet-wrap').style.display='none';ccWb=null;return;}
+  const buf=await file.arrayBuffer();
+  ccWb=XLSX.read(buf,{type:'array'});
+  const sel=G('cc-sheet');
+  sel.innerHTML=ccWb.SheetNames.map(n=>`<option value="${n}">${n}</option>`).join('');
+  G('cc-sheet-wrap').style.display=ccWb.SheetNames.length>1?'block':'none';
+};
 
 window.ccCompare=async function(){
   const dateVal=G('cc-date').value;
   const branch=G('cc-branch').value;
-  const file=G('cc-file').files[0];
   if(!dateVal){alert('เลือกวันที่ก่อน');return;}
-  if(!file){alert('เลือกไฟล์ Excel ก่อน');return;}
+  if(!ccWb){alert('เลือกไฟล์ Excel ก่อน');return;}
 
-  // Parse Excel
-  const buf=await file.arrayBuffer();
-  const wb=XLSX.read(buf,{type:'array'});
-  const ws=wb.Sheets[wb.SheetNames[0]];
+  // Parse selected sheet
+  const sheetName=G('cc-sheet').value||ccWb.SheetNames[0];
+  const ws=ccWb.Sheets[sheetName];
   const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
 
   // Find bill rows: a row where some cell in first 3 cols is a 4-6 digit job number
