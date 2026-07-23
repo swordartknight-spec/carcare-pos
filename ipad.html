@@ -476,7 +476,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v3</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v5</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -3677,17 +3677,46 @@ window.openBill=async function(){
   rCart();updateFloat();
   showToast('✅ เปิดบิล ช่อง '+(idx+1)+' — '+slots[idx].custName);
   G('content').scrollTop=0;
-  // Ask to print job ticket
+  // Ask to print job ticket.
+  // NOTE: iOS Safari blocks window.open/print unless it comes straight from a tap,
+  // so we show our own sheet and let the user tap the print button directly
+  // (native confirm() breaks the user-gesture chain on iPad).
   const wantPrint=localStorage.getItem('auto_print_ticket');
-  if(wantPrint==='always'){printJobTicket(idx);}
-  else if(wantPrint!=='never'){
-    setTimeout(()=>{
-      if(confirm('🖨️ พิมพ์ใบสั่งงาน A5 (วางในรถ) ไหม?\n\nช่อง '+(idx+1)+' · '+slots[idx].custName+'\n'+slots[idx].items)){
-        printJobTicket(idx);
-      }
-    },200);
+  if(wantPrint==='always'){printJobTicket(idx);setTimeout(()=>showBillDetail(idx),600);}
+  else if(wantPrint==='never'){setTimeout(()=>showBillDetail(idx),600);}
+  else{askPrintTicket(idx);}
+};
+
+// ── Print prompt sheet (keeps the user gesture intact for iOS) ──
+window.askPrintTicket=function(idx){
+  const s=slots[idx];if(!s){showBillDetail(idx);return;}
+  let el=document.getElementById('sh-print-ask');
+  if(!el){
+    el=document.createElement('div');
+    el.id='sh-print-ask';el.className='sbg';el.style.display='none';
+    document.body.appendChild(el);
   }
-  setTimeout(()=>showBillDetail(idx),600);
+  el.innerHTML='<div class="sht" onclick="event.stopPropagation()">'
+    +'<div class="sh"></div>'
+    +'<div style="text-align:center;font-size:34px;margin-bottom:4px;">🖨️</div>'
+    +'<h3 style="text-align:center;">พิมพ์ใบสั่งงาน?</h3>'
+    +'<div style="text-align:center;font-size:13px;color:var(--tx2);margin-bottom:14px;">'
+    +'ช่อง '+(idx+1)+' · '+(s.custName||'')+'<br>'
+    +'<b>'+(s.plate||'—')+'</b><br>'
+    +'<span style="font-size:12px;color:var(--tx3);">'+(s.items||'')+'</span></div>'
+    +'<button class="btn btn-g btn-bl" onclick="printJobTicket('+idx+');closePrintAsk('+idx+');">🖨️ พิมพ์ใบสั่งงาน</button>'
+    +'<button class="btn btn-bl" style="margin-top:8px;" onclick="closePrintAsk('+idx+')">ไม่พิมพ์</button>'
+    +'<div style="text-align:center;margin-top:10px;font-size:11px;color:var(--tx3);">'
+    +'<a href="javascript:void(0)" onclick="setAutoPrint(\'always\');closePrintAsk('+idx+');" style="color:var(--inf);">พิมพ์อัตโนมัติทุกครั้ง</a>'
+    +' · <a href="javascript:void(0)" onclick="setAutoPrint(\'never\');closePrintAsk('+idx+');" style="color:var(--tx3);">ไม่ต้องถามอีก</a></div>'
+    +'</div>';
+  el.onclick=function(e){if(e.target===el)closePrintAsk(idx);};
+  el.style.display='flex';
+};
+window.closePrintAsk=function(idx){
+  const el=document.getElementById('sh-print-ask');
+  if(el)el.style.display='none';
+  setTimeout(()=>showBillDetail(idx),300);
 };
 
 // ── Print job ticket (for opened bill / ติดรถ) ──
@@ -3697,54 +3726,172 @@ window.printJobTicket=function(idx){
   const items=s.cartSnap||[];
   const dateStr=now.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'});
   const timeStr=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  const esc=v=>String(v==null?'':v).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const B='&#3647;';
 
-  let h=`<div class="jt-top">
-    <div class="jt-brand">เหนือเมฆ Car Care<small>สาขา ${s.branch||''} · โทร 02-xxx-xxxx</small></div>
-    <div class="jt-title"><b>ใบสั่งงาน</b><span>WORKING BILL</span></div>
-  </div>`;
-
-  h+=`<div class="jt-meta">
-    <div class="jt-slot"><small>ช่อง</small><b>${idx+1}</b></div>
-    <div class="jt-info">
-      <div class="plate">${s.plate||'— ไม่ระบุทะเบียน —'}</div>
-      <div><span class="lbl">ลูกค้า</span>${s.custName||'Walk-in'}</div>
-      <div><span class="lbl">ขนาดรถ</span><b>${s.size||'-'}</b> &nbsp;·&nbsp; <span class="lbl" style="min-width:auto;">วันที่</span>${dateStr} ${timeStr}</div>
-      <div><span class="lbl">พนักงาน</span>${s.staff||'—'}</div>
-    </div>
-  </div>`;
-
-  h+=`<table class="jt-tb">
-    <thead><tr><th class="chk">✓</th><th>รายการบริการ</th><th>ราคา</th></tr></thead>
-    <tbody>`;
+  let rows='';
   items.forEach(it=>{
-    const qty=it.qty||1;
-    h+=`<tr>
-      <td class="chk"><span></span></td>
-      <td>${it.code?'<span class="cd">'+it.code+'</span>':''}${it.name}${it.size?' <small>('+it.size+')</small>':''}${qty>1?' × '+qty:''}</td>
-      <td>฿${((it.price||0)*qty).toLocaleString()}</td>
-    </tr>`;
+    const qty=it.qty||1;const unit=it.price||0;
+    rows+='<tr>'
+      +'<td class="chk"><span></span></td>'
+      +'<td class="desc">'+(it.code?'<i class="cd">'+esc(it.code)+'</i>':'')+esc(it.name)
+        +(it.size?'<em> ('+esc(it.size)+')</em>':'')+'</td>'
+      +'<td class="num">'+B+unit.toLocaleString()+'</td>'
+      +'<td class="num qty">'+qty+'</td>'
+      +'<td class="num">'+B+(unit*qty).toLocaleString()+'</td>'
+      +'</tr>';
   });
-  // pad empty rows so the sheet looks like a proper form
   for(let i=items.length;i<6;i++){
-    h+=`<tr><td class="chk"><span></span></td><td>&nbsp;</td><td>&nbsp;</td></tr>`;
+    rows+='<tr class="blank"><td class="chk"><span></span></td><td class="desc">&nbsp;</td>'
+      +'<td class="num">&nbsp;</td><td class="num qty">&nbsp;</td><td class="num">&nbsp;</td></tr>';
   }
-  h+=`</tbody></table>`;
 
-  h+=`<div class="jt-total"><span>รวมทั้งสิ้น</span><span>฿${(s.total||0).toLocaleString()}</span></div>`;
-  h+=`<div class="jt-unpaid">** ยังไม่ชำระเงิน — ใบสั่งงาน ไม่ใช่ใบเสร็จ **</div>`;
+  const total=s.total||0;
+  const sub=items.reduce((a,it)=>a+((it.price||0)*(it.qty||1)),0);
+  const disc=sub-total;
 
-  h+=`<div class="jt-note"><b>หมายเหตุ / จุดที่ต้องระวัง</b><div class="box"></div></div>`;
-  h+=`<div class="jt-sign">
-    <div><div class="ln"></div>ช่างผู้รับงาน</div>
-    <div><div class="ln"></div>ตรวจงาน / หัวหน้า</div>
-    <div><div class="ln"></div>ลูกค้ารับรถ</div>
-  </div>`;
-  h+=`<div class="jt-foot">เหนือเมฆ Car Care · พิมพ์ ${dateStr} ${timeStr}</div>`;
+  const doc='<!DOCTYPE html><html lang="th"><head><meta charset="utf-8">'
+  +'<meta name="viewport" content="width=device-width,initial-scale=1">'
+  +'<title>ใบสั่งงาน ช่อง '+(idx+1)+' '+esc(s.plate||'')+'</title><style>'
+  +'*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
+  +'html,body{margin:0;padding:0;background:#fff;color:#111;'
+  +"font-family:'Sarabun','Helvetica Neue',Helvetica,Arial,sans-serif;}"
+  +'body{padding:34pt 40pt;font-size:10.5pt;line-height:1.5;}'
+  +'.sheet{max-width:560pt;margin:0 auto;}'
 
-  document.getElementById('print-receipt').innerHTML=h;
-  document.body.classList.add('printing');
-  window.print();
-  setTimeout(()=>document.body.classList.remove('printing'),500);
+  /* header */
+  +'.co{text-align:center;} .co h1{margin:0;font-size:15pt;font-weight:800;letter-spacing:.3pt;}'
+  +'.co p{margin:3pt 0 0;font-size:8.5pt;color:#999;}'
+  +'.ttlwrap{display:flex;align-items:center;gap:14pt;margin:20pt 0 26pt;}'
+  +'.ttlwrap .bar{flex:1;height:2.5pt;background:#e0e0e0;}'
+  +'.ttlwrap h2{margin:0;font-size:30pt;font-weight:800;letter-spacing:1.5pt;white-space:nowrap;}'
+  +'.ttlwrap .sub{font-size:8pt;letter-spacing:3pt;color:#999;text-align:center;margin-top:2pt;}'
+
+  /* bill-to / meta */
+  +'.mid{display:flex;justify-content:space-between;gap:30pt;margin-bottom:26pt;}'
+  +'.bt{font-size:9.5pt;color:#999;line-height:1.7;}'
+  +'.bt .cap{font-size:8pt;letter-spacing:1pt;color:#aaa;}'
+  +'.bt .nm{font-size:13pt;font-weight:800;color:#111;margin:2pt 0;}'
+  +'.bt .plate{font-size:17pt;font-weight:800;color:#111;letter-spacing:.8pt;}'
+  +'.rt{text-align:right;font-size:9.5pt;color:#999;line-height:1.9;min-width:150pt;}'
+  +'.rt b{color:#111;font-weight:800;margin-left:12pt;}'
+  +'.rt .slot{font-size:16pt;}'
+
+  /* table */
+  +'table{width:100%;border-collapse:collapse;}'
+  +'thead th{font-size:9pt;font-weight:800;color:#111;text-align:left;padding:0 6pt 7pt;'
+  +'border-bottom:1.2pt solid #333;}'
+  +'thead th.num{text-align:right;}'
+  +'tbody td{padding:9pt 6pt;font-size:10.5pt;border-bottom:.8pt solid #ececec;vertical-align:top;}'
+  +'tbody td.num{text-align:right;white-space:nowrap;color:#444;}'
+  +'tbody td.desc{color:#222;}'
+  +'tbody td.desc em{font-style:normal;color:#999;font-size:9pt;}'
+  +'tbody tr.blank td{color:#fff;}'
+  +'i.cd{font-style:normal;font-weight:800;font-size:8.5pt;border:1pt solid #333;'
+  +'padding:.8pt 3.5pt;border-radius:2.5pt;margin-right:5pt;color:#111;}'
+  +'td.chk{width:22pt;text-align:center;}'
+  +'td.chk span{display:inline-block;width:12pt;height:12pt;border:1.2pt solid #999;border-radius:2.5pt;}'
+  +'thead th.chk{width:22pt;}'
+
+  /* totals */
+  +'.tot{display:flex;justify-content:flex-end;margin-top:2pt;}'
+  +'.tot table{width:210pt;}'
+  +'.tot td{padding:8pt 6pt;font-size:10.5pt;border-bottom:.8pt solid #ececec;}'
+  +'.tot td.r{text-align:right;white-space:nowrap;}'
+  +'.tot tr.grand td{font-size:12pt;font-weight:800;border-bottom:none;padding-top:11pt;}'
+
+  /* footer blocks */
+  +'.cols{display:flex;gap:34pt;margin-top:26pt;}'
+  +'.cols .c{flex:1;}'
+  +'.cols h4{margin:0 0 5pt;font-size:10pt;font-weight:800;}'
+  +'.cols p{margin:0;font-size:8.5pt;color:#999;line-height:1.75;}'
+  +'.notebox{border:.8pt solid #ddd;border-radius:3pt;height:46pt;margin-top:5pt;}'
+  +'.warn{margin-top:22pt;text-align:center;border:1pt dashed #666;border-radius:3pt;'
+  +'padding:7pt;font-size:9.5pt;font-weight:700;letter-spacing:.6pt;color:#333;}'
+  +'.sign{display:flex;gap:26pt;margin-top:26pt;text-align:center;font-size:8.5pt;color:#999;}'
+  +'.sign div{flex:1;} .sign .ln{border-bottom:.8pt solid #333;height:28pt;margin-bottom:4pt;}'
+  +'.foot{text-align:center;font-size:8pt;color:#bbb;margin-top:22pt;}'
+
+  /* screen-only toolbar */
+  +'.pbar{position:fixed;top:0;left:0;right:0;background:#C9A84C;padding:10px;'
+  +'display:flex;gap:10px;justify-content:center;z-index:99;}'
+  +'.pbar button{padding:12px 26px;font-size:15px;font-weight:700;border:none;'
+  +'border-radius:8px;cursor:pointer;background:#1a1a1a;color:#fff;}'
+  +'.pbar button.sec{background:#fff;color:#1a1a1a;}'
+  +'body{padding-top:66px;}'
+  +'@media print{.pbar{display:none!important;}body{padding:0;}@page{margin:12mm;}}'
+  +'</style></head><body>'
+
+  +'<div class="pbar"><button onclick="window.print()">🖨️ พิมพ์</button>'
+  +'<button class="sec" onclick="window.close()">ปิด</button></div>'
+
+  +'<div class="sheet">'
+  +'<div class="co"><h1>เหนือเมฆ Car Care</h1><p>สาขา '+esc(s.branch||'')+' · Nuea Mek Car Care</p></div>'
+  +'<div class="ttlwrap"><div class="bar"></div>'
+  +'<div><h2>ใบสั่งงาน</h2><div class="sub">WORKING BILL</div></div>'
+  +'<div class="bar"></div></div>'
+
+  +'<div class="mid">'
+  +'<div class="bt"><div class="cap">งานของ:</div>'
+  +'<div class="nm">'+esc(s.custName||'Walk-in')+'</div>'
+  +'<div class="plate">'+esc(s.plate||'— ไม่ระบุทะเบียน —')+'</div>'
+  +'<div>ขนาดรถ '+esc(s.size||'-')+'</div></div>'
+  +'<div class="rt">'
+  +'<div>ช่อง: <b class="slot">'+(idx+1)+'</b></div>'
+  +'<div>วันที่: <b>'+dateStr+'</b></div>'
+  +'<div>เวลา: <b>'+timeStr+'</b></div>'
+  +'<div>พนักงาน: <b>'+esc(s.staff||'—')+'</b></div>'
+  +'</div></div>'
+
+  +'<table><thead><tr>'
+  +'<th class="chk">&#10003;</th><th>รายการบริการ</th>'
+  +'<th class="num">ราคา</th><th class="num">จำนวน</th><th class="num">รวม</th>'
+  +'</tr></thead><tbody>'+rows+'</tbody></table>'
+
+  +'<div class="tot"><table>'
+  +'<tr><td>ยอดรวม</td><td class="r">'+B+sub.toLocaleString()+'</td></tr>'
+  +(disc>0?'<tr><td>ส่วนลด</td><td class="r">-'+B+disc.toLocaleString()+'</td></tr>':'')
+  +'<tr class="grand"><td>รวมทั้งสิ้น</td><td class="r">'+B+total.toLocaleString()+'</td></tr>'
+  +'</table></div>'
+
+  +'<div class="warn">** ยังไม่ชำระเงิน — เอกสารนี้เป็นใบสั่งงาน ไม่ใช่ใบเสร็จ **</div>'
+
+  +'<div class="cols">'
+  +'<div class="c"><h4>หมายเหตุ / จุดที่ต้องระวัง</h4><div class="notebox"></div></div>'
+  +'<div class="c"><h4>ขั้นตอนการทำงาน</h4>'
+  +'<p>1. ตรวจสภาพรถก่อนเริ่มงาน บันทึกรอยตำหนิ<br>'
+  +'2. ติ๊ก &#10003; ทุกรายการเมื่อทำเสร็จ<br>'
+  +'3. ให้หัวหน้าตรวจก่อนส่งมอบ<br>'
+  +'4. แนบใบนี้คืนเคาน์เตอร์เพื่อเก็บเงิน</p></div>'
+  +'</div>'
+
+  +'<div class="sign">'
+  +'<div><div class="ln"></div>ช่างผู้รับงาน</div>'
+  +'<div><div class="ln"></div>ตรวจงาน / หัวหน้า</div>'
+  +'<div><div class="ln"></div>ลูกค้ารับรถ</div>'
+  +'</div>'
+
+  +'<div class="foot">เหนือเมฆ Car Care · พิมพ์เมื่อ '+dateStr+' '+timeStr+'</div>'
+  +'</div></body></html>';
+
+  // Open in a new tab — iOS Safari handles this far better than print-CSS hiding.
+  const w=window.open('','_blank');
+  if(w&&w.document){
+    w.document.open();w.document.write(doc);w.document.close();
+    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||
+      (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    if(!isIOS){w.focus();setTimeout(()=>{try{w.print();}catch(e){}},400);}
+    return;
+  }
+  // Popup blocked → hidden iframe fallback
+  const old=document.getElementById('jt-frame');if(old)old.remove();
+  const f=document.createElement('iframe');
+  f.id='jt-frame';
+  f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+  document.body.appendChild(f);
+  const fd=f.contentWindow.document;
+  fd.open();fd.write(doc);fd.close();
+  setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print();}catch(e){alert('พิมพ์ไม่สำเร็จ — กรุณาอนุญาต popup สำหรับเว็บนี้');}},500);
 };
 window.setAutoPrint=function(mode){
   localStorage.setItem('auto_print_ticket',mode);
