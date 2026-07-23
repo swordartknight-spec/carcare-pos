@@ -322,6 +322,30 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .usage-prod-tag.save-tag{background:var(--ok-bg);color:var(--ok);}
 .recipe-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px;}
 .recipe-item:last-child{border-bottom:none;}
+/* ── PRINT RECEIPT ── */
+#print-receipt{display:none;}
+@media print{
+  body.printing>*:not(#print-receipt){display:none!important;}
+  body.printing #print-receipt{display:block!important;width:58mm;padding:2mm;font-family:'Courier New',monospace;font-size:11px;color:#000;background:#fff;}
+  #print-receipt .pr-head{text-align:center;font-weight:700;font-size:13px;margin-bottom:2px;}
+  #print-receipt .pr-sub{text-align:center;font-size:10px;margin-bottom:6px;}
+  #print-receipt .pr-line{border-top:1px dashed #000;margin:5px 0;}
+  #print-receipt .pr-row{display:flex;justify-content:space-between;gap:6px;}
+  #print-receipt .pr-total{font-weight:700;font-size:13px;}
+  #print-receipt .pr-foot{text-align:center;font-size:10px;margin-top:8px;}
+  @page{margin:0;size:58mm auto;}
+}
+/* ── iPad / TABLET SPLIT LAYOUT (≥900px) ── */
+@media(min-width:900px){
+  #sc-pos.split-on{display:grid!important;grid-template-columns:380px minmax(0,1fr);gap:16px;align-items:start;}
+  #pos-left{display:block!important;position:sticky;top:8px;max-height:calc(100vh - 76px);overflow-y:auto;border-right:1px solid var(--bdr);padding-right:12px;}
+  #pos-right{display:block!important;min-width:0;}
+  #sc-pos.split-on #bill-slot-wrap{margin:0 0 12px 0!important;border-radius:var(--rs);border:1px solid var(--bdr);}
+  #sc-pos.split-on #bill-slots{grid-template-columns:repeat(5,1fr)!important;}
+  #sc-pos.split-on #cart-sec{margin-top:12px;}
+  #sc-pos.split-on .sq-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+}
+#pos-left,#pos-right{display:contents;}
 </style>
 </head>
 <body>
@@ -391,7 +415,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v9y</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v10a</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1101,7 +1125,11 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   <div id="ok-cpn" style="display:none;margin-top:10px;background:var(--pur-bg);border-radius:var(--rs);padding:10px 12px;font-size:12px;color:var(--pur);font-weight:700;"></div>
   <button class="btn btn-g btn-bl" style="margin-top:14px;" onclick="hs('sh-ok');G('content').scrollTop=0;">รายการใหม่</button>
   <button class="btn btn-inf btn-bl" style="margin-top:8px;" onclick="shareLastInvoice().then&&shareLastInvoice();G('content').scrollTop=0;">📤 ส่งใบเสร็จ (Line)</button>
+  <button class="btn btn-bl" style="margin-top:8px;background:#333;color:#fff;" onclick="printReceipt()">🖨️ พิมพ์ใบเสร็จ</button>
 </div></div>
+
+<!-- PRINT RECEIPT (hidden on screen, shown only when printing) -->
+<div id="print-receipt"></div>
 
 <script>
 // Global functions needed by onclick handlers outside module scope
@@ -1836,6 +1864,60 @@ window.shareInvoice=async function(){
   else{navigator.clipboard?.writeText(text).then(()=>alert('คัดลอกใบเสร็จแล้ว!\nวางใน Line ได้เลย 📋'));}
   hs('sh-inv');
 };
+
+
+// ── TABLET SPLIT LAYOUT ──
+(function(){
+  const LEFT_IDS=['bill-slot-wrap','pos-cust-card','pos-staff-card','cart-sec'];
+  let origOrder=null;
+  function buildSplit(){
+    const sc=document.getElementById('sc-pos');if(!sc||document.getElementById('pos-left'))return;
+    origOrder=[...sc.children];
+    const L=document.createElement('div');L.id='pos-left';
+    const R=document.createElement('div');R.id='pos-right';
+    sc.appendChild(L);sc.appendChild(R);
+    origOrder.forEach(k=>{(LEFT_IDS.includes(k.id)?L:R).appendChild(k);});
+    sc.classList.add('split-on');
+  }
+  function unbuildSplit(){
+    const sc=document.getElementById('sc-pos');const L=document.getElementById('pos-left');const R=document.getElementById('pos-right');
+    if(!sc||!L)return;
+    (origOrder||[]).forEach(k=>sc.appendChild(k));
+    L.remove();R.remove();
+    sc.classList.remove('split-on');
+  }
+  const mq=window.matchMedia('(min-width:900px)');
+  function apply(){if(mq.matches)buildSplit();else unbuildSplit();}
+  if(mq.addEventListener)mq.addEventListener('change',apply);else mq.addListener(apply);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply);else apply();
+})();
+
+window.printReceipt=function(){
+  if(!lastTxnData){alert('ไม่มีบิลล่าสุด');return;}
+  const t=lastTxnData;
+  const items=t.items||[];
+  const now=new Date();
+  let h=`<div class="pr-head">เหนือเมฆ Car Care</div>`;
+  h+=`<div class="pr-sub">สาขา ${t.branch||currentBranch||''}<br>${t.date||''} ${t.time||now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}${t.id?'<br>เลขที่ '+t.id:''}</div>`;
+  if(t.customer&&t.customer!=='Walk-in')h+=`<div>ลูกค้า: ${t.customer}</div>`;
+  if(t.plate&&t.plate!=='—')h+=`<div>ทะเบียน: ${t.plate}</div>`;
+  h+=`<div class="pr-line"></div>`;
+  items.forEach(c=>{
+    h+=`<div class="pr-row"><span>${c.name}${c.size?' ('+c.size+')':''} x${c.qty||1}</span><span>฿${((c.price||0)*(c.qty||1)).toLocaleString()}</span></div>`;
+  });
+  h+=`<div class="pr-line"></div>`;
+  if(t.discount>0)h+=`<div class="pr-row"><span>ส่วนลด</span><span>-฿${t.discount.toLocaleString()}</span></div>`;
+  if(t.cpnDiscount>0)h+=`<div class="pr-row"><span>คูปอง</span><span>-฿${t.cpnDiscount.toLocaleString()}</span></div>`;
+  h+=`<div class="pr-row pr-total"><span>รวม</span><span>฿${(t.total||0).toLocaleString()}</span></div>`;
+  h+=`<div class="pr-row"><span>ชำระโดย</span><span>${t.payment||''}</span></div>`;
+  h+=`<div class="pr-line"></div>`;
+  h+=`<div class="pr-foot">ขอบคุณที่ใช้บริการ 🙏<br>เหนือเมฆ Car Care</div>`;
+  document.getElementById('print-receipt').innerHTML=h;
+  document.body.classList.add('printing');
+  window.print();
+  setTimeout(()=>document.body.classList.remove('printing'),500);
+};
+window.addEventListener('afterprint',()=>document.body.classList.remove('printing'));
 
 window.shareLastInvoice=async function(){
   if(!lastTxnData)return;
