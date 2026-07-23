@@ -12,7 +12,7 @@ if(window.innerWidth>=1024&&!localStorage.getItem('force_mobile')){
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#C9A84C"/>
 <link rel="manifest" href="manifest.json"/>
-<title>CarCare POS</title>
+<title>CarCare POS — iPad</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙</text></svg>"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -335,15 +335,26 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   #print-receipt .pr-foot{text-align:center;font-size:10px;margin-top:8px;}
   @page{margin:0;size:58mm auto;}
 }
-/* ── iPad / TABLET SPLIT LAYOUT (≥900px) ── */
-@media(min-width:900px){
-  #sc-pos.split-on{display:grid!important;grid-template-columns:380px minmax(0,1fr);gap:16px;align-items:start;}
-  #pos-left{display:block!important;position:sticky;top:8px;max-height:calc(100vh - 76px);overflow-y:auto;border-right:1px solid var(--bdr);padding-right:12px;}
+/* ── iPad DEDICATED SPLIT LAYOUT (always on ≥768px) ── */
+@media(min-width:768px){
+  #sc-pos.split-on{display:grid!important;grid-template-columns:400px minmax(0,1fr);gap:18px;align-items:start;}
+  #pos-left{display:block!important;position:sticky;top:8px;max-height:calc(100vh - 76px);overflow-y:auto;border-right:1px solid var(--bdr);padding-right:14px;}
   #pos-right{display:block!important;min-width:0;}
   #sc-pos.split-on #bill-slot-wrap{margin:0 0 12px 0!important;border-radius:var(--rs);border:1px solid var(--bdr);}
   #sc-pos.split-on #bill-slots{grid-template-columns:repeat(5,1fr)!important;}
-  #sc-pos.split-on #cart-sec{margin-top:12px;}
-  #sc-pos.split-on .sq-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+  #sc-pos.split-on #cart-sec{margin-top:12px;display:block!important;}
+  #sc-pos.split-on .sq-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+  /* Bigger touch targets for iPad */
+  #sc-pos.split-on .sq-card{min-height:86px;padding:10px 12px;}
+  #sc-pos.split-on .sq-name{font-size:13px;}
+  #sc-pos.split-on .btn{min-height:44px;}
+  #sc-pos.split-on .stab{padding:10px 16px;font-size:14px;}
+  /* Cart float not needed — cart always visible on left */
+  #cart-float{display:none!important;}
+}
+@media(min-width:1180px){
+  #sc-pos.split-on{grid-template-columns:440px minmax(0,1fr);}
+  #sc-pos.split-on .sq-grid{grid-template-columns:repeat(auto-fill,minmax(175px,1fr));}
 }
 #pos-left,#pos-right{display:contents;}
 </style>
@@ -378,7 +389,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     </div>
     <div style="margin-top:20px;border-top:1px solid #333;padding-top:16px;">
       <label class="slbl">📱 สลับเวอร์ชั่น</label>
-      <a href="./ipad.html" style="display:block;text-align:center;padding:10px;background:#333;color:#aaa;border-radius:7px;font-size:12px;text-decoration:none;margin-top:8px;">→ เปิดเวอร์ชั่น iPad</a>
+      <a href="./index.html" style="display:block;text-align:center;padding:10px;background:#333;color:#aaa;border-radius:7px;font-size:12px;text-decoration:none;margin-top:8px;">→ เปิดเวอร์ชั่นมือถือ (index)</a>
     </div>
     <div style="margin-top:20px;border-top:1px solid #333;padding-top:16px;">
       <label class="slbl">🖨️ พิมพ์ใบสั่งงานตอนเปิดบิล</label>
@@ -427,7 +438,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">v10c</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v1</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1899,8 +1910,11 @@ window.shareInvoice=async function(){
     L.remove();R.remove();
     sc.classList.remove('split-on');
   }
-  const mq=window.matchMedia('(min-width:900px)');
-  function apply(){if(mq.matches)buildSplit();else unbuildSplit();}
+  const mq=window.matchMedia('(min-width:768px)');
+  function apply(){
+    if(mq.matches){buildSplit();const cs=document.getElementById('cart-sec');if(cs)cs.style.display='block';}
+    else unbuildSplit();
+  }
   if(mq.addEventListener)mq.addEventListener('change',apply);else mq.addListener(apply);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply);else apply();
 })();
