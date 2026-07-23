@@ -476,7 +476,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v6</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v7</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -3741,8 +3741,8 @@ window.printJobTicket=function(idx){
       +'<td class="num">'+B+(unit*qty).toLocaleString()+'</td>'
       +'</tr>';
   });
-  // landscape A5 is short — pad to 4 rows only
-  for(let i=items.length;i<4;i++){
+  // portrait A5 — pad to 6 rows
+  for(let i=items.length;i<6;i++){
     rows+='<tr class="blank"><td class="chk"><span></span></td><td class="desc">&nbsp;</td>'
       +'<td class="num">&nbsp;</td><td class="num qty">&nbsp;</td><td class="num">&nbsp;</td></tr>';
   }
@@ -3757,8 +3757,8 @@ window.printJobTicket=function(idx){
   +'*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
   +'html,body{margin:0;padding:0;background:#fff;color:#111;'
   +"font-family:'Sarabun','Helvetica Neue',Helvetica,Arial,sans-serif;}"
-  +'body{padding:20pt 26pt;font-size:9.5pt;line-height:1.35;}'
-  +'.sheet{width:100%;max-width:740pt;margin:0 auto;}'
+  +'body{padding:24pt 28pt;font-size:10pt;line-height:1.45;}'
+  +'.sheet{width:100%;max-width:560pt;margin:0 auto;}'
 
   /* header — compact for landscape */
   +'.hd{display:flex;align-items:center;justify-content:space-between;gap:16pt;'
@@ -3823,14 +3823,14 @@ window.printJobTicket=function(idx){
   +'.pbar .tip{align-self:center;font-size:11px;color:#4a3800;font-weight:700;}'
   +'body{padding-top:64px;}'
   /* A5 LANDSCAPE — one ticket per sheet */
-  +'@page{size:A5 landscape;margin:8mm;}'
+  +'@page{size:A5 portrait;margin:10mm;}'
   +'@media print{.pbar{display:none!important;}body{padding:0;}'
   +'.sheet{max-width:none;} html,body{width:100%;}}'
   +'</style></head><body>'
 
   +'<div class="pbar"><button onclick="window.print()">🖨️ พิมพ์</button>'
   +'<button class="sec" onclick="window.close()">ปิด</button>'
-  +'<span class="tip">ตั้งกระดาษ A5 · แนวนอน</span></div>'
+  +'<span class="tip">ตั้งกระดาษ A5 · แนวตั้ง</span></div>'
 
   +'<div class="sheet">'
   +'<div class="hd">'
