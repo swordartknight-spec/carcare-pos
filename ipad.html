@@ -476,7 +476,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v5</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v6</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -3741,7 +3741,8 @@ window.printJobTicket=function(idx){
       +'<td class="num">'+B+(unit*qty).toLocaleString()+'</td>'
       +'</tr>';
   });
-  for(let i=items.length;i<6;i++){
+  // landscape A5 is short — pad to 4 rows only
+  for(let i=items.length;i<4;i++){
     rows+='<tr class="blank"><td class="chk"><span></span></td><td class="desc">&nbsp;</td>'
       +'<td class="num">&nbsp;</td><td class="num qty">&nbsp;</td><td class="num">&nbsp;</td></tr>';
   }
@@ -3756,61 +3757,62 @@ window.printJobTicket=function(idx){
   +'*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
   +'html,body{margin:0;padding:0;background:#fff;color:#111;'
   +"font-family:'Sarabun','Helvetica Neue',Helvetica,Arial,sans-serif;}"
-  +'body{padding:34pt 40pt;font-size:10.5pt;line-height:1.5;}'
-  +'.sheet{max-width:560pt;margin:0 auto;}'
+  +'body{padding:20pt 26pt;font-size:9.5pt;line-height:1.35;}'
+  +'.sheet{width:100%;max-width:740pt;margin:0 auto;}'
 
-  /* header */
-  +'.co{text-align:center;} .co h1{margin:0;font-size:15pt;font-weight:800;letter-spacing:.3pt;}'
-  +'.co p{margin:3pt 0 0;font-size:8.5pt;color:#999;}'
-  +'.ttlwrap{display:flex;align-items:center;gap:14pt;margin:20pt 0 26pt;}'
-  +'.ttlwrap .bar{flex:1;height:2.5pt;background:#e0e0e0;}'
-  +'.ttlwrap h2{margin:0;font-size:30pt;font-weight:800;letter-spacing:1.5pt;white-space:nowrap;}'
-  +'.ttlwrap .sub{font-size:8pt;letter-spacing:3pt;color:#999;text-align:center;margin-top:2pt;}'
+  /* header — compact for landscape */
+  +'.hd{display:flex;align-items:center;justify-content:space-between;gap:16pt;'
+  +'border-bottom:2pt solid #111;padding-bottom:7pt;margin-bottom:11pt;}'
+  +'.hd .co h1{margin:0;font-size:12.5pt;font-weight:800;letter-spacing:.2pt;}'
+  +'.hd .co p{margin:1.5pt 0 0;font-size:7.5pt;color:#999;}'
+  +'.hd .ttl{text-align:right;}'
+  +'.hd .ttl h2{margin:0;font-size:23pt;font-weight:800;letter-spacing:1.2pt;line-height:1;}'
+  +'.hd .ttl .sub{font-size:7pt;letter-spacing:2.5pt;color:#999;margin-top:1.5pt;}'
 
-  /* bill-to / meta */
-  +'.mid{display:flex;justify-content:space-between;gap:30pt;margin-bottom:26pt;}'
-  +'.bt{font-size:9.5pt;color:#999;line-height:1.7;}'
-  +'.bt .cap{font-size:8pt;letter-spacing:1pt;color:#aaa;}'
-  +'.bt .nm{font-size:13pt;font-weight:800;color:#111;margin:2pt 0;}'
-  +'.bt .plate{font-size:17pt;font-weight:800;color:#111;letter-spacing:.8pt;}'
-  +'.rt{text-align:right;font-size:9.5pt;color:#999;line-height:1.9;min-width:150pt;}'
-  +'.rt b{color:#111;font-weight:800;margin-left:12pt;}'
-  +'.rt .slot{font-size:16pt;}'
+  /* two-column body: left = job info, right = table */
+  +'.body{display:flex;gap:18pt;align-items:flex-start;}'
+  +'.left{width:150pt;flex-shrink:0;}'
+  +'.right{flex:1;min-width:0;}'
 
-  /* table */
+  +'.cap{font-size:7pt;letter-spacing:1pt;color:#aaa;}'
+  +'.slotbox{border:2pt solid #111;border-radius:4pt;padding:3pt 0;text-align:center;margin-bottom:8pt;}'
+  +'.slotbox small{display:block;font-size:7pt;letter-spacing:2pt;color:#666;}'
+  +'.slotbox b{font-size:24pt;font-weight:800;line-height:1;}'
+  +'.plate{font-size:16pt;font-weight:800;letter-spacing:.6pt;line-height:1.15;margin:1pt 0 3pt;}'
+  +'.nm{font-size:11pt;font-weight:700;}'
+  +'.kv{font-size:8.5pt;color:#666;line-height:1.7;margin-top:4pt;}'
+  +'.kv b{color:#111;}'
+
   +'table{width:100%;border-collapse:collapse;}'
-  +'thead th{font-size:9pt;font-weight:800;color:#111;text-align:left;padding:0 6pt 7pt;'
+  +'thead th{font-size:8pt;font-weight:800;color:#111;text-align:left;padding:0 5pt 5pt;'
   +'border-bottom:1.2pt solid #333;}'
-  +'thead th.num{text-align:right;}'
-  +'tbody td{padding:9pt 6pt;font-size:10.5pt;border-bottom:.8pt solid #ececec;vertical-align:top;}'
+  +'thead th.num{text-align:right;} thead th.chk{width:18pt;}'
+  +'tbody td{padding:6pt 5pt;font-size:9.5pt;border-bottom:.7pt solid #ececec;vertical-align:top;}'
   +'tbody td.num{text-align:right;white-space:nowrap;color:#444;}'
   +'tbody td.desc{color:#222;}'
-  +'tbody td.desc em{font-style:normal;color:#999;font-size:9pt;}'
+  +'tbody td.desc em{font-style:normal;color:#999;font-size:8pt;}'
   +'tbody tr.blank td{color:#fff;}'
-  +'i.cd{font-style:normal;font-weight:800;font-size:8.5pt;border:1pt solid #333;'
-  +'padding:.8pt 3.5pt;border-radius:2.5pt;margin-right:5pt;color:#111;}'
-  +'td.chk{width:22pt;text-align:center;}'
-  +'td.chk span{display:inline-block;width:12pt;height:12pt;border:1.2pt solid #999;border-radius:2.5pt;}'
-  +'thead th.chk{width:22pt;}'
+  +'i.cd{font-style:normal;font-weight:800;font-size:7.5pt;border:1pt solid #333;'
+  +'padding:.6pt 3pt;border-radius:2pt;margin-right:4pt;color:#111;}'
+  +'td.chk{width:18pt;text-align:center;}'
+  +'td.chk span{display:inline-block;width:11pt;height:11pt;border:1.1pt solid #999;border-radius:2pt;}'
 
-  /* totals */
-  +'.tot{display:flex;justify-content:flex-end;margin-top:2pt;}'
-  +'.tot table{width:210pt;}'
-  +'.tot td{padding:8pt 6pt;font-size:10.5pt;border-bottom:.8pt solid #ececec;}'
+  +'.tot{display:flex;justify-content:flex-end;margin-top:1pt;}'
+  +'.tot table{width:172pt;}'
+  +'.tot td{padding:5pt;font-size:9.5pt;border-bottom:.7pt solid #ececec;}'
   +'.tot td.r{text-align:right;white-space:nowrap;}'
-  +'.tot tr.grand td{font-size:12pt;font-weight:800;border-bottom:none;padding-top:11pt;}'
+  +'.tot tr.grand td{font-size:11.5pt;font-weight:800;border-bottom:none;padding-top:7pt;}'
 
-  /* footer blocks */
-  +'.cols{display:flex;gap:34pt;margin-top:26pt;}'
-  +'.cols .c{flex:1;}'
-  +'.cols h4{margin:0 0 5pt;font-size:10pt;font-weight:800;}'
-  +'.cols p{margin:0;font-size:8.5pt;color:#999;line-height:1.75;}'
-  +'.notebox{border:.8pt solid #ddd;border-radius:3pt;height:46pt;margin-top:5pt;}'
-  +'.warn{margin-top:22pt;text-align:center;border:1pt dashed #666;border-radius:3pt;'
-  +'padding:7pt;font-size:9.5pt;font-weight:700;letter-spacing:.6pt;color:#333;}'
-  +'.sign{display:flex;gap:26pt;margin-top:26pt;text-align:center;font-size:8.5pt;color:#999;}'
-  +'.sign div{flex:1;} .sign .ln{border-bottom:.8pt solid #333;height:28pt;margin-bottom:4pt;}'
-  +'.foot{text-align:center;font-size:8pt;color:#bbb;margin-top:22pt;}'
+  +'.warn{margin-top:8pt;text-align:center;border:1pt dashed #666;border-radius:3pt;'
+  +'padding:4.5pt;font-size:8.5pt;font-weight:700;letter-spacing:.4pt;color:#333;}'
+
+  /* bottom strip: note box + signatures side by side */
+  +'.bottom{display:flex;gap:16pt;margin-top:10pt;align-items:flex-end;}'
+  +'.note{flex:1;} .note h4{margin:0 0 3pt;font-size:8.5pt;font-weight:800;}'
+  +'.notebox{border:.8pt solid #ddd;border-radius:3pt;height:34pt;}'
+  +'.sign{display:flex;gap:14pt;text-align:center;font-size:7.5pt;color:#999;width:300pt;}'
+  +'.sign div{flex:1;} .sign .ln{border-bottom:.8pt solid #333;height:24pt;margin-bottom:3pt;}'
+  +'.foot{text-align:center;font-size:7pt;color:#bbb;margin-top:7pt;}'
 
   /* screen-only toolbar */
   +'.pbar{position:fixed;top:0;left:0;right:0;background:#C9A84C;padding:10px;'
@@ -3818,58 +3820,55 @@ window.printJobTicket=function(idx){
   +'.pbar button{padding:12px 26px;font-size:15px;font-weight:700;border:none;'
   +'border-radius:8px;cursor:pointer;background:#1a1a1a;color:#fff;}'
   +'.pbar button.sec{background:#fff;color:#1a1a1a;}'
-  +'body{padding-top:66px;}'
-  +'@media print{.pbar{display:none!important;}body{padding:0;}@page{margin:12mm;}}'
+  +'.pbar .tip{align-self:center;font-size:11px;color:#4a3800;font-weight:700;}'
+  +'body{padding-top:64px;}'
+  /* A5 LANDSCAPE — one ticket per sheet */
+  +'@page{size:A5 landscape;margin:8mm;}'
+  +'@media print{.pbar{display:none!important;}body{padding:0;}'
+  +'.sheet{max-width:none;} html,body{width:100%;}}'
   +'</style></head><body>'
 
   +'<div class="pbar"><button onclick="window.print()">🖨️ พิมพ์</button>'
-  +'<button class="sec" onclick="window.close()">ปิด</button></div>'
+  +'<button class="sec" onclick="window.close()">ปิด</button>'
+  +'<span class="tip">ตั้งกระดาษ A5 · แนวนอน</span></div>'
 
   +'<div class="sheet">'
+  +'<div class="hd">'
   +'<div class="co"><h1>เหนือเมฆ Car Care</h1><p>สาขา '+esc(s.branch||'')+' · Nuea Mek Car Care</p></div>'
-  +'<div class="ttlwrap"><div class="bar"></div>'
-  +'<div><h2>ใบสั่งงาน</h2><div class="sub">WORKING BILL</div></div>'
-  +'<div class="bar"></div></div>'
+  +'<div class="ttl"><h2>ใบสั่งงาน</h2><div class="sub">WORKING BILL</div></div>'
+  +'</div>'
 
-  +'<div class="mid">'
-  +'<div class="bt"><div class="cap">งานของ:</div>'
+  +'<div class="body">'
+  +'<div class="left">'
+  +'<div class="slotbox"><small>ช่อง</small><b>'+(idx+1)+'</b></div>'
+  +'<div class="cap">งานของ:</div>'
   +'<div class="nm">'+esc(s.custName||'Walk-in')+'</div>'
-  +'<div class="plate">'+esc(s.plate||'— ไม่ระบุทะเบียน —')+'</div>'
-  +'<div>ขนาดรถ '+esc(s.size||'-')+'</div></div>'
-  +'<div class="rt">'
-  +'<div>ช่อง: <b class="slot">'+(idx+1)+'</b></div>'
-  +'<div>วันที่: <b>'+dateStr+'</b></div>'
-  +'<div>เวลา: <b>'+timeStr+'</b></div>'
-  +'<div>พนักงาน: <b>'+esc(s.staff||'—')+'</b></div>'
-  +'</div></div>'
+  +'<div class="plate">'+esc(s.plate||'— ไม่ระบุ —')+'</div>'
+  +'<div class="kv">ขนาดรถ: <b>'+esc(s.size||'-')+'</b><br>'
+  +'วันที่: <b>'+dateStr+'</b><br>เวลา: <b>'+timeStr+'</b><br>'
+  +'พนักงาน: <b>'+esc(s.staff||'—')+'</b></div>'
+  +'</div>'
 
+  +'<div class="right">'
   +'<table><thead><tr>'
   +'<th class="chk">&#10003;</th><th>รายการบริการ</th>'
   +'<th class="num">ราคา</th><th class="num">จำนวน</th><th class="num">รวม</th>'
   +'</tr></thead><tbody>'+rows+'</tbody></table>'
-
   +'<div class="tot"><table>'
   +'<tr><td>ยอดรวม</td><td class="r">'+B+sub.toLocaleString()+'</td></tr>'
   +(disc>0?'<tr><td>ส่วนลด</td><td class="r">-'+B+disc.toLocaleString()+'</td></tr>':'')
   +'<tr class="grand"><td>รวมทั้งสิ้น</td><td class="r">'+B+total.toLocaleString()+'</td></tr>'
   +'</table></div>'
+  +'<div class="warn">** ยังไม่ชำระเงิน — ใบสั่งงาน ไม่ใช่ใบเสร็จ **</div>'
+  +'</div></div>'
 
-  +'<div class="warn">** ยังไม่ชำระเงิน — เอกสารนี้เป็นใบสั่งงาน ไม่ใช่ใบเสร็จ **</div>'
-
-  +'<div class="cols">'
-  +'<div class="c"><h4>หมายเหตุ / จุดที่ต้องระวัง</h4><div class="notebox"></div></div>'
-  +'<div class="c"><h4>ขั้นตอนการทำงาน</h4>'
-  +'<p>1. ตรวจสภาพรถก่อนเริ่มงาน บันทึกรอยตำหนิ<br>'
-  +'2. ติ๊ก &#10003; ทุกรายการเมื่อทำเสร็จ<br>'
-  +'3. ให้หัวหน้าตรวจก่อนส่งมอบ<br>'
-  +'4. แนบใบนี้คืนเคาน์เตอร์เพื่อเก็บเงิน</p></div>'
-  +'</div>'
-
+  +'<div class="bottom">'
+  +'<div class="note"><h4>หมายเหตุ / จุดที่ต้องระวัง</h4><div class="notebox"></div></div>'
   +'<div class="sign">'
   +'<div><div class="ln"></div>ช่างผู้รับงาน</div>'
-  +'<div><div class="ln"></div>ตรวจงาน / หัวหน้า</div>'
+  +'<div><div class="ln"></div>ตรวจงาน</div>'
   +'<div><div class="ln"></div>ลูกค้ารับรถ</div>'
-  +'</div>'
+  +'</div></div>'
 
   +'<div class="foot">เหนือเมฆ Car Care · พิมพ์เมื่อ '+dateStr+' '+timeStr+'</div>'
   +'</div></body></html>';
