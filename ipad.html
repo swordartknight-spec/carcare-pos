@@ -319,18 +319,59 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 .usage-prod-tag.save-tag{background:var(--ok-bg);color:var(--ok);}
 .recipe-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px;}
 .recipe-item:last-child{border-bottom:none;}
-/* ── PRINT RECEIPT ── */
+/* ── PRINT: A5 JOB TICKET (iPad) ── */
 #print-receipt{display:none;}
 @media print{
   body.printing>*:not(#print-receipt){display:none!important;}
-  body.printing #print-receipt{display:block!important;width:58mm;padding:2mm;font-family:'Courier New',monospace;font-size:11px;color:#000;background:#fff;}
-  #print-receipt .pr-head{text-align:center;font-weight:700;font-size:13px;margin-bottom:2px;}
-  #print-receipt .pr-sub{text-align:center;font-size:10px;margin-bottom:6px;}
-  #print-receipt .pr-line{border-top:1px dashed #000;margin:5px 0;}
-  #print-receipt .pr-row{display:flex;justify-content:space-between;gap:6px;}
-  #print-receipt .pr-total{font-weight:700;font-size:13px;}
-  #print-receipt .pr-foot{text-align:center;font-size:10px;margin-top:8px;}
-  @page{margin:0;size:58mm auto;}
+  body.printing #print-receipt{display:block!important;width:148mm;min-height:200mm;padding:10mm 9mm;font-family:'Sarabun','Helvetica Neue',Arial,sans-serif;font-size:12pt;color:#000;background:#fff;box-sizing:border-box;}
+  @page{margin:0;size:A5 portrait;}
+
+  /* Header */
+  #print-receipt .jt-top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #000;padding-bottom:4mm;margin-bottom:4mm;}
+  #print-receipt .jt-brand{font-size:16pt;font-weight:800;letter-spacing:.5px;}
+  #print-receipt .jt-brand small{display:block;font-size:9pt;font-weight:400;margin-top:1mm;}
+  #print-receipt .jt-title{text-align:right;}
+  #print-receipt .jt-title b{font-size:20pt;font-weight:800;display:block;line-height:1;}
+  #print-receipt .jt-title span{font-size:9pt;}
+
+  /* Slot box + meta */
+  #print-receipt .jt-meta{display:flex;gap:5mm;margin-bottom:4mm;}
+  #print-receipt .jt-slot{border:2.5pt solid #000;border-radius:2mm;padding:3mm 5mm;text-align:center;min-width:26mm;}
+  #print-receipt .jt-slot small{display:block;font-size:8pt;letter-spacing:1px;}
+  #print-receipt .jt-slot b{font-size:26pt;line-height:1;font-weight:800;}
+  #print-receipt .jt-info{flex:1;font-size:11pt;line-height:1.7;}
+  #print-receipt .jt-info .plate{font-size:19pt;font-weight:800;letter-spacing:1px;line-height:1.2;}
+  #print-receipt .jt-info .lbl{display:inline-block;min-width:20mm;color:#444;font-size:10pt;}
+
+  /* Service table */
+  #print-receipt table.jt-tb{width:100%;border-collapse:collapse;margin-bottom:4mm;}
+  #print-receipt table.jt-tb th{background:#000;color:#fff;font-size:10pt;padding:2mm 3mm;text-align:left;}
+  #print-receipt table.jt-tb th:last-child{text-align:right;}
+  #print-receipt table.jt-tb td{border-bottom:1pt solid #bbb;padding:3mm;font-size:12pt;vertical-align:top;}
+  #print-receipt table.jt-tb td:last-child{text-align:right;white-space:nowrap;}
+  #print-receipt table.jt-tb .cd{font-weight:800;font-size:10pt;border:1.2pt solid #000;padding:.4mm 1.6mm;border-radius:1mm;margin-right:2mm;}
+  #print-receipt table.jt-tb .chk{width:9mm;text-align:center;}
+  #print-receipt table.jt-tb .chk span{display:inline-block;width:6mm;height:6mm;border:1.5pt solid #000;border-radius:1mm;}
+
+  /* Total */
+  #print-receipt .jt-total{display:flex;justify-content:flex-end;gap:6mm;border-top:2pt solid #000;padding-top:3mm;font-size:15pt;font-weight:800;}
+  #print-receipt .jt-unpaid{text-align:center;border:1.5pt dashed #000;padding:2.5mm;margin-top:4mm;font-size:11pt;font-weight:700;letter-spacing:1px;}
+
+  /* Notes / signature */
+  #print-receipt .jt-note{margin-top:6mm;font-size:10pt;}
+  #print-receipt .jt-note .box{border:1pt solid #888;height:20mm;margin-top:2mm;border-radius:1mm;}
+  #print-receipt .jt-sign{display:flex;gap:8mm;margin-top:8mm;font-size:10pt;text-align:center;}
+  #print-receipt .jt-sign div{flex:1;}
+  #print-receipt .jt-sign .ln{border-bottom:1pt solid #000;height:12mm;margin-bottom:1.5mm;}
+  #print-receipt .jt-foot{text-align:center;font-size:9pt;color:#555;margin-top:5mm;border-top:1pt solid #ccc;padding-top:2mm;}
+
+  /* legacy thermal classes still used by printReceipt() */
+  #print-receipt .pr-head{text-align:center;font-weight:700;font-size:14pt;margin-bottom:2mm;}
+  #print-receipt .pr-sub{text-align:center;font-size:10pt;margin-bottom:4mm;}
+  #print-receipt .pr-line{border-top:1pt dashed #000;margin:3mm 0;}
+  #print-receipt .pr-row{display:flex;justify-content:space-between;gap:4mm;font-size:11pt;padding:1mm 0;}
+  #print-receipt .pr-total{font-weight:800;font-size:14pt;}
+  #print-receipt .pr-foot{text-align:center;font-size:10pt;margin-top:5mm;}
 }
 /* ── iPad DEDICATED SPLIT LAYOUT (always on ≥768px) ── */
 @media(min-width:768px){
@@ -435,7 +476,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v2</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v3</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -3641,7 +3682,7 @@ window.openBill=async function(){
   if(wantPrint==='always'){printJobTicket(idx);}
   else if(wantPrint!=='never'){
     setTimeout(()=>{
-      if(confirm('🖨️ พิมพ์ใบสั่งงาน (ติดรถ) ไหม?\n\nช่อง '+(idx+1)+' · '+slots[idx].custName+'\n'+slots[idx].items)){
+      if(confirm('🖨️ พิมพ์ใบสั่งงาน A5 (วางในรถ) ไหม?\n\nช่อง '+(idx+1)+' · '+slots[idx].custName+'\n'+slots[idx].items)){
         printJobTicket(idx);
       }
     },200);
@@ -3653,20 +3694,53 @@ window.openBill=async function(){
 window.printJobTicket=function(idx){
   const s=slots[idx];if(!s)return;
   const now=new Date();
-  let h=`<div class="pr-head">ใบสั่งงาน</div>`;
-  h+=`<div class="pr-sub">เหนือเมฆ Car Care · สาขา ${s.branch||''}<br>${now.toLocaleDateString('th-TH')} ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</div>`;
-  h+=`<div style="text-align:center;font-size:22px;font-weight:700;border:2px solid #000;padding:4px;margin:6px 0;">ช่อง ${idx+1}</div>`;
-  h+=`<div style="font-size:15px;font-weight:700;text-align:center;">${s.plate||'— ไม่ระบุทะเบียน —'}</div>`;
-  h+=`<div style="text-align:center;font-size:11px;">${s.custName||''} · ขนาด ${s.size||''}</div>`;
-  h+=`<div class="pr-line"></div>`;
-  (s.cartSnap||[]).forEach(c=>{
-    h+=`<div class="pr-row"><span>${c.code?'['+c.code+'] ':''}${c.name}${c.size?' ('+c.size+')':''} x${c.qty||1}</span><span>฿${((c.price||0)*(c.qty||1)).toLocaleString()}</span></div>`;
+  const items=s.cartSnap||[];
+  const dateStr=now.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const timeStr=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+
+  let h=`<div class="jt-top">
+    <div class="jt-brand">เหนือเมฆ Car Care<small>สาขา ${s.branch||''} · โทร 02-xxx-xxxx</small></div>
+    <div class="jt-title"><b>ใบสั่งงาน</b><span>WORKING BILL</span></div>
+  </div>`;
+
+  h+=`<div class="jt-meta">
+    <div class="jt-slot"><small>ช่อง</small><b>${idx+1}</b></div>
+    <div class="jt-info">
+      <div class="plate">${s.plate||'— ไม่ระบุทะเบียน —'}</div>
+      <div><span class="lbl">ลูกค้า</span>${s.custName||'Walk-in'}</div>
+      <div><span class="lbl">ขนาดรถ</span><b>${s.size||'-'}</b> &nbsp;·&nbsp; <span class="lbl" style="min-width:auto;">วันที่</span>${dateStr} ${timeStr}</div>
+      <div><span class="lbl">พนักงาน</span>${s.staff||'—'}</div>
+    </div>
+  </div>`;
+
+  h+=`<table class="jt-tb">
+    <thead><tr><th class="chk">✓</th><th>รายการบริการ</th><th>ราคา</th></tr></thead>
+    <tbody>`;
+  items.forEach(it=>{
+    const qty=it.qty||1;
+    h+=`<tr>
+      <td class="chk"><span></span></td>
+      <td>${it.code?'<span class="cd">'+it.code+'</span>':''}${it.name}${it.size?' <small>('+it.size+')</small>':''}${qty>1?' × '+qty:''}</td>
+      <td>฿${((it.price||0)*qty).toLocaleString()}</td>
+    </tr>`;
   });
-  h+=`<div class="pr-line"></div>`;
-  h+=`<div class="pr-row pr-total"><span>รวม</span><span>฿${(s.total||0).toLocaleString()}</span></div>`;
-  if(s.staff)h+=`<div style="font-size:11px;">พนักงาน: ${s.staff}</div>`;
-  h+=`<div class="pr-line"></div>`;
-  h+=`<div class="pr-foot">** ยังไม่ชำระเงิน **<br>ใบสั่งงาน ไม่ใช่ใบเสร็จ</div>`;
+  // pad empty rows so the sheet looks like a proper form
+  for(let i=items.length;i<6;i++){
+    h+=`<tr><td class="chk"><span></span></td><td>&nbsp;</td><td>&nbsp;</td></tr>`;
+  }
+  h+=`</tbody></table>`;
+
+  h+=`<div class="jt-total"><span>รวมทั้งสิ้น</span><span>฿${(s.total||0).toLocaleString()}</span></div>`;
+  h+=`<div class="jt-unpaid">** ยังไม่ชำระเงิน — ใบสั่งงาน ไม่ใช่ใบเสร็จ **</div>`;
+
+  h+=`<div class="jt-note"><b>หมายเหตุ / จุดที่ต้องระวัง</b><div class="box"></div></div>`;
+  h+=`<div class="jt-sign">
+    <div><div class="ln"></div>ช่างผู้รับงาน</div>
+    <div><div class="ln"></div>ตรวจงาน / หัวหน้า</div>
+    <div><div class="ln"></div>ลูกค้ารับรถ</div>
+  </div>`;
+  h+=`<div class="jt-foot">เหนือเมฆ Car Care · พิมพ์ ${dateStr} ${timeStr}</div>`;
+
   document.getElementById('print-receipt').innerHTML=h;
   document.body.classList.add('printing');
   window.print();
