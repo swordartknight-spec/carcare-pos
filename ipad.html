@@ -373,28 +373,87 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   #print-receipt .pr-total{font-weight:800;font-size:14pt;}
   #print-receipt .pr-foot{text-align:center;font-size:10pt;margin-top:5mm;}
 }
-/* ── iPad DEDICATED SPLIT LAYOUT (always on ≥768px) ── */
+/* ── iPad SPLIT LAYOUT — pure CSS grid, children stay in place (handlers intact) ── */
 @media(min-width:768px){
-  #sc-pos.split-on{display:grid!important;grid-template-columns:400px minmax(0,1fr);gap:18px;align-items:start;}
-  #pos-left{display:block!important;position:sticky;top:8px;max-height:calc(100vh - 76px);overflow-y:auto;border-right:1px solid var(--bdr);padding-right:14px;}
-  #pos-right{display:block!important;min-width:0;}
-  #sc-pos.split-on #bill-slot-wrap{margin:0 0 12px 0!important;border-radius:var(--rs);border:1px solid var(--bdr);}
+  #sc-pos.split-on{
+    display:grid!important;
+    grid-template-columns:400px minmax(0,1fr);
+    grid-auto-flow:row;
+    gap:0 18px;
+    align-items:start;
+  }
+  /* LEFT column */
+  #sc-pos.split-on > #bill-slot-wrap,
+  #sc-pos.split-on > #bill-detail-view,
+  #sc-pos.split-on > #pos-size-card,
+  #sc-pos.split-on > #pos-cust-card,
+  #sc-pos.split-on > #pos-staff-card,
+  #sc-pos.split-on > #cart-sec{grid-column:1;}
+  /* Left column stacking order: slots → size → customer → staff → cart */
+  #sc-pos.split-on > #bill-slot-wrap{grid-row:1;}
+  #sc-pos.split-on > #bill-detail-view{grid-row:2;}
+  #sc-pos.split-on > #pos-size-card{grid-row:3;}
+  #sc-pos.split-on > #pos-cust-card{grid-row:4;}
+  #sc-pos.split-on > #pos-staff-card{grid-row:5;}
+  #sc-pos.split-on > #cart-sec{grid-row:6;}
+  /* RIGHT column — services only */
+  #sc-pos.split-on > #cat-topnav,
+  #sc-pos.split-on > #promo-banner,
+  #sc-pos.split-on > #quick-sell,
+  #sc-pos.split-on > #sg{grid-column:2;}
+  #sc-pos.split-on > #cat-topnav{grid-row:1;}
+  #sc-pos.split-on > #promo-banner{grid-row:2;}
+  #sc-pos.split-on > #quick-sell{grid-row:3;}
+  #sc-pos.split-on > #sg{grid-row:4;}
+
   #sc-pos.split-on #bill-slots{grid-template-columns:repeat(5,1fr)!important;}
-  #sc-pos.split-on #cart-sec{margin-top:12px;display:block!important;}
   #sc-pos.split-on .sq-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
-  /* Bigger touch targets for iPad */
   #sc-pos.split-on .sq-card{min-height:86px;padding:10px 12px;}
   #sc-pos.split-on .sq-name{font-size:13px;}
-  #sc-pos.split-on .btn{min-height:44px;}
-  #sc-pos.split-on .stab{padding:10px 16px;font-size:14px;}
-  /* Cart float not needed — cart always visible on left */
   #cart-float{display:none!important;}
 }
 @media(min-width:1180px){
   #sc-pos.split-on{grid-template-columns:440px minmax(0,1fr);}
   #sc-pos.split-on .sq-grid{grid-template-columns:repeat(auto-fill,minmax(175px,1fr));}
 }
-#pos-left,#pos-right{display:contents;}
+
+/* ── HAMBURGER MENU (iPad ≥768px) ── */
+#ham-btn{display:none;}
+#ham-menu{display:none;}
+#ham-backdrop{display:none;}
+@media(min-width:768px){
+  /* hide bottom tab bar on iPad */
+  #bottom-nav{display:none!important;}
+  #content{padding-bottom:20px!important;}
+  /* hamburger button top-left */
+  #ham-btn{
+    display:flex;flex-direction:column;justify-content:center;gap:4px;
+    position:fixed;top:calc(10px + var(--st,0px));left:12px;z-index:200;
+    width:46px;height:46px;border-radius:12px;border:1px solid var(--bdr);
+    background:var(--sur);cursor:pointer;padding:0 12px;box-shadow:0 2px 8px rgba(0,0,0,.08);
+  }
+  #ham-btn span{display:block;height:2.5px;background:var(--tx1);border-radius:2px;transition:.2s;}
+  /* push page content down so hamburger doesn't overlap */
+  #app{padding-top:52px;}
+  /* slide-up menu */
+  #ham-menu{
+    display:block;position:fixed;left:50%;transform:translateX(-50%) translateY(120%);
+    bottom:0;width:min(560px,94vw);background:var(--sur);
+    border-radius:20px 20px 0 0;z-index:210;box-shadow:0 -8px 40px rgba(0,0,0,.2);
+    transition:transform .28s cubic-bezier(.2,.8,.2,1);padding-bottom:calc(16px + var(--sb));
+  }
+  #ham-menu.open{transform:translateX(-50%) translateY(0);}
+  #ham-menu .ham-head{display:flex;justify-content:space-between;align-items:center;
+    padding:16px 20px 10px;font-weight:800;font-size:15px;}
+  #ham-menu .ham-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 16px;}
+  #ham-menu .ham-item{display:flex;flex-direction:column;align-items:center;gap:6px;
+    padding:14px 6px;border:1px solid var(--bdr);border-radius:14px;background:var(--bg);
+    font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;transition:.15s;}
+  #ham-menu .ham-item span{font-size:22px;}
+  #ham-menu .ham-item.active{background:var(--gold);color:var(--blk);border-color:var(--gold-dk);}
+  #ham-backdrop{display:none;position:fixed;inset:0;z-index:205;background:rgba(0,0,0,.3);}
+  #ham-backdrop.open{display:block;}
+}
 </style>
 </head>
 <body>
@@ -476,7 +535,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v7</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v12</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -506,9 +565,12 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
     <!-- BILL SLOT GRID -->
     <div id="bill-slot-wrap" style="background:var(--sur);border-bottom:1px solid var(--bdr);padding:10px 12px;margin:-12px -12px 14px -12px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;cursor:pointer;" onclick="toggleSlots()">
         <span style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;">📋 บิลที่เปิดไว้</span>
-        <span id="slots-open-count" style="font-size:10px;color:var(--tx3);"></span>
+        <span style="display:flex;align-items:center;gap:8px;">
+          <span id="slots-open-count" style="font-size:10px;color:var(--tx3);"></span>
+          <span id="slots-caret" style="font-size:12px;color:var(--tx3);transition:transform .2s;">▼</span>
+        </span>
       </div>
       <div id="bill-slots" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div>
     </div>
@@ -588,9 +650,8 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     </div>
 
     <!-- Quick sell shortcuts -->
-    <div id="quick-sell" style="margin-bottom:12px;">
-      <div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">⚡ รายการขายดี</div>
-      <div id="quick-sell-cards" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;"></div>
+    <div id="quick-sell" style="display:none;">
+      <div id="quick-sell-cards"></div>
     </div>
 
     <!-- Paper coupon alert moved into cart section -->
@@ -599,7 +660,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
     <!-- Cart -->
     <div class="cart-sec" id="cart-sec" style="display:none;">
-      <div class="ch"><span>🛒 Cart</span><button class="btn btn-s btn-d" onclick="clrCart()">ล้าง</button></div>
+      <div class="ch"><span>🛒 ตะกร้า</span><button class="btn btn-s btn-d" onclick="clrCart()">ล้าง</button></div>
       <div id="ci-list"></div>
 
       <!-- UNIFIED COUPON SECTION -->
@@ -852,12 +913,38 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 </div><!-- content -->
 
+<!-- HAMBURGER (iPad top-left) -->
+<button id="ham-btn" onclick="toggleHamMenu()" aria-label="เมนู">
+  <span></span><span></span><span></span>
+</button>
+
 <!-- BOTTOM NAV — Mobile shows only POS + Today + More -->
-<div class="nav">
+<div class="nav" id="bottom-nav">
   <button class="nt active" id="nt-pos" onclick="sw('pos',this)"><span class="ni">🛒</span>POS</button>
   <button class="nt" id="nt-today" onclick="sw('today',this)"><span class="ni">📊</span>Today</button>
   <button class="nt" onclick="toggleMoreMenu()"><span class="ni">••••</span>More</button>
 </div>
+
+<!-- HAMBURGER SLIDE-UP MENU (iPad) -->
+<div id="ham-menu">
+  <div class="ham-head"><span>เมนู</span><span onclick="toggleHamMenu()" style="cursor:pointer;font-size:20px;color:var(--tx3);">✕</span></div>
+  <div class="ham-grid">
+    <button class="ham-item active" data-scr="pos" onclick="hamGo('pos',this)"><span>🛒</span>POS</button>
+    <button class="ham-item" data-scr="today" onclick="hamGo('today',this)"><span>📊</span>วันนี้</button>
+    <button class="ham-item" data-scr="loyalty" onclick="hamGo('loyalty',this)"><span>⭐</span>สมาชิก</button>
+    <button class="ham-item" data-scr="history" onclick="hamGo('history',this)"><span>🕐</span>ประวัติ</button>
+    <button class="ham-item" data-scr="staff" onclick="hamGo('staff',this)"><span>👤</span>คอมมิชชั่น</button>
+    <button class="ham-item" data-scr="stock" onclick="hamGo('stock',this)"><span>📦</span>สต็อก</button>
+    <button class="ham-item" data-scr="prices" onclick="hamGo('prices',this)"><span>📋</span>ราคา</button>
+    <button class="ham-item" data-scr="usage" onclick="hamGo('usage',this)"><span>🧪</span>น้ำยา</button>
+  </div>
+  <div style="text-align:center;padding:12px;border-top:1px solid var(--bdr);">
+    <a href="./desktop.html" style="font-size:12px;color:var(--inf);text-decoration:none;font-weight:700;">🖥 เปิดหน้า Dashboard →</a>
+    &nbsp;·&nbsp;
+    <a href="./index.html" style="font-size:12px;color:var(--tx3);text-decoration:none;">📱 มือถือ</a>
+  </div>
+</div>
+<div id="ham-backdrop" onclick="toggleHamMenu()"></div>
 
 <!-- MORE MENU -->
 <div id="more-menu" style="display:none;position:fixed;bottom:calc(56px + var(--sb));left:0;right:0;background:var(--sur);border-top:1px solid var(--bdr);z-index:150;padding:8px 0;box-shadow:0 -4px 20px rgba(0,0,0,.12);">
@@ -1928,31 +2015,16 @@ window.shareInvoice=async function(){
 };
 
 
-// ── TABLET SPLIT LAYOUT ──
+// ── TABLET SPLIT LAYOUT (pure CSS, no DOM move — keeps event handlers intact) ──
 (function(){
-  const LEFT_IDS=['bill-slot-wrap','pos-cust-card','pos-staff-card','cart-sec'];
-  let origOrder=null;
-  function buildSplit(){
-    const sc=document.getElementById('sc-pos');if(!sc||document.getElementById('pos-left'))return;
-    origOrder=[...sc.children];
-    const L=document.createElement('div');L.id='pos-left';
-    const R=document.createElement('div');R.id='pos-right';
-    sc.appendChild(L);sc.appendChild(R);
-    origOrder.forEach(k=>{(LEFT_IDS.includes(k.id)?L:R).appendChild(k);});
-    sc.classList.add('split-on');
-  }
-  function unbuildSplit(){
-    const sc=document.getElementById('sc-pos');const L=document.getElementById('pos-left');const R=document.getElementById('pos-right');
-    if(!sc||!L)return;
-    (origOrder||[]).forEach(k=>sc.appendChild(k));
-    L.remove();R.remove();
-    sc.classList.remove('split-on');
-  }
-  const mq=window.matchMedia('(min-width:768px)');
   function apply(){
-    if(mq.matches){buildSplit();const cs=document.getElementById('cart-sec');if(cs)cs.style.display='block';}
-    else unbuildSplit();
+    const sc=document.getElementById('sc-pos');if(!sc)return;
+    if(window.matchMedia('(min-width:768px)').matches)sc.classList.add('split-on');
+    else sc.classList.remove('split-on');
+    if(typeof rCart==='function')try{rCart();}catch(e){}
   }
+  window._reapplySplit=apply;
+  const mq=window.matchMedia('(min-width:768px)');
   if(mq.addEventListener)mq.addEventListener('change',apply);else mq.addListener(apply);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply);else apply();
 })();
@@ -2375,6 +2447,21 @@ window.sw=function(id,el){
 };
 window.sh=function(id){G(id).style.display='flex';if(id==='sh-staff')rStaffManage();};
 
+window.toggleHamMenu=function(){
+  const m=document.getElementById('ham-menu');
+  const b=document.getElementById('ham-backdrop');
+  const open=m.classList.toggle('open');
+  b.classList.toggle('open',open);
+};
+window.hamGo=function(scr,el){
+  // switch screen
+  sw(scr);
+  // sync active state on ham items
+  document.querySelectorAll('#ham-menu .ham-item').forEach(x=>x.classList.remove('active'));
+  if(el)el.classList.add('active');
+  toggleHamMenu();
+};
+
 window.toggleMoreMenu=function(){
   const menu=G('more-menu');
   const backdrop=G('more-backdrop');
@@ -2692,6 +2779,7 @@ window.exportUsage=function(){
 const _origSw=window.sw;
 window.sw=function(id,el){
   _origSw(id,el);
+  if(id==='pos'&&window._reapplySplit)try{window._reapplySplit();}catch(e){}
   if(id==='usage'){
     setUsageRange('month');
     rUsage();
@@ -3508,6 +3596,8 @@ setInterval(()=>{
 // ══ QUICK SELL SHORTCUTS ══
 // Top selling services based on transaction history
 function rQuickSell(){
+  // "รายการขายดี" removed — favorites (⭐) replaces it. Keep function as no-op.
+  return;
   const el=G('quick-sell-cards');if(!el)return;
 
   // Count service frequency from transactions
@@ -3580,7 +3670,7 @@ async function deductPaperCpn(){
 }
 
 // ══ 10-SLOT BILL SYSTEM ══
-const TOTAL_SLOTS=10;
+const TOTAL_SLOTS=5;
 let slots=[]; // array of 10 slot objects
 let activeSlotIdx=null; // which slot is being viewed
 
@@ -3597,6 +3687,19 @@ function initSlots(){
 
 function saveSlots(){
   localStorage.setItem('billSlots',JSON.stringify(slots));
+}
+
+let _slotsCollapsed=localStorage.getItem('slots_collapsed')==='1';
+window.toggleSlots=function(){
+  _slotsCollapsed=!_slotsCollapsed;
+  localStorage.setItem('slots_collapsed',_slotsCollapsed?'1':'0');
+  applySlotsCollapse();
+};
+function applySlotsCollapse(){
+  const grid=G('bill-slots');const caret=G('slots-caret');
+  if(!grid)return;
+  grid.style.display=_slotsCollapsed?'none':'grid';
+  if(caret)caret.style.transform=_slotsCollapsed?'rotate(-90deg)':'';
 }
 
 function rSlots(){
@@ -3628,6 +3731,7 @@ function rSlots(){
       <span class="slot-time">${timeStr}</span>
     </div>`;
   }).join('');
+  applySlotsCollapse();
 }
 
 // ── Select slot ──
