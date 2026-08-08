@@ -535,7 +535,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v13</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v14</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1600,41 +1600,25 @@ function rSvcs(){
     </div>`;
   }
 
-  // Favorites section at top
   const favItems=filtered.filter(s=>FAVS.includes(s.code||s._id||s.name));
 
   if(CC!=='all'){
     let html='';
     if(favItems.length){
-      html+=`<div style="grid-column:1/-1;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
-        <span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:#fff3cd;color:#856404;">⭐ รายการโปรด</span>
-        <div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
+      html+=`<div style="grid-column:1/-1;margin-bottom:4px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:#fff3cd;color:#856404;">⭐ รายการโปรด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
       html+=favItems.map(makeCard).join('');
       html+=`<div style="grid-column:1/-1;margin-top:12px;"></div>`;
     }
     html+=filtered.map(makeCard).join('');
     G('sg').innerHTML=html;
-    return;
   } else {
-    const catOrder=['ล้างรถ','เคลือบสี','ภายใน','บริการอื่น','ใบปัดน้ำฝน'];
     let html='';
-    // Favorites first
     if(favItems.length){
-      html+=`<div style="grid-column:1/-1;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
-        <span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:#fff3cd;color:#856404;">⭐ รายการโปรด</span>
-        <div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
+      html+=`<div style="grid-column:1/-1;margin-bottom:4px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:#fff3cd;color:#856404;">⭐ รายการโปรด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
       html+=favItems.map(makeCard).join('');
+      html+=`<div style="grid-column:1/-1;margin:8px 0 4px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:var(--bg);color:var(--tx2);">ทั้งหมด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
     }
-    for(const cat of catOrder){
-      const items=filtered.filter(s=>s.cat===cat);
-      if(!items.length) continue;
-      const cl=CAT_CL2[cat]||'bgy';
-      html+=`<div style="grid-column:1/-1;margin-top:16px;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
-        <span class="badge ${cl}" style="font-size:11px;padding:3px 10px;flex-shrink:0;">${cat}</span>
-        <div style="flex:1;height:0.5px;background:var(--bdr);"></div>
-      </div>`;
-      html+=items.map(makeCard).join('');
-    }
+    html+=filtered.map(makeCard).join('');
     G('sg').innerHTML=html||'<div class="empty" style="grid-column:1/-1;">ไม่มีบริการ</div>';
   }
 }
@@ -1642,14 +1626,12 @@ function rSvcs(){
 window.setSz=function(s,el){CZ=s;document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));el.classList.add('active');rSvcs();};
 window.setCat=function(c,el){CC=c;document.querySelectorAll('.cat-nav').forEach(x=>x.classList.remove('active'));el.classList.add('active');rSvcs();};
 
-// ══ PAYMENT METHOD ══
 window.setPay=function(m,el){
   selPayMethod=m;
   document.querySelectorAll('.pay-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
 };
 
-// ══ CART ══
 window.addCart=function(item){
   const ex=cart.find(c=>c.id===item.id);
   if(ex)ex.qty++;else cart.push({...item,qty:1});
