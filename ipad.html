@@ -535,7 +535,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v14</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v15</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1601,26 +1601,19 @@ function rSvcs(){
   }
 
   const favItems=filtered.filter(s=>FAVS.includes(s.code||s._id||s.name));
+  const nonFav=filtered.filter(s=>!FAVS.includes(s.code||s._id||s.name));
 
-  if(CC!=='all'){
-    let html='';
-    if(favItems.length){
-      html+=`<div style="grid-column:1/-1;margin-bottom:4px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:#fff3cd;color:#856404;">⭐ รายการโปรด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
-      html+=favItems.map(makeCard).join('');
-      html+=`<div style="grid-column:1/-1;margin-top:12px;"></div>`;
-    }
-    html+=filtered.map(makeCard).join('');
-    G('sg').innerHTML=html;
-  } else {
-    let html='';
-    if(favItems.length){
-      html+=`<div style="grid-column:1/-1;margin-bottom:4px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:#fff3cd;color:#856404;">⭐ รายการโปรด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
-      html+=favItems.map(makeCard).join('');
-      html+=`<div style="grid-column:1/-1;margin:8px 0 4px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:var(--bg);color:var(--tx2);">ทั้งหมด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
-    }
-    html+=filtered.map(makeCard).join('');
-    G('sg').innerHTML=html||'<div class="empty" style="grid-column:1/-1;">ไม่มีบริการ</div>';
+  const favDivider=`<div style="grid-column:1/-1;margin:0 0 2px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:#fff3cd;color:#856404;">⭐ รายการโปรด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
+  const allDivider=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:var(--bg);color:var(--tx2);">ทั้งหมด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
+
+  let html='';
+  if(favItems.length){
+    html+=favDivider;
+    html+=favItems.map(makeCard).join('');
+    html+=allDivider;
   }
+  html+=nonFav.map(makeCard).join('');
+  G('sg').innerHTML=html||'<div class="empty" style="grid-column:1/-1;">ไม่มีบริการ</div>';
 }
 
 window.setSz=function(s,el){CZ=s;document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));el.classList.add('active');rSvcs();};
