@@ -378,6 +378,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   #sc-pos.split-on{
     display:grid!important;
     grid-template-columns:400px minmax(0,1fr);
+    grid-template-rows:auto auto auto auto auto max-content 1fr;
     grid-auto-flow:row;
     gap:0 18px;
     align-items:start;
@@ -401,24 +402,25 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   #sc-pos.split-on > #promo-banner,
   #sc-pos.split-on > #quick-sell,
   #sc-pos.split-on > #sg{grid-column:2;}
-  #sc-pos.split-on > #cat-topnav{grid-row:1;}
-  #sc-pos.split-on > #promo-banner{grid-row:2;}
-  #sc-pos.split-on > #quick-sell{grid-row:3;}
-  #sc-pos.split-on > #sg{grid-row:4;}
+  #sc-pos.split-on > #cat-topnav{grid-row:1;align-self:start;z-index:2;position:relative;}
+  #sc-pos.split-on > #promo-banner{display:none!important;}
+  #sc-pos.split-on > #quick-sell{display:none!important;}
+  /* services span every row so they start at the very top, offset to clear the category bar */
+  #sc-pos.split-on > #sg{grid-row:1/-1;align-self:start;margin-top:52px;}
 
   #sc-pos.split-on #bill-slots{grid-template-columns:repeat(5,1fr)!important;}
-  #sc-pos.split-on .sq-grid{grid-template-columns:repeat(3,1fr);gap:8px;grid-auto-rows:88px;align-content:start;}
-  #sc-pos.split-on .sq-grid > div[style*="grid-column:1/-1"]{grid-row:auto;height:auto!important;min-height:0;align-self:center;}
-  #sc-pos.split-on .sq-card{height:88px;min-height:0;padding:9px 12px;overflow:hidden;justify-content:space-between;gap:2px;}
-  #sc-pos.split-on .sq-name{font-size:13px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  #sc-pos.split-on .sq-grid{grid-template-columns:repeat(3,1fr);gap:8px;grid-auto-rows:min-content;align-content:start;}
+  #sc-pos.split-on .sq-grid > div[style*="grid-column:1/-1"]{height:auto!important;min-height:0;align-self:center;}
+  #sc-pos.split-on .sq-card{height:100px;min-height:0;padding:9px 12px;overflow:hidden;justify-content:flex-start;gap:3px;}
+  #sc-pos.split-on .sq-name{font-size:13px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:32px;}
   #sc-pos.split-on .sq-code{font-size:10px;}
-  #sc-pos.split-on .sq-price{font-size:14px;}
+  #sc-pos.split-on .sq-price{font-size:15px;margin-top:auto;}
   #sc-pos.split-on .sq-name{font-size:14px;}
   #cart-float{display:none!important;}
 }
 @media(min-width:1180px){
   #sc-pos.split-on{grid-template-columns:440px minmax(0,1fr);}
-  #sc-pos.split-on .sq-grid{grid-template-columns:repeat(4,1fr);gap:10px;grid-auto-rows:88px;}
+  #sc-pos.split-on .sq-grid{grid-template-columns:repeat(4,1fr);gap:10px;grid-auto-rows:min-content;}
 }
 
 /* ── HAMBURGER MENU (iPad ≥768px) ── */
@@ -432,13 +434,14 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   /* hamburger button top-left */
   #ham-btn{
     display:flex;flex-direction:column;justify-content:center;gap:4px;
-    position:fixed;top:calc(10px + var(--st,0px));left:12px;z-index:200;
-    width:46px;height:46px;border-radius:12px;border:1px solid var(--bdr);
-    background:var(--sur);cursor:pointer;padding:0 12px;box-shadow:0 2px 8px rgba(0,0,0,.08);
+    position:fixed;top:calc(8px + var(--st,0px));left:12px;z-index:300;
+    width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.12);cursor:pointer;padding:0 9px;
   }
-  #ham-btn span{display:block;height:2.5px;background:var(--tx1);border-radius:2px;transition:.2s;}
-  /* push page content down so hamburger doesn't overlap */
-  #app{padding-top:52px;}
+  #ham-btn span{display:block;height:2.5px;background:var(--gold);border-radius:2px;transition:.2s;}
+  /* make room in the top bar for the hamburger */
+  .topbar{padding-left:64px;}
+  #app{padding-top:0;}
   /* slide-up menu */
   #ham-menu{
     display:block;position:fixed;left:50%;transform:translateX(-50%) translateY(120%);
@@ -539,7 +542,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v17</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v21</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1607,8 +1610,8 @@ function rSvcs(){
   const favItems=filtered.filter(s=>FAVS.includes(s.code||s._id||s.name));
   const nonFav=filtered.filter(s=>!FAVS.includes(s.code||s._id||s.name));
 
-  const favDivider=`<div style="grid-column:1/-1;margin:0 0 2px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:#fff3cd;color:#856404;">⭐ รายการโปรด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
-  const allDivider=`<div style="grid-column:1/-1;margin:6px 0 2px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:var(--bg);color:var(--tx2);">ทั้งหมด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
+  const favDivider=`<div style="grid-column:1/-1;margin:0 0 6px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:#fff3cd;color:#856404;">⭐ รายการโปรด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
+  const allDivider=`<div style="grid-column:1/-1;margin:14px 0 6px;display:flex;align-items:center;gap:8px;"><span class="badge" style="font-size:11px;padding:3px 10px;flex-shrink:0;background:var(--bg);color:var(--tx2);">ทั้งหมด</span><div style="flex:1;height:0.5px;background:var(--bdr);"></div></div>`;
 
   let html='';
   if(favItems.length){
