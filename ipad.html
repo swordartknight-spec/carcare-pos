@@ -412,6 +412,22 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   #sc-pos.split-on .sq-grid{grid-template-columns:repeat(3,1fr);gap:8px;grid-auto-rows:min-content;align-content:start;}
   #sc-pos.split-on .sq-grid > div[style*="grid-column:1/-1"]{height:auto!important;min-height:0;align-self:center;}
   #sc-pos.split-on .sq-card{height:100px;min-height:0;padding:9px 12px;overflow:hidden;justify-content:flex-start;gap:3px;}
+  /* faded icon watermark + category tint for quick visual scanning */
+  #sc-pos.split-on .sq-card{isolation:isolate;}
+  #sc-pos.split-on .sq-bg{
+    position:absolute;right:-6px;bottom:-12px;font-size:56px;line-height:1;
+    opacity:.13;pointer-events:none;z-index:0;filter:grayscale(.15);
+  }
+  #sc-pos.split-on .sq-name,
+  #sc-pos.split-on .sq-code,
+  #sc-pos.split-on .sq-price,
+  #sc-pos.split-on .sq-cpn{position:relative;z-index:1;}
+  #sc-pos.split-on .sq-card.cat-W{background:linear-gradient(135deg,#f2f8fd 0%,var(--sur) 62%);border-color:#dbe9f5;}
+  #sc-pos.split-on .sq-card.cat-P{background:linear-gradient(135deg,#fdf7ee 0%,var(--sur) 62%);border-color:#f0e2cc;}
+  #sc-pos.split-on .sq-card.cat-I{background:linear-gradient(135deg,#f4f9f3 0%,var(--sur) 62%);border-color:#dcecd9;}
+  #sc-pos.split-on .sq-card.cat-S,
+  #sc-pos.split-on .sq-card.cat-L{background:linear-gradient(135deg,#faf5fb 0%,var(--sur) 62%);border-color:#e9dcee;}
+  #sc-pos.split-on .sq-card.cat-O{background:linear-gradient(135deg,#f5f6f8 0%,var(--sur) 62%);border-color:#e0e3e8;}
   #sc-pos.split-on .sq-name{font-size:13px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:32px;}
   #sc-pos.split-on .sq-code{font-size:10px;}
   #sc-pos.split-on .sq-price{font-size:15px;margin-top:auto;}
@@ -542,7 +558,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v21</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v22</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1578,6 +1594,26 @@ window.toggleFav=function(key){
   rSvcs();
 };
 
+// Icon per service (used as faded card background for quick visual scanning)
+function svcIcon(s){
+  const code=(s.code||'').toUpperCase();
+  const n=(s.name||'');
+  if(/คูปอง|Pass|แพ็คเกจ/i.test(n))return '\uD83C\uDFAB';
+  if(/มอเตอร์ไซค์/.test(n))return '\uD83C\uDFCD\uFE0F';
+  if(/สติกเกอร์/.test(n))return '\uD83C\uDFF7\uFE0F';
+  if(/ซักพรม|พรม/.test(n))return '\uD83E\uDDF9';
+  if(/เบาะ/.test(n))return '\uD83D\uDCBA';
+  if(/เซรามิก|เคลือบแก้ว/.test(n))return '\uD83D\uDC8E';
+  if(/ขัด/.test(n))return '\u2728';
+  const c0=code[0];
+  if(c0==='W')return '\uD83D\uDCA6';
+  if(c0==='P')return '\u2728';
+  if(c0==='I')return '\uD83D\uDE97';
+  if(c0==='O')return '\uD83C\uDF27\uFE0F';
+  if(c0==='S'||c0==='L')return '\uD83D\uDD27';
+  return '\uD83E\uDDFD';
+}
+
 function rSvcs(){
   let list=svcs.filter(s=>!s.hidden);if(CC!=='all')list=list.filter(s=>s.cat===CC);
   list=list.slice().sort((a,b)=>{
@@ -1597,8 +1633,10 @@ function rSvcs(){
     const svcKey=s.code||s._id||s.name;
     const isFav=FAVS.includes(svcKey);
     const d=JSON.stringify({id:(s._id||s.code)+'_'+CZ,name:s.name,cat:s.cat,price:p,size:CZ,code:s.code,SC:s.SC||0,SCo:s.SCo||0,CS_S:s.CS_S||0,CS_M:s.CS_M||0,CS_L:s.CS_L||0,CS_XL:s.CS_XL||0,CS_XXL:s.CS_XXL||0,CO_S:s.CO_S||0,CO_M:s.CO_M||0,CO_L:s.CO_L||0,CO_XL:s.CO_XL||0,CO_XXL:s.CO_XXL||0,cpnWash:s.cpnWash||0,cpnMonth:s.cpnMonth||0,svcRef:s._id||s.code});
-    return`<div class="sq-card" onclick='addCart(${d.replace(/'/g,"&apos;")})'>
-      <div class="sq-fav" onclick='event.stopPropagation();toggleFav("${svcKey.replace(/"/g,"&quot;")}")' style="position:absolute;top:4px;right:6px;font-size:16px;cursor:pointer;z-index:2;line-height:1;">${isFav?'⭐':'☆'}</div>
+    const ico=svcIcon(s);
+    return`<div class="sq-card cat-${(s.code||'X')[0]}" onclick='addCart(${d.replace(/'/g,"&apos;")})'>
+      <div class="sq-bg">${ico}</div>
+      <div class="sq-fav" onclick='event.stopPropagation();toggleFav("${svcKey.replace(/"/g,"&quot;")}")' style="position:absolute;top:4px;right:6px;font-size:16px;cursor:pointer;z-index:3;line-height:1;">${isFav?'⭐':'☆'}</div>
       ${hasCpn?'<div class="sq-cpn-tag">🎫</div>':''}
       <div class="sq-name">${s.name}</div>
       <div class="sq-code">${s.code}·${CZ}</div>
