@@ -558,7 +558,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v22</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v23</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1439,6 +1439,10 @@ function startApp(){
   // Auto-set Vercel URL if not already set
   if(!localStorage.getItem('line_server_url')){
     localStorage.setItem('line_server_url','https://carcare-pos.vercel.app');
+  }
+  // Print server (ใบสั่งงาน) — เครื่อง Windows ที่ต่อ Epson L3150
+  if(!localStorage.getItem('print_server_url')){
+    localStorage.setItem('print_server_url','http://192.168.1.105:3333');
   }
   // PIN login — wait for staff list to load from Firebase first
   setTimeout(()=>{
@@ -3844,7 +3848,7 @@ window.closePrintAsk=function(idx){
 };
 
 // ── Print job ticket (for opened bill / ติดรถ) ──
-window.printJobTicket=function(idx){
+window.printJobTicket=async function(idx){
   const s=slots[idx];if(!s)return;
   const now=new Date();
   const items=s.cartSnap||[];
@@ -3997,24 +4001,56 @@ window.printJobTicket=function(idx){
   +'<div class="foot">เหนือเมฆ Car Care · พิมพ์เมื่อ '+dateStr+' '+timeStr+'</div>'
   +'</div></body></html>';
 
-  // Open in a new tab — iOS Safari handles this far better than print-CSS hiding.
-  const w=window.open('','_blank');
-  if(w&&w.document){
-    w.document.open();w.document.write(doc);w.document.close();
-    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||
-      (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-    if(!isIOS){w.focus();setTimeout(()=>{try{w.print();}catch(e){}},400);}
+  // ── ยิงไปพิมพ์ผ่าน Print Server (คอม Windows + Epson L3150) ──
+  // ตัดปัญหา AirPrint/mDNS บน iPad ไปเลย — server สั่งพิมพ์ตรงผ่าน Windows driver
+  const printServerUrl=(localStorage.getItem('print_server_url')||'').replace(/^["']+|["']+$/g,'').trim();
+
+  function openPreviewTab(){
+    // fallback เดิม: เปิดแท็บให้ดู/พิมพ์เองผ่าน AirPrint ถ้ายิง server ไม่ได้
+    const w=window.open('','_blank');
+    if(w&&w.document){
+      w.document.open();w.document.write(doc);w.document.close();
+      const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||
+        (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+      if(!isIOS){w.focus();setTimeout(()=>{try{w.print();}catch(e){}},400);}
+      return;
+    }
+    const old=document.getElementById('jt-frame');if(old)old.remove();
+    const f=document.createElement('iframe');
+    f.id='jt-frame';
+    f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+    document.body.appendChild(f);
+    const fd=f.contentWindow.document;
+    fd.open();fd.write(doc);fd.close();
+    setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print();}catch(e){alert('พิมพ์ไม่สำเร็จ — กรุณาอนุญาต popup สำหรับเว็บนี้');}},500);
+  }
+
+  if(!printServerUrl){
+    // ยังไม่ได้ตั้งค่า print server → ใช้วิธีเดิม
+    openPreviewTab();
     return;
   }
-  // Popup blocked → hidden iframe fallback
-  const old=document.getElementById('jt-frame');if(old)old.remove();
-  const f=document.createElement('iframe');
-  f.id='jt-frame';
-  f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
-  document.body.appendChild(f);
-  const fd=f.contentWindow.document;
-  fd.open();fd.write(doc);fd.close();
-  setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print();}catch(e){alert('พิมพ์ไม่สำเร็จ — กรุณาอนุญาต popup สำหรับเว็บนี้');}},500);
+
+  try{
+    const ctl=new AbortController();
+    const to=setTimeout(()=>ctl.abort(),6000);
+    const res=await fetch(printServerUrl+'/print',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({html:doc,copies:1}),
+      signal:ctl.signal
+    });
+    clearTimeout(to);
+    const result=await res.json().catch(()=>({}));
+    if(res.ok&&result.success){
+      if(typeof showToast==='function')showToast('🖨️ ส่งพิมพ์ใบสั่งงานแล้ว');
+    }else{
+      throw new Error(result.error||'พิมพ์ไม่สำเร็จ');
+    }
+  }catch(e){
+    alert('เชื่อมต่อเครื่องพิมพ์ไม่ได้ (ตรวจว่าคอมที่ร้านเปิด print server อยู่หรือไม่)\n\nจะเปิดหน้าตัวอย่างให้พิมพ์เองแทน');
+    openPreviewTab();
+  }
 };
 window.setAutoPrint=function(mode){
   localStorage.setItem('auto_print_ticket',mode);
