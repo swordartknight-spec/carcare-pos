@@ -558,7 +558,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v23</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v24</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1442,7 +1442,10 @@ function startApp(){
   }
   // Print server (ใบสั่งงาน) — เครื่อง Windows ที่ต่อ Epson L3150
   if(!localStorage.getItem('print_server_url')){
-    localStorage.setItem('print_server_url','http://192.168.1.105:3333');
+    localStorage.setItem('print_server_url','https://192.168.1.105:3333');
+  }else if(localStorage.getItem('print_server_url').startsWith('http://')){
+    // migrate ค่าเก่าที่เคยตั้งเป็น http ให้เป็น https (GitHub Pages เป็น HTTPS ยิงหา http ไม่ได้)
+    localStorage.setItem('print_server_url',localStorage.getItem('print_server_url').replace('http://','https://'));
   }
   // PIN login — wait for staff list to load from Firebase first
   setTimeout(()=>{
