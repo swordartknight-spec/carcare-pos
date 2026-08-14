@@ -558,7 +558,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v39</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v41</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -4058,11 +4058,14 @@ window.printJobTicket=async function(idx){
      แต่หมุนเนื้อหาด้านในไว้ 90 องศาผ่าน CSS transform แทน — ไดรเวอร์เห็นเป็น portrait
      ปกติ พิมพ์ตามที่มันอยากทำอยู่แล้ว แต่เนื้อหาที่ออกมาถูกต้องเพราะหมุนมาให้แล้ว
      ในตัวไฟล์ PDF เอง เวลาถือกระดาษต้องหมุนเป็นแนวนอน (วางขวาง) ถึงจะเห็น 2 ใบตั้งตรง */
-  +'html,body{height:100%;}'
+  +'html,body{height:100%;margin:0;}'
   +'body{position:relative;overflow:hidden;}'
-  +'.rotate-wrap{position:absolute;top:50%;left:50%;width:281mm;height:194mm;'
-  +'transform-origin:center center;transform:translate(-50%,-50%) rotate(90deg);}'
-  +'@page{size:A4 portrait;margin:8mm;}'
+  /* ใช้ top:0;left:0 + translateY(-100%) แทนการ centering ด้วย % — ไม่พึ่งขนาด
+     containing block เลย คำนวณจากขนาดตัวเองล้วนๆ (291mm×204mm) แม่นยำกว่าและ
+     ไม่ขึ้นกับว่า Puppeteer/Chromium จะคำนวณขนาด body % ถูกหรือผิดตอนแปลงเป็น PDF */
+  +'.rotate-wrap{position:absolute;top:0;left:0;width:291mm;height:204mm;'
+  +'transform-origin:top left;transform:rotate(90deg) translateY(-100%);}'
+  +'@page{size:A4 portrait;margin:3mm;}'
   +'@media print{.pbar{display:none!important;} body{padding-top:0;}}'
   +'</style></head><body>'
 
