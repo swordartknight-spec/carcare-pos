@@ -558,7 +558,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v26</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v38</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1440,12 +1440,15 @@ function startApp(){
   if(!localStorage.getItem('line_server_url')){
     localStorage.setItem('line_server_url','https://carcare-pos.vercel.app');
   }
-  // Print server (ใบสั่งงาน) — เครื่อง Windows ที่ต่อ Epson L3150
+  // Print server (ใบสั่งงาน) — เครื่อง Windows ที่ต่อ Epson L805
   if(!localStorage.getItem('print_server_url')){
-    localStorage.setItem('print_server_url','https://192.168.1.105:3333');
+    localStorage.setItem('print_server_url','https://192.168.1.103:3333');
   }else if(localStorage.getItem('print_server_url').startsWith('http://')){
     // migrate ค่าเก่าที่เคยตั้งเป็น http ให้เป็น https (GitHub Pages เป็น HTTPS ยิงหา http ไม่ได้)
     localStorage.setItem('print_server_url',localStorage.getItem('print_server_url').replace('http://','https://'));
+  }else if(localStorage.getItem('print_server_url').includes('192.168.1.105')){
+    // ย้ายเครื่อง print server ใหม่ — อัปเดต IP เครื่องเก่าที่ iPad เคยจำไว้ให้อัตโนมัติ
+    localStorage.setItem('print_server_url','https://192.168.1.103:3333');
   }
   // PIN login — wait for staff list to load from Firebase first
   setTimeout(()=>{
@@ -3787,6 +3790,13 @@ window.openBill=async function(){
   }
   const{tot}=uTot();
   const plate=selC?.plate||'';
+  // เก็บสแนปช็อตคูปองที่ใช้ (ถ้ามี) ไว้แสดงในใบสั่งงาน
+  let couponSnap=null;
+  if(usedCoupon){
+    couponSnap={name:usedCoupon.desc||usedCoupon.name||'คูปอง',kind:'loyalty'};
+  }else if(appliedPaperCpn&&appliedPaperCpn.cpn){
+    couponSnap={name:appliedPaperCpn.cpn.desc||appliedPaperCpn.cpn.name||'คูปองกระดาษ',kind:'paper'};
+  }
   slots[idx]={
     status:'open',
     custName:selC?selC.name:'Walk-in',
@@ -3798,7 +3808,8 @@ window.openBill=async function(){
     staff:loggedInStaff||G('staff-sel')?.value||'',
     openedAt:new Date().toISOString(),
     cartSnap:cart.map(c=>({...c})),
-    custSnap:selC?JSON.parse(JSON.stringify(selC)):null
+    custSnap:selC?JSON.parse(JSON.stringify(selC)):null,
+    couponSnap
   };
   activeSlotIdx=idx;
   saveSlots();
@@ -3851,6 +3862,7 @@ window.closePrintAsk=function(idx){
 };
 
 // ── Print job ticket (for opened bill / ติดรถ) ──
+// โลโก้ + QR code LINE — เก็บเป็น base64 ฝังในไฟล์ ไม่ต้องพึ่งเน็ตตอนพิมพ์
 window.printJobTicket=async function(idx){
   const s=slots[idx];if(!s)return;
   const now=new Date();
@@ -3868,42 +3880,76 @@ window.printJobTicket=async function(idx){
   // สร้างแถวตาราง (ใช้ร่วมกันทั้ง 2 สำเนา) — คอลัมน์แคบ: #, รายการ (+ราคา×จำนวนเป็น subtext), รวม
   function buildRows(){
     let r='';
-    items.forEach((it,i)=>{
+    let n=0;
+    items.forEach((it)=>{
+      n++;
       const qty=it.qty||1;const unit=it.price||0;
-      r+='<tr><td class="sn">'+(i+1)+'</td>'
+      r+='<tr><td class="sn">'+n+'</td>'
         +'<td class="pt">'+(it.code?'<i class="cd">'+esc(it.code)+'</i>':'')+esc(it.name)
           +(it.size?' <em>('+esc(it.size)+')</em>':'')
           +'<div class="sub">'+B+unit.toLocaleString()+' × '+qty+'</div></td>'
         +'<td class="am">'+(unit*qty).toLocaleString()+'</td></tr>';
     });
-    for(let i=items.length;i<5;i++){
+    // ถ้ามีการใช้คูปอง แสดงชื่อคูปองเป็นอีกแถวหนึ่งในตารางรายการ พร้อมมูลค่าส่วนลดในช่องราคา
+    if(s.couponSnap&&s.couponSnap.name){
+      n++;
+      r+='<tr><td class="sn">'+n+'</td>'
+        +'<td class="pt"><i class="cd">CPN</i>'+esc(s.couponSnap.name)
+          +'<div class="sub">ใช้สิทธิ์คูปอง'+(s.couponSnap.kind==='paper'?' (คูปองกระดาษ)':'')+'</div></td>'
+        +'<td class="am">-'+B+disc.toLocaleString()+'</td></tr>';
+    }
+    for(let i=n;i<5;i++){
       r+='<tr class="bl"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>';
     }
     return r;
   }
   const rowsHtml=buildRows();
 
+  // รายการคูปองคงเหลือของลูกค้าคนนี้ (ถ้ามี) — ไว้แสดงใต้ตาราง
+  function buildCouponList(){
+    const cpns=(s.custSnap&&s.custSnap.coupons)||[];
+    const nowD=new Date();
+    const lines=[];
+    cpns.forEach(c=>{
+      if(c.type==='wash'&&c.remaining>0)lines.push('🎫 ล้างรถฟรี — เหลือ '+c.remaining+' ครั้ง');
+      else if(c.type==='month'&&new Date(c.expires)>nowD)lines.push('🎫 ล้างรถฟรีถึง '+new Date(c.expires).toLocaleDateString('th-TH'));
+      else if((c.source==='paper'||c.type==='template')&&c.remaining>0&&(!c.expires||new Date(c.expires)>nowD))
+        lines.push('🎟 '+(c.desc||c.name||'คูปอง')+' — เหลือ '+c.remaining+' ครั้ง');
+    });
+    if(!lines.length)return '';
+    return '<div class="cpnlist"><b>คูปองคงเหลือของลูกค้า:</b><br>'+lines.map(esc).join('<br>')+'</div>';
+  }
+  const couponListHtml=buildCouponList();
+
   // สร้าง 1 สำเนา (ใช้ซ้ำ 2 รอบ: ลูกค้า / ร้าน) — คอลัมน์แคบ ทรงสูง (แนวตั้ง)
   function buildCopy(copyLabel,copyClass){
     return '<div class="copy">'
     +'<div class="copytag '+copyClass+'">'+copyLabel+'</div>'
     +'<div class="chd">'
-      +'<div class="gear">⚙</div>'
-      +'<h1>เหนือเมฆ<br>Car Care</h1>'
+      +'<h1>Nuamek Car Care</h1>'
       +'<div class="band">ALL CAR CARE &amp; DETAILING</div>'
       +'<div class="addr">สาขา '+esc(s.branch||'-')+'</div>'
+      +'<div class="contact">เปิด 08:00&ndash;18:00 &middot; โทร 099 047 0424</div>'
+    +'</div>'
+    +'<div class="doctitle">ใบสั่งงาน &middot; JOB ORDER</div>'
+
+
+
+    +'<div class="metabox">'
+      +'<div class="mcol">'
+        +'<div class="mfield"><span>เลขที่</span><b>'+jobNo+'</b></div>'
+        +'<div class="mfield"><span>วันที่</span><b>'+dateStr+'</b></div>'
+        +'<div class="mfield"><span>เวลา</span><b>'+timeStr+'</b></div>'
+        +'<div class="mfield"><span>ช่อง</span><b>'+(idx+1)+'</b></div>'
+      +'</div>'
+      +'<div class="mcol">'
+        +'<div class="mfield"><span>ทะเบียน</span><b>'+esc(s.plate||'—')+'</b></div>'
+        +'<div class="mfield"><span>ยี่ห้อ/รุ่น</span><b>'+esc((s.custSnap&&s.custSnap.car)||'—')+'</b></div>'
+        +'<div class="mfield"><span>เบอร์โทร</span><b>'+esc((s.custSnap&&s.custSnap.phone)||'—')+'</b></div>'
+        +'<div class="mfield"><span>พนักงานรับรถ</span><b>'+esc(s.staff||'—')+'</b></div>'
+      +'</div>'
     +'</div>'
 
-    +'<div class="mrow"><span>เลขที่</span><b>'+jobNo+'</b></div>'
-    +'<div class="mrow"><span>วันที่</span><b>'+dateStr+'</b></div>'
-    +'<div class="mrow"><span>เวลา</span><b>'+timeStr+'</b></div>'
-    +'<div class="mrow2"><span>ลูกค้า</span><b class="fill">'+esc(s.custName||'Walk-in')+'</b></div>'
-    +'<div class="mlist">'
-      +'<div class="mrow"><span>ทะเบียน</span><b class="fill">'+esc(s.plate||'—')+'</b></div>'
-      +'<div class="mrow"><span>ขนาดรถ</span><b class="fill">'+esc(s.size||'-')+'</b></div>'
-      +'<div class="mrow"><span>ช่อง</span><b class="fill">'+(idx+1)+'</b></div>'
-      +'<div class="mrow"><span>พนักงาน</span><b class="fill">'+esc(s.staff||'—')+'</b></div>'
-    +'</div>'
 
     +'<table class="tb"><thead><tr>'
     +'<th class="sn">#</th><th class="pt">รายการบริการ</th>'
@@ -3911,12 +3957,16 @@ window.printJobTicket=async function(idx){
     +'</tr></thead><tbody>'+rowsHtml+'</tbody>'
     +'<tfoot><tr class="tot"><td colspan="2">รวมทั้งสิ้น</td><td class="am">'+B+total.toLocaleString()+'</td></tr></tfoot>'
     +'</table>'
-    +(disc>0?'<div class="discline">ส่วนลด '+B+disc.toLocaleString()+'<br>(เต็ม '+B+sub.toLocaleString()+')</div>':'')
+    +(disc>0?'<div class="discline">ส่วนลด '+B+disc.toLocaleString()+' (เต็ม '+B+sub.toLocaleString()+')</div>':'')
+    +couponListHtml
 
     +'<div class="ftr">'
     +'<div class="note1">** ใบสั่งงาน ยังไม่ใช่ใบเสร็จ **<br>ชำระเงินที่เคาน์เตอร์</div>'
-    +'<div class="terms">E.&amp;O.E. รถที่จอดในร้าน ลูกค้าดูแลความเสี่ยงเอง กรุณาตรวจสอบทรัพย์สินก่อนส่งมอบ</div>'
-    +'<div class="sign"><div class="ln"></div>ลายเซ็นลูกค้า / ผู้รับรถ</div>'
+    +'<div class="frow">'
+      +'<div class="terms">E.&amp;O.E. รถที่จอดในร้าน ลูกค้าดูแลความเสี่ยงเอง กรุณาตรวจสอบทรัพย์สินก่อนส่งมอบ<br>'
+      +'พบปัญหาโทร 096 894 3622</div>'
+      +'<div class="sign"><div class="ln"></div>ลายเซ็นลูกค้า / ผู้รับรถ</div>'
+    +'</div>'
     +'</div>'
     +'</div>';
   }
@@ -3925,13 +3975,15 @@ window.printJobTicket=async function(idx){
   +'<meta name="viewport" content="width=device-width,initial-scale=1">'
   +'<title>ใบสั่งงาน ช่อง '+(idx+1)+' '+esc(s.plate||'')+'</title><style>'
   +'*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
-  +'html,body{margin:0;padding:0;background:#fff;color:#111;height:100%;'
+  +'html,body{margin:0;padding:0;background:#fff;color:#111;'
   +"font-family:'Sarabun','Helvetica Neue',Helvetica,Arial,sans-serif;}"
   +'body{font-size:7.6pt;line-height:1.3;}'
 
-  /* 2 คอลัมน์ ซ้าย-ขวา — แต่ละสำเนาทรงสูง-แคบ (แนวตั้ง) */
-  +'.wrap{display:flex;align-items:stretch;height:277mm;}'
-  +'.copy{flex:1;padding:4mm 4mm;position:relative;overflow:hidden;'
+  /* 2 คอลัมน์ ซ้าย-ขวา — แต่ละสำเนาสัดส่วนตรง A5 แนวตั้ง (148×210mm) พอดี
+     ต้องใช้กระดาษ A4 แนวนอน (297×210mm) ถึงจะแบ่งซ้าย-ขวาได้สัดส่วน A5 จริง
+     (A5 กว้าง 148mm ×2 = 296mm ≈ ความกว้าง A4 แนวนอนพอดี) */
+  +'.wrap{display:flex;align-items:stretch;height:194mm;}'
+  +'.copy{flex:1;padding:3.5mm 4mm;position:relative;overflow:hidden;'
   +'display:flex;flex-direction:column;}'
 
   +'.copytag{align-self:flex-start;font-size:7.5pt;font-weight:800;border:1.2pt solid #111;'
@@ -3939,22 +3991,30 @@ window.printJobTicket=async function(idx){
   +'.copytag.cust{background:#111;color:#fff;}'
   +'.copytag.shop{background:#fff;color:#111;}'
 
-  +'.chd{text-align:center;border-bottom:2pt solid #111;padding-bottom:5pt;margin-bottom:6pt;}'
-  +'.gear{font-size:20pt;line-height:1;}'
-  +'.chd h1{margin:2pt 0 0;font-size:12.5pt;font-weight:800;letter-spacing:.2pt;'
+  +'.chd{text-align:center;border-bottom:2pt solid #111;padding-bottom:5pt;margin-bottom:4pt;}'
+  +'.chd h1{margin:0;font-size:12.5pt;font-weight:800;letter-spacing:.2pt;'
   +'font-style:italic;line-height:1.15;}'
   +'.band{display:inline-block;background:#111;color:#fff;font-size:6.3pt;font-weight:700;'
   +'padding:1pt 5pt;margin-top:3pt;letter-spacing:.2pt;}'
+  +'.doctitle{font-size:9pt;font-weight:800;color:#111;text-align:center;margin-bottom:6pt;}'
   +'.addr{font-size:6.5pt;color:#666;margin-top:2pt;}'
+  +'.contact{font-size:6pt;color:#999;margin-top:1pt;}'
 
-  +'.mrow{display:flex;justify-content:space-between;gap:6pt;font-size:7.6pt;padding:1.5pt 0;}'
-  +'.mrow span{color:#888;flex-shrink:0;}'
-  +'.mrow b{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'
-  +'.mrow2{display:flex;justify-content:space-between;gap:6pt;font-size:7.6pt;padding:3pt 0;'
-  +'margin:3pt 0;border-top:.7pt dotted #bbb;border-bottom:.7pt dotted #bbb;}'
-  +'.mrow2 span{color:#888;}'
-  +'.mlist{margin-bottom:6pt;padding-bottom:4pt;border-bottom:.7pt dotted #bbb;}'
-  +'.fill{color:#111;}'
+  +'.mcust{font-size:7.6pt;padding:3pt 0;border-top:.7pt dotted #bbb;}'
+  +'.mcust span{color:#888;margin-right:5pt;}'
+  +'.mcust b{color:#111;font-weight:700;}'
+
+  +'.metabox{display:flex;justify-content:space-between;gap:8pt;'
+  +'padding:4pt 0;border-top:.7pt dotted #bbb;border-bottom:.7pt dotted #bbb;margin-bottom:6pt;}'
+  +'.mcol{flex:1;min-width:0;}'
+  +'.mfield{font-size:7.2pt;padding:2pt 0;}'
+  +'.mfield span{color:#888;display:block;font-size:6.3pt;}'
+  +'.mfield b{display:block;color:#111;font-weight:700;margin-top:.5pt;'
+  +'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'
+
+  +'.cpnlist{font-size:6.3pt;color:#555;line-height:1.7;padding:4pt 0;'
+  +'border-top:.7pt dotted #ddd;margin-top:2pt;}'
+  +'.cpnlist b{display:block;color:#111;font-size:6.6pt;margin-bottom:2pt;}'
 
   +'table.tb{width:100%;border-collapse:collapse;border:1.1pt solid #111;table-layout:fixed;}'
   +'table.tb th{border:.7pt solid #333;background:#f2f2f2;font-size:6.6pt;font-weight:800;'
@@ -3975,14 +4035,15 @@ window.printJobTicket=async function(idx){
   +'.ftr{margin-top:auto;padding-top:6pt;}'
   +'.note1{text-align:center;font-size:6.6pt;font-weight:700;border:1pt dashed #666;'
   +'border-radius:3pt;padding:3pt;margin-bottom:5pt;line-height:1.4;}'
-  +'.terms{font-size:5.8pt;color:#999;line-height:1.5;margin-bottom:6pt;}'
+  +'.frow{display:flex;justify-content:space-between;align-items:flex-end;gap:8pt;margin-bottom:6pt;}'
+  +'.terms{font-size:5.7pt;color:#999;line-height:1.5;flex:1;}'
   +'.sign{font-size:6.6pt;color:#666;text-align:center;}'
   +'.sign .ln{border-bottom:.8pt solid #333;height:20pt;margin-bottom:3pt;}'
 
   /* เส้นตัดคั่นกลาง — แนวตั้ง */
-  +'.cutline{width:0;border-left:1.3pt dashed #999;position:relative;flex-shrink:0;}'
+  +'.cutline{width:0;border-left:1pt dashed #ddd;position:relative;flex-shrink:0;}'
   +'.cutline span{position:absolute;top:50%;left:50%;white-space:nowrap;background:#fff;'
-  +'padding:6pt 0;font-size:6.5pt;color:#999;'
+  +'padding:6pt 0;font-size:6pt;color:#bbb;'
   +'transform:translate(-50%,-50%) rotate(90deg);}'
 
   /* screen-only toolbar */
@@ -3993,14 +4054,15 @@ window.printJobTicket=async function(idx){
   +'.pbar button.sec{background:#fff;color:#1a1a1a;}'
   +'.pbar .tip{align-self:center;font-size:11px;color:#4a3800;font-weight:700;}'
   +'body{padding-top:64px;}'
-  /* A4 แนวตั้ง — 2 สำเนา (ลูกค้า+ร้าน) วางซ้าย-ขวา แต่ละสำเนาทรงตั้ง */
-  +'@page{size:A4 portrait;margin:8mm;}'
+  /* A4 แนวนอน — 2 สำเนา (ลูกค้า+ร้าน) วางซ้าย-ขวา แต่ละสำเนาสัดส่วนตรง A5 แนวตั้ง
+     เวลาถือกระดาษที่พิมพ์ออกมา ต้องหมุนเป็นแนวนอน (วางขวาง) ถึงจะเห็น 2 ใบตั้งตรงข้างกัน */
+  +'@page{size:A4 landscape;margin:8mm;}'
   +'@media print{.pbar{display:none!important;} body{padding-top:0;}}'
   +'</style></head><body>'
 
   +'<div class="pbar"><button onclick="window.print()">🖨️ พิมพ์</button>'
   +'<button class="sec" onclick="window.close()">ปิด</button>'
-  +'<span class="tip">ตั้งกระดาษ A4 · แนวตั้ง · 2 สำเนาซ้าย-ขวา</span></div>'
+  +'<span class="tip">ตั้งกระดาษ A4 · แนวนอน · 2 สำเนา A5 ซ้าย-ขวา</span></div>'
 
   +'<div class="wrap">'
   +buildCopy('ต้นฉบับ — ลูกค้า','cust')
@@ -4009,7 +4071,6 @@ window.printJobTicket=async function(idx){
   +'</div>'
 
   +'</body></html>';
-
 
   // ── ยิงไปพิมพ์ผ่าน Print Server (คอม Windows + Epson L3150) ──
   // ตัดปัญหา AirPrint/mDNS บน iPad ไปเลย — server สั่งพิมพ์ตรงผ่าน Windows driver
