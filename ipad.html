@@ -558,7 +558,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v44</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v45</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1916,7 +1916,7 @@ window.selCust=function(id){
     if(G('wash-dots'))G('wash-dots').innerHTML=dotsHtml;
     if(G('wash-next-txt'))G('wash-next-txt').textContent=posInCycle===0?'เริ่มรอบใหม่! ล้างอีก 5 ครั้ง = ฟรี 1 ครั้ง':'อีก '+nextFree+' ครั้ง = ล้างฟรี 1 ครั้ง 🎁';
   }
-  G('plate').value=selC.plate||'';
+  {const plateEl=G('plate');if(plateEl)plateEl.value=selC.plate||'';}
   // Show coupons in chip
   const now=new Date();
   const active=(selC.coupons||[]).filter(c=>(c.type==='wash'&&c.remaining>0)||(c.type==='month'&&new Date(c.expires)>now));
@@ -2061,7 +2061,7 @@ window.previewInvoice=function(){
   G('inv-content').innerHTML=`<div class="inv-box">
     <div class="inv-logo">⚙ CarCare POS</div>
     <div style="font-size:11px;color:var(--tx2);margin-bottom:12px;">${now.toLocaleDateString('th-TH')} ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</div>
-    ${selC?`<div style="font-size:12px;margin-bottom:8px;">ลูกค้า: <b>${selC.name}</b> · ทะเบียน: ${G('plate').value||selC.plate||'—'}</div>`:''}
+    ${selC?`<div style="font-size:12px;margin-bottom:8px;">ลูกค้า: <b>${selC.name}</b> · ทะเบียน: ${G('plate')?.value||selC.plate||'—'}</div>`:''}
     ${cart.map(c=>`<div class="inv-line"><span>${c.name} (${c.size})×${c.qty}</span><span>฿${(c.price*c.qty).toLocaleString()}</span></div>`).join('')}
     ${disc>0?`<div class="inv-line" style="color:var(--ok)"><span>ส่วนลด Loyalty</span><span>-฿${disc.toLocaleString()}</span></div>`:''}
     ${cpnDisc>0?`<div class="inv-line" style="color:var(--pur)"><span>🎫 คูปอง</span><span>-฿${cpnDisc.toLocaleString()}</span></div>`:''}
@@ -3001,7 +3001,7 @@ window.usePaperCpn=async function(idx){
 const _origSelCust=window.selCust;
 window.selCust=function(id){
   _origSelCust(id);
-  setTimeout(()=>{rPaperCpnAlert();rPromoBanner();},100);
+  setTimeout(()=>{rPaperCpnAlert();rPromoBanner();rCouponSection();},100);
 };
 
 // Init
