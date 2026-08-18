@@ -558,7 +558,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v43</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v44</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1382,6 +1382,7 @@ let db=null,LM=false;
 let currentBranch=localStorage.getItem('branch')||'';
 let custs=[],stock=[],txns=[],svcs=[],expenses=[],staffList=[];
 let cart=[],selC=null,rsId=null,txnN=1000;
+let loggedInStaff=null; // ต้องประกาศก่อน startApp() ถูกเรียก เพราะ initStaffDropdown() อ้างอิงตัวแปรนี้ตั้งแต่ตอนโหลดแอป
 let FAVS=JSON.parse(localStorage.getItem('svc_favs')||'[]');
 let CZ='S',CC='ล้างรถ',PLCat='all';
 let selPayMethod='เงินสด',usedCoupon=null,appliedPaperCpn=null;
@@ -3546,7 +3547,7 @@ setTimeout(function(){
 
 
 // ══ PIN LOGIN SYSTEM ══
-let loggedInStaff = null;
+// (moved loggedInStaff declaration earlier — see near top of script, before startApp/initStaffDropdown run)
 let loginPinBuffer = '';
 
 function showPinLogin(){
