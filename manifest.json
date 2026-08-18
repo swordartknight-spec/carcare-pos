@@ -2,7 +2,7 @@
   "name": "CarCare POS",
   "short_name": "CarCare",
   "description": "Car Care Point of Sale with Loyalty & Stock",
-  "start_url": "./index.html",
+  "start_url": "./ipad.html",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#C9A84C",
