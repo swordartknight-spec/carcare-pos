@@ -558,7 +558,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v45</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v46</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -633,9 +633,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     <div class="card" id="pos-staff-card" style="padding:10px 12px;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
         <div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;white-space:nowrap;width:56px;">คนขาย:</div>
-        <select id="seller-sel" style="flex:1;padding:6px 10px;font-size:13px;">
-          <option value="">-- เลือกคนขาย --</option>
-        </select>
+        <div id="seller-display" style="flex:1;padding:6px 10px;font-size:13px;color:var(--tx2);background:var(--bg);border-radius:6px;">-- ยังไม่ได้ล็อกอิน --</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;white-space:nowrap;width:56px;">คนทำ:</div>
@@ -1517,13 +1515,12 @@ function initStaffDropdown(){
   const sel=G('staff-sel');const val=sel.value;
   sel.innerHTML='<option value="">-- เลือกคนทำ --</option>'+staffList.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
   if(val)sel.value=val;
-  const sellerSel=G('seller-sel');
-  if(sellerSel){
-    const sellerVal=sellerSel.value;
-    sellerSel.innerHTML='<option value="">-- เลือกคนขาย --</option>'+staffList.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
-    if(sellerVal)sellerSel.value=sellerVal;
-    else if(loggedInStaff)sellerSel.value=loggedInStaff;
-  }
+  updateSellerDisplay();
+}
+
+function updateSellerDisplay(){
+  const el=G('seller-display');if(!el)return;
+  el.textContent=loggedInStaff?('👤 '+loggedInStaff):'-- ยังไม่ได้ล็อกอิน --';
 }
 
 window.updateStaffDisplay=function(){
@@ -1934,7 +1931,7 @@ window.checkout=async function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
   const plate=(()=>{try{const el=G('plate');return el?el.value:'';}catch{return '';}})()||(selC?selC.plate:'');
   const staffName=loggedInStaff||G('staff-sel').value||'ไม่ระบุ';
-  const sellerName=G('seller-sel')?.value||loggedInStaff||'ไม่ระบุ';
+  const sellerName=loggedInStaff||'ไม่ระบุ';
   const{sub,disc,cpnDisc,paperDisc,tot}=uTot();
   const pts=Math.floor(tot/10);
   const now=new Date();
@@ -3623,6 +3620,7 @@ window.loginPinPress=function(k){
       // Auto-set staff selector
       const sel=G('staff-sel');
       if(sel){sel.value=matched.name;updateStaffDisplay();}
+      updateSellerDisplay();
       // Update badge
       const badge=G('logged-staff-badge');
       if(badge){badge.style.display='inline-block';badge.textContent='👤 '+matched.name;}
@@ -3650,6 +3648,7 @@ window.skipPinLogin=function(){
   localStorage.removeItem('loggedStaff');
   const badge=G('logged-staff-badge');
   if(badge){badge.style.display='inline-block';badge.textContent='👤 Guest';}
+  updateSellerDisplay();
   hidePinLogin();
   rToday();rHist();rSt();
 };
