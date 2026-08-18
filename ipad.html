@@ -558,7 +558,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v42</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">p-v43</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -631,8 +631,14 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
     <!-- Staff selector -->
     <div class="card" id="pos-staff-card" style="padding:10px 12px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;white-space:nowrap;width:56px;">คนขาย:</div>
+        <select id="seller-sel" style="flex:1;padding:6px 10px;font-size:13px;">
+          <option value="">-- เลือกคนขาย --</option>
+        </select>
+      </div>
       <div style="display:flex;align-items:center;gap:8px;">
-        <div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;white-space:nowrap;">คนทำ:</div>
+        <div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;white-space:nowrap;width:56px;">คนทำ:</div>
         <select id="staff-sel" style="flex:1;padding:6px 10px;font-size:13px;" onchange="updateStaffDisplay()">
           <option value="">-- เลือกคนทำ --</option>
         </select>
@@ -1286,6 +1292,16 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   </div>
 </div></div>
 
+<!-- Add item to already-open bill (upsell mid-service) -->
+<div id="sh-add-item" class="sbg" style="display:none;" onclick="csbg(event,'sh-add-item')">
+<div class="sht" onclick="event.stopPropagation()">
+  <div class="sh"></div><h3>➕ เพิ่มรายการ</h3>
+  <input id="add-item-search" type="text" placeholder="ค้นหาบริการ..." oninput="filterAddItem(this.value)"
+    style="width:100%;padding:10px 12px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:10px;box-sizing:border-box;"/>
+  <div id="add-item-list" style="max-height:50vh;overflow-y:auto;"></div>
+  <div class="sbt"><button class="btn" style="flex:1;" onclick="hs('sh-add-item')">ปิด</button></div>
+</div></div>
+
 <!-- Success -->
 <div id="sh-ok" class="sbg" style="display:none;">
 <div class="sht" onclick="event.stopPropagation()">
@@ -1500,6 +1516,13 @@ function initStaffDropdown(){
   const sel=G('staff-sel');const val=sel.value;
   sel.innerHTML='<option value="">-- เลือกคนทำ --</option>'+staffList.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
   if(val)sel.value=val;
+  const sellerSel=G('seller-sel');
+  if(sellerSel){
+    const sellerVal=sellerSel.value;
+    sellerSel.innerHTML='<option value="">-- เลือกคนขาย --</option>'+staffList.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+    if(sellerVal)sellerSel.value=sellerVal;
+    else if(loggedInStaff)sellerSel.value=loggedInStaff;
+  }
 }
 
 window.updateStaffDisplay=function(){
@@ -1540,14 +1563,17 @@ function rStaffInc(){
     }catch{return false;}
   });
 
-  // Build per-staff totals
+  // Build per-staff totals — ค่าขาย (csale) นับให้ "คนขาย" (seller), ค่าทำ (cop) นับให้ "คนทำ" (staff) แยกกัน
   const staffTotals={};
   filtered.forEach(t=>{
-    const name=t.staff||'ไม่ระบุ';
-    if(!staffTotals[name])staffTotals[name]={csale:0,cop:0,txns:0};
-    staffTotals[name].csale+=(t.csaleTotal||0);
-    staffTotals[name].cop+=(t.copTotal||0);
-    staffTotals[name].txns++;
+    const sellerName=t.seller||t.staff||'ไม่ระบุ';
+    const workerName=t.staff||'ไม่ระบุ';
+    if(!staffTotals[sellerName])staffTotals[sellerName]={csale:0,cop:0,txns:0};
+    if(!staffTotals[workerName])staffTotals[workerName]={csale:0,cop:0,txns:0};
+    staffTotals[sellerName].csale+=(t.csaleTotal||0);
+    staffTotals[sellerName].txns++;
+    staffTotals[workerName].cop+=(t.copTotal||0);
+    if(workerName!==sellerName)staffTotals[workerName].txns++;
   });
 
   const rows=Object.entries(staffTotals);
@@ -1587,7 +1613,14 @@ window.exportStaffInc=function(month,year){
     try{const p=(t.date||'').split('/');const d=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));return d.getMonth()===month&&d.getFullYear()===year;}catch{return false;}
   });
   const staffTotals={};
-  filtered.forEach(t=>{const n=t.staff||'ไม่ระบุ';if(!staffTotals[n])staffTotals[n]={csale:0,cop:0,txns:0};staffTotals[n].csale+=(t.csaleTotal||0);staffTotals[n].cop+=(t.copTotal||0);staffTotals[n].txns++;});
+  filtered.forEach(t=>{
+    const sellerName=t.seller||t.staff||'ไม่ระบุ';const workerName=t.staff||'ไม่ระบุ';
+    if(!staffTotals[sellerName])staffTotals[sellerName]={csale:0,cop:0,txns:0};
+    if(!staffTotals[workerName])staffTotals[workerName]={csale:0,cop:0,txns:0};
+    staffTotals[sellerName].csale+=(t.csaleTotal||0);staffTotals[sellerName].txns++;
+    staffTotals[workerName].cop+=(t.copTotal||0);
+    if(workerName!==sellerName)staffTotals[workerName].txns++;
+  });
   const MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
   let c='\uFEFF';
   c+=`สรุปค่าสิ่งตอบแทน ${MONTHS[month]} ${year}\r\n\r\n`;
@@ -1730,11 +1763,8 @@ function rCouponSection(){
   if(!active.length){sec.style.display='none';return;}
   sec.style.display='block';
   const hasWash=cart.some(c=>c.cat==='ล้างรถ');
-  if(!hasWash){
-    G('cpn-opts').innerHTML='<div style="font-size:11px;color:var(--amb);padding:6px 0;">⚠️ คูปองใช้ได้กับบริการล้างรถเท่านั้น กรุณาเพิ่มล้างรถก่อน</div>';
-    return;
-  }
-  G('cpn-opts').innerHTML=active.map((c,i)=>{
+  G('cpn-opts').innerHTML=(!hasWash?'<div style="font-size:11px;color:var(--amb);padding:4px 0 8px;">⚠️ คูปองใช้ได้กับบริการล้างรถเท่านั้น — เพิ่มบริการล้างรถก่อนกดใช้</div>':'')
+  +active.map((c,i)=>{
     let label='';
     if(c.type==='wash')label=`🎫 ล้างรถฟรี — เหลือ ${c.remaining} ครั้ง`;
     else if(c.type==='month')label=`🎫 ล้างรถฟรีถึง ${fmtDate(c.expires)}`;
@@ -1745,9 +1775,9 @@ function rCouponSection(){
       else label+=` (ล้างรถฟรี ฿${svcs.find(s=>s.code==='-')?.[CZ]||200})`;
     }
     const isUsed=(usedCoupon&&usedCoupon.idx===i)||(appliedPaperCpn&&appliedPaperCpn.origIdx===i);
-    return`<div class="cpn-opt" style="${isUsed?'background:rgba(59,109,17,.1);border-radius:6px;':''}">
+    return`<div class="cpn-opt" style="${isUsed?'background:rgba(59,109,17,.1);border-radius:6px;':''}${!hasWash?'opacity:.5;':''}">
       <span style="font-size:12px;">${label}</span>
-      <button class="btn btn-s ${isUsed?'btn-ok':'btn-pur'}" onclick="useAnyCoupon(${i})">${isUsed?'✓ ใช้แล้ว':'ใช้'}</button>
+      <button class="btn btn-s ${isUsed?'btn-ok':'btn-pur'}" ${!hasWash?'disabled':''} onclick="useAnyCoupon(${i})">${isUsed?'✓ ใช้แล้ว':'ใช้'}</button>
     </div>`;
   }).join('');
 }
@@ -1903,6 +1933,7 @@ window.checkout=async function(){
   if(!cart.length){alert('กรุณาเพิ่มบริการก่อน');return;}
   const plate=(()=>{try{const el=G('plate');return el?el.value:'';}catch{return '';}})()||(selC?selC.plate:'');
   const staffName=loggedInStaff||G('staff-sel').value||'ไม่ระบุ';
+  const sellerName=G('seller-sel')?.value||loggedInStaff||'ไม่ระบุ';
   const{sub,disc,cpnDisc,paperDisc,tot}=uTot();
   const pts=Math.floor(tot/10);
   const now=new Date();
@@ -1940,7 +1971,7 @@ window.checkout=async function(){
 
   const tdata={
     id:recId,customer:selC?selC.name:'Walk-in',plate,size:CZ,
-    payment:selPayMethod,staff:loggedInStaff||staffName,branch:currentBranch||'',
+    payment:selPayMethod,staff:loggedInStaff||staffName,seller:sellerName,branch:currentBranch||'',
     items:cart.map(c=>c.name).join(', '),
     itemDetails:svcEntries,total:tot,pts:selC?pts:0,
     csaleTotal,copTotal,discount:disc,cpnDiscount:cpnDisc,paperDiscount:paperDisc||0,
@@ -2178,7 +2209,13 @@ function rToday(){
   G('td-card').textContent='฿'+today.filter(t=>t.payment==='บัตร').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
   // Staff incentive today
   const staffTotals={};
-  today.forEach(t=>{const n=t.staff||'ไม่ระบุ';if(!staffTotals[n])staffTotals[n]={csale:0,cop:0};staffTotals[n].csale+=(t.csaleTotal||0);staffTotals[n].cop+=(t.copTotal||0);});
+  today.forEach(t=>{
+    const sellerName=t.seller||t.staff||'ไม่ระบุ';const workerName=t.staff||'ไม่ระบุ';
+    if(!staffTotals[sellerName])staffTotals[sellerName]={csale:0,cop:0};
+    if(!staffTotals[workerName])staffTotals[workerName]={csale:0,cop:0};
+    staffTotals[sellerName].csale+=(t.csaleTotal||0);
+    staffTotals[workerName].cop+=(t.copTotal||0);
+  });
   const rows=Object.entries(staffTotals);
   const totalCS=rows.reduce((a,[,v])=>a+v.csale,0),totalCO=rows.reduce((a,[,v])=>a+v.cop,0);
   G('td-staff-inc').innerHTML=rows.map(([n,v])=>`<tr>
@@ -3375,7 +3412,14 @@ window.showClosingReport=function(){
 
   // Staff breakdown
   const staffMap={};
-  today.forEach(t=>{const n=t.staff||'ไม่ระบุ';if(!staffMap[n])staffMap[n]={csale:0,cop:0,n:0};staffMap[n].csale+=(t.csaleTotal||0);staffMap[n].cop+=(t.copTotal||0);staffMap[n].n++;});
+  today.forEach(t=>{
+    const sellerName=t.seller||t.staff||'ไม่ระบุ';const workerName=t.staff||'ไม่ระบุ';
+    if(!staffMap[sellerName])staffMap[sellerName]={csale:0,cop:0,n:0};
+    if(!staffMap[workerName])staffMap[workerName]={csale:0,cop:0,n:0};
+    staffMap[sellerName].csale+=(t.csaleTotal||0);staffMap[sellerName].n++;
+    staffMap[workerName].cop+=(t.copTotal||0);
+    if(workerName!==sellerName)staffMap[workerName].n++;
+  });
 
   G('closing-content').innerHTML=`
     <div style="background:var(--blk);color:var(--gold);border-radius:var(--r);padding:14px;text-align:center;margin-bottom:12px;">
@@ -4177,6 +4221,7 @@ function showBillDetail(idx){
       </div>
     </div>
     <div class="bd-body">
+      <div style="font-size:13px;font-weight:700;margin-bottom:2px;">👤 ${slot.custName||'Walk-in'}${(slot.custSnap&&slot.custSnap.phone)?' · 📞 '+slot.custSnap.phone:''}</div>
       <div style="font-size:11px;color:var(--tx3);margin-bottom:12px;">ทะเบียน ${slot.plate||'—'} · ขนาด ${slot.size||'M'} · พนักงาน ${slot.staff||'—'}</div>
       ${(slot.cartSnap||[]).map(c=>`
         <div class="bd-item">
@@ -4187,6 +4232,7 @@ function showBillDetail(idx){
         <span>รวม (รวม VAT)</span>
         <span style="color:var(--gold);">฿${(slot.total||0).toLocaleString()}</span>
       </div>
+      ${!isDone?`<button class="btn btn-s" style="width:100%;margin-top:10px;" onclick="openAddItemSheet(${idx})">➕ เพิ่มรายการ</button>`:''}
     </div>
     <div class="bd-footer">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;" id="bd-pay-row">
@@ -4205,6 +4251,51 @@ window.setSlotPay=function(m,el){
   billPayMethod=m;
   document.querySelectorAll('#bd-pay-row .pay-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
+};
+
+// ── เพิ่มรายการระหว่างบิลเปิดอยู่ (upsell ตอนกำลังล้าง) ──
+let addItemTargetIdx=null;
+window.openAddItemSheet=function(idx){
+  addItemTargetIdx=idx;
+  const s=G('add-item-search');if(s)s.value='';
+  renderAddItemList('');
+  sh('sh-add-item');
+};
+function renderAddItemList(q){
+  const slot=slots[addItemTargetIdx];if(!slot)return;
+  const sz=slot.size||'M';
+  const ql=(q||'').toLowerCase().trim();
+  const list=(svcs||[]).filter(s=>(s[sz]||0)>0 &&
+    (!ql || s.name.toLowerCase().includes(ql) || (s.code||'').toLowerCase().includes(ql)));
+  const box=G('add-item-list');if(!box)return;
+  box.innerHTML=list.map(s=>{
+    const p=s[sz]||0;
+    const key=(s._id||s.code||s.name).replace(/'/g,"\\'");
+    return `<div onclick="pickAddItem('${key}')" style="display:flex;justify-content:space-between;align-items:center;
+      padding:12px 10px;border-bottom:1px solid var(--bdr);cursor:pointer;">
+      <span>${s.name}${s.code?' <span style="color:var(--tx3);font-size:11px;">('+s.code+')</span>':''}</span>
+      <span style="font-weight:700;color:var(--gold);">฿${p.toLocaleString()}</span>
+    </div>`;
+  }).join('')||'<div style="padding:20px;text-align:center;color:var(--tx3);">ไม่พบรายการ</div>';
+}
+window.filterAddItem=function(v){renderAddItemList(v);};
+window.pickAddItem=function(key){
+  const idx=addItemTargetIdx;const slot=slots[idx];if(!slot)return;
+  const sz=slot.size||'M';
+  const svc=(svcs||[]).find(s=>(s._id||s.code||s.name)===key);
+  if(!svc)return;
+  const price=svc[sz]||0;
+  slot.cartSnap=slot.cartSnap||[];
+  const ex=slot.cartSnap.find(c=>(c.code||c.name)===(svc.code||svc.name));
+  if(ex)ex.qty=(ex.qty||1)+1;
+  else slot.cartSnap.push({id:(svc._id||svc.code)+'_'+sz,name:svc.name,cat:svc.cat,price,size:sz,code:svc.code,qty:1});
+  slot.items=slot.cartSnap.map(c=>c.name).join(', ');
+  slot.total=(slot.total||0)+price;
+  saveSlots();
+  hs('sh-add-item');
+  showBillDetail(idx);
+  rSlots();
+  if(typeof showToast==='function')showToast('➕ เพิ่ม '+svc.name+' แล้ว');
 };
 
 // ── Close bill detail ──
