@@ -177,7 +177,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
     <!-- TODAY -->
     <div class="screen active" id="sc-today">
-      <div class="stat-grid" style="grid-template-columns:repeat(6,1fr);">
+      <div class="stat-grid" style="grid-template-columns:repeat(5,1fr);">
         <div class="stat-card gold">
           <div class="stat-lbl">ยอดขายวันนี้</div>
           <div class="stat-val" id="t-total">฿0</div>
@@ -202,11 +202,6 @@ input:focus,select:focus{border-color:var(--gold);}
           <div class="stat-lbl">Daily Retention</div>
           <div class="stat-val" id="t-retention-daily" style="font-size:28px;">—%</div>
           <div class="stat-sub" id="t-retention-daily-sub">ลูกค้าเก่าที่มาวันนี้</div>
-        </div>
-        <div class="stat-card green">
-          <div class="stat-lbl">Overall Retention</div>
-          <div class="stat-val" id="t-retention" style="font-size:28px;">—%</div>
-          <div class="stat-sub" id="t-retention-sub">ลูกค้ากลับมาซ้ำ</div>
         </div>
       </div>
 
@@ -233,7 +228,7 @@ input:focus,select:focus{border-color:var(--gold);}
       <div class="table-card">
         <div class="table-head"><span style="font-weight:700;">รายการวันนี้</span><span id="today-count" style="color:var(--tx3);font-size:12px;"></span></div>
         <table>
-          <thead><tr><th>#</th><th>ลูกค้า</th><th>ทะเบียน</th><th>บริการ</th><th>พนักงาน</th><th>ระยะเวลา</th><th>วิธีชำระ</th><th style="text-align:right;">รวม</th></tr></thead>
+          <thead><tr><th>#</th><th>ลูกค้า</th><th>ทะเบียน</th><th>มาแล้ว</th><th>บริการ</th><th>พนักงาน</th><th>ระยะเวลา</th><th>วิธีชำระ</th><th style="text-align:right;">รวม</th></tr></thead>
           <tbody id="today-table"></tbody>
         </table>
       </div>
@@ -670,25 +665,18 @@ function rToday(){
   G('t-cust').textContent=n;
   G('t-avg').textContent='Avg ฿'+(n?Math.round(tot/n):0).toLocaleString()+'/คน';
   G('t-pts').textContent=today.reduce((a,t)=>a+(t.pts||0),0).toLocaleString();
-  // Overall retention rate (all-time)
-  const custVisits={};
-  txns.filter(t=>filterBranch(t)&&t.customer&&t.customer!=='Walk-in'&&t.customer!=='ลูกค้า').forEach(t=>{custVisits[t.customer]=(custVisits[t.customer]||0)+1;});
-  const totalC=Object.keys(custVisits).length;
-  const returnC=Object.values(custVisits).filter(v=>v>1).length;
-  const retRate=totalC>0?Math.round(returnC/totalC*100):0;
-  G('t-retention').textContent=retRate+'%';
-  G('t-retention-sub').textContent=returnC+' จาก '+totalC+' สมาชิก';
-  // Daily retention — of today's named customers, how many visited before today
+  // Daily retention — ตัวเศษ: ลูกค้ามีชื่อที่เคยมาก่อนวันนี้ / ตัวหาร: ลูกค้าทั้งหมดวันนี้ (รวม Walk-in)
   const todayNamed=today.filter(t=>t.customer&&t.customer!=='Walk-in'&&t.customer!=='ลูกค้า');
-  const uniqueTodayCusts=[...new Set(todayNamed.map(t=>t.customer))];
+  const uniqueTodayNamedCusts=[...new Set(todayNamed.map(t=>t.customer))];
+  const uniqueTodayAllCusts=n; // จำนวนรายการทั้งหมดวันนี้ (รวม Walk-in) ใช้เป็นตัวหาร
   let returningToday=0;
-  uniqueTodayCusts.forEach(cust=>{
+  uniqueTodayNamedCusts.forEach(cust=>{
     const hadPriorVisit=txns.some(t=>filterBranch(t)&&t.customer===cust&&!sameDay(t.date,now));
     if(hadPriorVisit)returningToday++;
   });
-  const dailyRet=uniqueTodayCusts.length>0?Math.round(returningToday/uniqueTodayCusts.length*100):0;
+  const dailyRet=uniqueTodayAllCusts>0?Math.round(returningToday/uniqueTodayAllCusts*100):0;
   G('t-retention-daily').textContent=dailyRet+'%';
-  G('t-retention-daily-sub').textContent=returningToday+' จาก '+uniqueTodayCusts.length+' คนวันนี้';
+  G('t-retention-daily-sub').textContent=returningToday+' จาก '+uniqueTodayAllCusts+' คนวันนี้ (รวม Walk-in)';
   G('t-cash').textContent='฿'+today.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
   G('t-qr').textContent='฿'+today.filter(t=>t.payment==='QR').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
   G('t-transfer').textContent='฿'+today.filter(t=>t.payment==='โอน').reduce((a,t)=>a+(t.total||0),0).toLocaleString();
@@ -703,7 +691,13 @@ function rToday(){
   const payData=[today.filter(t=>t.payment==='เงินสด').reduce((a,t)=>a+(t.total||0),0),today.filter(t=>t.payment==='QR').reduce((a,t)=>a+(t.total||0),0),today.filter(t=>t.payment==='โอน').reduce((a,t)=>a+(t.total||0),0),today.filter(t=>t.payment==='บัตร').reduce((a,t)=>a+(t.total||0),0)];
   if(chartPay)chartPay.destroy();
   chartPay=new Chart(G('chart-pay'),{type:'doughnut',data:{labels:['เงินสด','QR','โอน','บัตร'],datasets:[{data:payData,backgroundColor:['#3B6D11','#185FA5','#534AB7','#854F0B'],borderWidth:0}]},options:{plugins:{legend:{position:'bottom'}},responsive:true,cutout:'65%'}});
-  G('today-table').innerHTML=today.map(t=>`<tr><td style="font-weight:700;color:var(--gold);">${t.id||''}</td><td>${t.customer||'Walk-in'}</td><td>${t.plate||'—'}</td><td style="max-width:220px;">${renderItems(t)}</td><td>${t.staff||'—'}</td><td style="color:var(--tx3);font-size:12px;">${t.time||'—'}</td><td style="font-size:12px;">${t.washDuration>0?'<span style="background:var(--inf-bg);color:var(--inf);padding:2px 7px;border-radius:99px;font-weight:700;">'+t.washDuration+' น.</span>':'<span style="color:var(--tx3);">—</span>'}</td><td><span class="badge b-${payClass(t.payment)}">${t.payment||''}</span></td><td style="text-align:right;font-weight:700;">฿${(t.total||0).toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">ยังไม่มีรายการ</td></tr>';
+  const custVisitCounts={};
+  txns.filter(t=>filterBranch(t)&&t.customer&&t.customer!=='Walk-in'&&t.customer!=='ลูกค้า').forEach(t=>{custVisitCounts[t.customer]=(custVisitCounts[t.customer]||0)+1;});
+  G('today-table').innerHTML=today.map(t=>{
+    const isNamed=t.customer&&t.customer!=='Walk-in'&&t.customer!=='ลูกค้า';
+    const visitCount=isNamed?(custVisitCounts[t.customer]||1):null;
+    return `<tr><td style="font-weight:700;color:var(--gold);">${t.id||''}</td><td>${t.customer||'Walk-in'}</td><td>${t.plate||'—'}</td><td style="text-align:center;">${visitCount!=null?'<span style="background:var(--gold-lt);color:var(--gold);padding:2px 8px;border-radius:99px;font-weight:700;font-size:12px;">'+visitCount+' ครั้ง</span>':'<span style="color:var(--tx3);">—</span>'}</td><td style="max-width:220px;">${renderItems(t)}</td><td>${t.staff||'—'}</td><td style="color:var(--tx3);font-size:12px;">${t.time||'—'}</td><td style="font-size:12px;">${t.washDuration>0?'<span style="background:var(--inf-bg);color:var(--inf);padding:2px 7px;border-radius:99px;font-weight:700;">'+t.washDuration+' น.</span>':'<span style="color:var(--tx3);">—</span>'}</td><td><span class="badge b-${payClass(t.payment)}">${t.payment||''}</span></td><td style="text-align:right;font-weight:700;">฿${(t.total||0).toLocaleString()}</td></tr>`;
+  }).join('')||'<tr><td colspan="9" class="empty">ยังไม่มีรายการ</td></tr>';
 }
 
 // ── HISTORY ──
