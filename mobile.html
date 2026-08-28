@@ -558,7 +558,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">m-v2</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">m-v3</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -1487,22 +1487,41 @@ function startApp(){
   const now=new Date();
   G('inc-month').value=now.getMonth();
   G('inc-year').value=now.getFullYear();
+  // โหลดข้อมูลที่เคย cache ไว้จากรอบก่อนมาแสดงทันที (ไม่ต้องรอ Firebase เชื่อมต่อเสร็จ)
+  // แก้ปัญหาเปิดจากไอคอนหน้าจอ iPad แล้วค้างจอเปล่า "Connecting..." นาน เพราะ iOS เคลียร์
+  // แอปออกจากหน่วยความจำบ่อย ทุกครั้งที่เปิดจากไอคอนจึงเหมือนเปิดแอปใหม่ทุกครั้ง
+  try{
+    const cachedCusts=localStorage.getItem('cache_custs');
+    const cachedSvcs=localStorage.getItem('cache_svcs');
+    const cachedStaff=localStorage.getItem('cache_staffList');
+    if(cachedCusts){custs=JSON.parse(cachedCusts);rLoy();}
+    if(cachedSvcs){svcs=JSON.parse(cachedSvcs);rSvcs();}
+    if(cachedStaff){staffList=JSON.parse(cachedStaff);initStaffDropdown();}
+    if(cachedCusts||cachedSvcs||cachedStaff)setDot('sy','Connecting... (ใช้ข้อมูลล่าสุดที่เคยมีไปก่อน)');
+  }catch(e){}
   if(db&&!LM)subscribe();
   else{rSvcs();rLoy();rSt();rHist();rToday();rPL();rStaffInc();}
 }
 
 function subscribe(){
-  onSnapshot(collection(db,'customers'),s=>{custs=s.docs.map(d=>({...d.data(),_id:d.id}));rLoy();setDot('on','Synced ✓');},()=>setDot('off','Offline'));
+  onSnapshot(collection(db,'customers'),s=>{
+    custs=s.docs.map(d=>({...d.data(),_id:d.id}));
+    try{localStorage.setItem('cache_custs',JSON.stringify(custs));}catch(e){}
+    rLoy();setDot('on','Synced ✓');
+  },()=>setDot('off','Offline'));
   onSnapshot(collection(db,'stock'),s=>{stock=s.docs.map(d=>({...d.data(),_id:d.id}));rSt();});
   onSnapshot(query(collection(db,'transactions'),orderBy('createdAt','desc'),limit(300)),s=>{txns=s.docs.map(d=>({...d.data(),_id:d.id}));rHist();rToday();rStaffInc();});
   onSnapshot(collection(db,'services'),s=>{
     // Auto-seed DISABLED — services are managed via reset-services.html / pricing page.
     // (Auto-seeding default services caused duplicates after reset.)
-    svcs=s.docs.map(d=>({...d.data(),_id:d.id}));rSvcs();rPL();
+    svcs=s.docs.map(d=>({...d.data(),_id:d.id}));
+    try{localStorage.setItem('cache_svcs',JSON.stringify(svcs));}catch(e){}
+    rSvcs();rPL();
   });
   onSnapshot(query(collection(db,'expenses'),orderBy('createdAt','desc'),limit(100)),s=>{expenses=s.docs.map(d=>({...d.data(),_id:d.id}));rExpenses();});
   onSnapshot(collection(db,'staff'),s=>{
   staffList=s.docs.map(d=>({...d.data(),_id:d.id}));
+  try{localStorage.setItem('cache_staffList',JSON.stringify(staffList));}catch(e){}
   initStaffDropdown();
   rStaffManage();
   if(!window._pinShown){window._pinShown=true;showPinLogin();}
