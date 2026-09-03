@@ -528,6 +528,17 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
 <div id="pin-login" style="position:fixed;inset:0;background:var(--blk);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
   <div style="font-size:36px;margin-bottom:8px;">⚙</div>
   <div style="font-size:20px;font-weight:700;color:var(--gold);margin-bottom:4px;">CarCare POS</div>
+
+  <!-- Loading state — โชว์ระหว่างรอ sync ข้อมูลพนักงานจาก Firebase -->
+  <div id="pin-loading" style="display:none;flex-direction:column;align-items:center;margin-top:8px;">
+    <div style="width:36px;height:36px;border:3px solid #333;border-top:3px solid var(--gold);border-radius:50%;animation:pinspin 0.8s linear infinite;margin-bottom:16px;"></div>
+    <div style="font-size:13px;color:#aaa;">กำลังซิงค์ข้อมูล...</div>
+    <div id="pin-loading-sub" style="font-size:11px;color:#555;margin-top:4px;"></div>
+  </div>
+  <style>@keyframes pinspin{to{transform:rotate(360deg);}}</style>
+
+  <!-- ตัวจริง: โชว์ต่อเมื่อ sync เสร็จแล้ว (หรือเกิน timeout สำรอง) -->
+  <div id="pin-content" style="display:none;flex-direction:column;align-items:center;">
   <div style="font-size:12px;color:#aaa;margin-bottom:24px;">เลือกสาขา แล้วใส่ PIN</div>
 
   <!-- Branch selector -->
@@ -554,11 +565,12 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
   </div>
   <div id="pin-error" style="color:#f87171;font-size:12px;min-height:20px;margin-bottom:12px;"></div>
   <button onclick="skipPinLogin()" style="background:none;border:none;color:#444;font-size:12px;cursor:pointer;padding:8px;">เข้าแบบ Guest →</button>
+  </div>
 </div>
 
 <div class="app" id="app" style="display:none;">
 <div class="topbar">
-  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">m-v3</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
+  <div class="logo">⚙ CarCare POS <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:4px;">m-v7</span> <span id="branch-badge" onclick="showBranchPicker()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:6px;"></span> <span id="logged-staff-badge" onclick="showPinLogin()" style="display:none;cursor:pointer;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-left:4px;background:#333;color:var(--gold);">👤 Guest</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:99px;padding:4px 10px;">
       <span style="font-size:10px;color:#aaa;">Walk-in</span>
@@ -571,6 +583,7 @@ input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,
     <span class="dot" id="dot"></span>
     <span id="sl">offline</span>
     <span class="badge bg2" style="margin-left:4px;">Open</span>
+    <span id="prn-status" onclick="checkPrinterStatus()" style="margin-left:8px;cursor:pointer;font-size:11px;padding:2px 8px;border-radius:99px;background:#333;color:#888;white-space:nowrap;" title="แตะเพื่อเช็คสถานะเครื่องพิมพ์ใหม่">🖨️ ...</span>
   </div>
 </div>
 
@@ -1394,6 +1407,27 @@ function showToast(msg,duration=2000){
   clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-10px)';},duration);
 }
 function setDot(s,l){G('dot').className='dot '+s;G('sl').textContent=l;}
+
+// ── เช็คสถานะเครื่องพิมพ์ (print server) — แตะที่ป้ายเพื่อเช็คใหม่ทันที หรือเช็คอัตโนมัติทุก 60 วิ ──
+async function checkPrinterStatus(){
+  const el=G('prn-status');if(!el)return;
+  const url=(localStorage.getItem('print_server_url')||'').replace(/^["']+|["']+$/g,'').trim();
+  if(!url){el.textContent='🖨️ ไม่ได้ตั้งค่า';el.style.background='#333';el.style.color='#888';return;}
+  el.textContent='🖨️ กำลังเช็ค...';el.style.background='#333';el.style.color='#888';
+  try{
+    const ctl=new AbortController();
+    const to=setTimeout(()=>ctl.abort(),4000);
+    const res=await fetch(url+'/status',{signal:ctl.signal});
+    clearTimeout(to);
+    if(res.ok){el.textContent='🖨️ พร้อมพิมพ์';el.style.background='rgba(59,109,17,.15)';el.style.color='#3b6d11';}
+    else throw new Error('bad status');
+  }catch(e){
+    el.textContent='🖨️ พิมพ์ไม่ได้';el.style.background='rgba(211,47,47,.12)';el.style.color='#d32f2f';
+  }
+}
+// เช็คตอนเปิดแอป แล้วเช็คซ้ำทุก 60 วินาที
+setTimeout(checkPrinterStatus,1500);
+setInterval(checkPrinterStatus,60000);
 function fmtDate(d){return d?new Date(d).toLocaleDateString('th-TH'):'—';}
 function todayTH(){return new Date().toLocaleDateString('th-TH');}
 function parseThDate(d){if(!d)return null;const p=(''+d).split('/');if(p.length!==3)return null;let y=parseInt(p[2]);if(y>2400)y-=543;return new Date(y,parseInt(p[1])-1,parseInt(p[0]));}
@@ -1457,24 +1491,23 @@ function startApp(){
   }
   // Print server (ใบสั่งงาน) — เครื่อง Windows ที่ต่อ Epson L805
   if(!localStorage.getItem('print_server_url')){
-    localStorage.setItem('print_server_url','https://192.168.1.101:3333');
+    localStorage.setItem('print_server_url','https://192.168.1.103:3333');
   }else if(localStorage.getItem('print_server_url').startsWith('http://')){
     // migrate ค่าเก่าที่เคยตั้งเป็น http ให้เป็น https (GitHub Pages เป็น HTTPS ยิงหา http ไม่ได้)
     localStorage.setItem('print_server_url',localStorage.getItem('print_server_url').replace('http://','https://'));
   }else if(localStorage.getItem('print_server_url').includes('192.168.1.105')
-    ||localStorage.getItem('print_server_url').includes('192.168.1.103')
     ||localStorage.getItem('print_server_url').includes('192.168.0.113')
-    ||localStorage.getItem('print_server_url').includes('192.168.1.100')){
+    ||localStorage.getItem('print_server_url').includes('192.168.1.100')
+    ||localStorage.getItem('print_server_url').includes('192.168.1.101')){
     // เปลี่ยนเครื่อง/เน็ตเวิร์กใหม่ — อัปเดต IP เครื่องเก่าที่เคยจำไว้ให้อัตโนมัติ
-    localStorage.setItem('print_server_url','https://192.168.1.101:3333');
+    localStorage.setItem('print_server_url','https://192.168.1.103:3333');
   }
-  // PIN login — wait for staff list to load from Firebase first
+  // PIN login — โชว์ loading ทันที รอ sync ข้อมูลพนักงานจริงๆ ก่อนค่อยเปิดให้กด PIN ได้
+  showPinLoginLoading();
   setTimeout(()=>{
     const saved=localStorage.getItem('loggedStaff');
     const badge=G('logged-staff-badge');
     if(badge)badge.style.display='inline-block';
-    // Always show PIN screen — staff must log in each session
-    showPinLogin();
     // If staff was saved, pre-fill after Firebase loads
     if(saved){
       window._savedStaffName=saved;
@@ -1487,41 +1520,33 @@ function startApp(){
   const now=new Date();
   G('inc-month').value=now.getMonth();
   G('inc-year').value=now.getFullYear();
-  // โหลดข้อมูลที่เคย cache ไว้จากรอบก่อนมาแสดงทันที (ไม่ต้องรอ Firebase เชื่อมต่อเสร็จ)
-  // แก้ปัญหาเปิดจากไอคอนหน้าจอ iPad แล้วค้างจอเปล่า "Connecting..." นาน เพราะ iOS เคลียร์
-  // แอปออกจากหน่วยความจำบ่อย ทุกครั้งที่เปิดจากไอคอนจึงเหมือนเปิดแอปใหม่ทุกครั้ง
-  try{
-    const cachedCusts=localStorage.getItem('cache_custs');
-    const cachedSvcs=localStorage.getItem('cache_svcs');
-    const cachedStaff=localStorage.getItem('cache_staffList');
-    if(cachedCusts){custs=JSON.parse(cachedCusts);rLoy();}
-    if(cachedSvcs){svcs=JSON.parse(cachedSvcs);rSvcs();}
-    if(cachedStaff){staffList=JSON.parse(cachedStaff);initStaffDropdown();}
-    if(cachedCusts||cachedSvcs||cachedStaff)setDot('sy','Connecting... (ใช้ข้อมูลล่าสุดที่เคยมีไปก่อน)');
-  }catch(e){}
   if(db&&!LM)subscribe();
-  else{rSvcs();rLoy();rSt();rHist();rToday();rPL();rStaffInc();}
+  else{rSvcs();rLoy();rSt();rHist();rToday();rPL();rStaffInc();showPinLogin();}
+  // Fallback กันค้าง: ถ้า sync ไม่เสร็จภายใน 8 วิ (เช่น ออฟไลน์/เน็ตช้า) เปิด PIN pad ไปก่อน
+  // พร้อมข้อความเตือนว่าข้อมูลอาจไม่ล่าสุด กันร้านใช้งานไม่ได้เลยเวลาเน็ตมีปัญหา
+  setTimeout(()=>{
+    if(!window._pinShown){
+      window._pinShown=true;
+      showPinLogin();
+      const sub=G('pin-loading-sub');
+      const errEl=G('pin-error');
+      if(errEl)errEl.textContent='⚠️ ซิงค์ไม่สำเร็จ — ข้อมูลอาจไม่ล่าสุด';
+    }
+  },8000);
 }
 
 function subscribe(){
-  onSnapshot(collection(db,'customers'),s=>{
-    custs=s.docs.map(d=>({...d.data(),_id:d.id}));
-    try{localStorage.setItem('cache_custs',JSON.stringify(custs));}catch(e){}
-    rLoy();setDot('on','Synced ✓');
-  },()=>setDot('off','Offline'));
+  onSnapshot(collection(db,'customers'),s=>{custs=s.docs.map(d=>({...d.data(),_id:d.id}));rLoy();setDot('on','Synced ✓');},()=>setDot('off','Offline'));
   onSnapshot(collection(db,'stock'),s=>{stock=s.docs.map(d=>({...d.data(),_id:d.id}));rSt();});
   onSnapshot(query(collection(db,'transactions'),orderBy('createdAt','desc'),limit(300)),s=>{txns=s.docs.map(d=>({...d.data(),_id:d.id}));rHist();rToday();rStaffInc();});
   onSnapshot(collection(db,'services'),s=>{
     // Auto-seed DISABLED — services are managed via reset-services.html / pricing page.
     // (Auto-seeding default services caused duplicates after reset.)
-    svcs=s.docs.map(d=>({...d.data(),_id:d.id}));
-    try{localStorage.setItem('cache_svcs',JSON.stringify(svcs));}catch(e){}
-    rSvcs();rPL();
+    svcs=s.docs.map(d=>({...d.data(),_id:d.id}));rSvcs();rPL();
   });
   onSnapshot(query(collection(db,'expenses'),orderBy('createdAt','desc'),limit(100)),s=>{expenses=s.docs.map(d=>({...d.data(),_id:d.id}));rExpenses();});
   onSnapshot(collection(db,'staff'),s=>{
   staffList=s.docs.map(d=>({...d.data(),_id:d.id}));
-  try{localStorage.setItem('cache_staffList',JSON.stringify(staffList));}catch(e){}
   initStaffDropdown();
   rStaffManage();
   if(!window._pinShown){window._pinShown=true;showPinLogin();}
@@ -3569,12 +3594,22 @@ function showPinLogin(){
   updateLoginDisplay();
   const errEl=G('pin-error');if(errEl)errEl.textContent='';
   const pl=G('pin-login');if(pl)pl.style.display='flex';
+  const loading=G('pin-loading');if(loading)loading.style.display='none';
+  const content=G('pin-content');if(content)content.style.display='flex';
   // Pre-select last used branch
   const saved=localStorage.getItem('branch');
   if(saved)pinSelectBranch(saved);
 }
 window.showPinLogin=showPinLogin;
 window._showPinLogin=showPinLogin;
+
+// โชว์หน้า PIN แบบ loading (ระหว่างรอ sync ข้อมูลพนักงานจาก Firebase) — ยังกด PIN ไม่ได้จนกว่าจะ sync เสร็จ
+function showPinLoginLoading(){
+  const pl=G('pin-login');if(pl)pl.style.display='flex';
+  const loading=G('pin-loading');if(loading)loading.style.display='flex';
+  const content=G('pin-content');if(content)content.style.display='none';
+}
+window.showPinLoginLoading=showPinLoginLoading;
 
 window.pinSelectBranch=function(b){
   currentBranch=b;
